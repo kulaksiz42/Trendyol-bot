@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 import requests, base64, os
 
 app = FastAPI()
@@ -20,12 +19,13 @@ def root():
 
 @app.get("/urunler")
 def urunler(page: int = 0, size: int = 50):
-    try:
-        url = f"https://api.trendyol.com/sapigw/suppliers/{SUPPLIER_ID}/products"
-        r = requests.get(url, headers=HEADERS, params={"page": page, "size": size, "approved": "true"}, timeout=15)
-        return JSONResponse(content=r.json(), status_code=r.status_code)
-    except Exception as e:
-        return {"hata": str(e)}
+    url = f"https://api.trendyol.com/sapigw/suppliers/{SUPPLIER_ID}/products"
+    r = requests.get(url, headers=HEADERS, params={"page": page, "size": size, "approved": "true"}, timeout=15)
+    return {
+        "status_code": r.status_code,
+        "headers": dict(r.headers),
+        "body": r.text[:500]
+    }
 
 if __name__ == "__main__":
     import uvicorn
