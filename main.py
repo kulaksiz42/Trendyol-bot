@@ -7,7 +7,7 @@ app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 SUPPLIER_ID = "480490"
-TOKEN = base64.b64encode(b"eRewGQPe6cIeQRPDcas3:wFIXQ57iaW0pCkAnopI6").decode()
+TOKEN = base64.b64encode(b"x4ea3wblY7pSrkRQJJVD:JtWzSkp8HLHB9M3pVLMc").decode()
 HEADERS = {
     "Authorization": f"Basic {TOKEN}",
     "User-Agent": f"TrendyolApp-{SUPPLIER_ID}",
