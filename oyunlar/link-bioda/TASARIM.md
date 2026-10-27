@@ -1,0 +1,210 @@
+# Link Bio'da — Tasarım Taslağı (v0.2)
+
+> Durum: tasarım aşaması, kod yok. Bu belge konuştukça güncellenecek.
+
+## Özet
+
+24 yaşında (ya da oyuncunun seçtiği yaşta, en az 18) bir karakter, geçim derdinden "içerik üreticisi" olmaya karar veriyor. Oyuncu 7 gün boyunca çekim yapıyor, abone mesajlarına cevap veriyor, X'te tanıtım yapıyor, kazandığı parayla bir şeyler alıyor ve bunları yaparken ailesinden, vergi dairesinden ve "sabah 6 operasyonundan" kaçmaya çalışıyor.
+
+- **Platform adı oyunda:** "FanKasa" (parodi; gerçek marka adı kullanılmıyor)
+- **Süre:** tek oturum, 15–20 dakika, 7 oyun günü
+- **Ton:** yüzeyde hafif ve absürt; altında "gerçek yüz" teması. Espri karakterin kimliğiyle değil, etrafındaki insanların ikiyüzlülüğüyle yapılır.
+- **Görsel:** 3D (Three.js), stilize low-poly karakterler ve oda
+- **Kitle:** X kullanıcıları. Göndermeler X dilini, Türkiye gündemini ve X tiplerini bilen birinin güleceği şekilde yazılır.
+
+## Kesin kurallar
+
+1. Tüm karakterler yetişkin. Yaş kaydırıcısı 18'den başlar.
+2. Çıplaklık ve açık cinsel içerik yok. "O an" her zaman bir şaka ile kesilir (kedi, kapı zili, sansür etiketi).
+3. Gerçek kişi adı yok. Siyasetçi, ünlü, gözaltına alınan gerçek üreticiler ya da gerçek X hesapları kullanılmaz. Tüm hesaplar kurmaca tiplerdir.
+4. Gerçek para yok. Oyun içi para yalnızca oyun içinde geçerli.
+5. Oyuncular arası serbest mesajlaşma ve fotoğraf yükleme yok.
+6. Girişte "18 yaşından büyüğüm" onayı.
+
+## 1. Karakter oluşturma
+
+- **Kimlik:** kadın, erkek, trans kadın, trans erkek, non-binary
+- **Yönelim:** hetero, gay, lezbiyen, biseksüel
+- **Beden:** yaş (18–60), boy, kilo/vücut tipi, ten rengi
+- **Baş:** saç modeli ve rengi, sakal/bıyık, kaş, gözlük
+- **Detay:** dövme, piercing, oje, saat, kolye
+- **Başlangıç kıyafeti:** eşofman, kot-tişört, takım elbise (eski iş yerinden kalma)
+- **Geçmiş (tek seçim):** işten çıkarılmış plaza çalışanı, KPSS'ye 4. kez giren mezun, kirası %80 artmış öğrenci, fon mağduru (ana parası fonda kalmış)
+  - Geçmiş, başlangıç parasını ve ilk gün diyaloglarını değiştirir.
+
+**Nişler:** her özellik bir abone kitlesini açar ve mesaj kutusundaki tipleri değiştirir.
+- Gözlük: "kütüphaneci" kitlesi
+- Sakal: "ayı" kitlesi
+- Yaş 35+: "olgun" kitlesi
+- Takım elbise: "ofis" kitlesi
+- Absürt nişler:
+  - Sadece çorap fotoğrafı isteyen abone
+  - Vergi beyannamesini ASMR'la okuyan sesi isteyen abone
+  - Sadece mercimek çorbası içerken izlemek isteyen abone (690 TL'lik çorba göndermesi)
+
+## 2. Günlük döngü
+
+Her gün dört aşamadan oluşur. Sıralama sabit, içerik değişken.
+
+### 2.1 Çekim (3D oda)
+- Oyuncu kıyafet, ışık, açı ve dekor seçer, sonra kısa bir zamanlama/denge mini oyunu oynar.
+- Mini oyun sırasında olaylar kesinti yapar:
+  - Annenin görüntülü araması
+  - Komşunun matkabı
+  - Kedi
+  - Kargo
+  - "Bant daraltması": yükleme çubuğu takılır, VPN düğmesine basman gerekir
+- Çekimin sonucu bir "kapak fotoğrafı" olur. Görsel her zaman giyinik ya da sansür etiketli.
+
+### 2.2 Mesaj kutusu (oyunun kalbi)
+Her gün 4–6 mesaj gelir. Her mesajda 2–3 cevap seçeneği var. Cevaplar bahşişi, abone mutluluğunu ve riskleri değiştirir. Örnek tipler:
+
+| Tip | Mesaj | Komik seçenek |
+|---|---|---|
+| Muhasebeci abone | "Fatura kesebilir misiniz, şirketten gider göstereceğim." | "Kesiyorum ama açıklamaya 'danışmanlık' yazıyorum." |
+| Fon mağduru abone | "Ana param fonda kaldı. Aboneliği taksitle ödeyebilir miyim?" | "Ana para gelince ödersin." (abone sadakati artar) |
+| KPSS'ci | "KPSS'ye çalışıyorum, motive edici bir mesaj atar mısın?" | Paragraf sorusuyla cevap ver |
+| Derbi abonesi | "Takımım kazanırsa indirim yapar mısın?" | Derbi günü olayıyla bağlanır |
+| Yabancı abone | Otomatik çeviriyle bozuk Türkçe: "Merhaba güzel kişi, sizin bayrak çok kırmızı." | "Siber Dünya Savaşı" göndermesi |
+| Sigma koç | "Ben aslında seni analiz ediyorum, aura farming yapıyorsun." | "6-7" yaz |
+| Eski öğretmen | "Ben senin ilkokul öğretmeninim. Kompozisyonların hep iyiydi." | Engelle / "Teşekkür ederim hocam" |
+| Aile grubuna yanlış atan | "Abla/abi yanlışlıkla aile grubuna attım, nasıl silinir?" | Teknik destek ver (+bahşiş) |
+| Grok'çu | "Grok'a soracaktım bu gerçek mi diye, erişim engeli var." | "Ben de bilmiyorum" |
+| Pazarlıkçı | "Kapalıçarşı'da olsak 50 lira düşerdin." | Kampanya aç / ret |
+| Yapay zekâ ile sahte görsel üreten | "Senin fotoğrafını yapay zekâyla ürettim, bak." | Engelle ve şikâyet et (doğru seçim ödüllendirilir) |
+
+### 2.3 X'te tanıtım
+X akışının parodisi. Oyuncu günün tweetini seçer ("link bio'da 🔗", gündeme atlayan tweet, kavga tweeti). Gelen yanıtlar:
+- "DM'ye bak kral"
+- "Türk kızları/erkekleri bozuldu" (yazan hesap aboneler listesinde)
+- "Ahlak bekçisi" alıntıları
+- Konuyla alakasız siyaset kavgası
+- "Gündem bu mu ya, ana paramız fonda kaldı" yanıtı
+- Çinli/Japon hesaplarla otomatik çeviri kavgası
+
+### 2.4 Gece: alışveriş ve olay
+- Gün sonu kazanç dolar olarak gelir, kurdan TL'ye çevrilir.
+- Kazanç ilk kez asgari ücreti (2026: net 28.075,50 TL) geçince olay çıkar: "Bu ay babanın 30 yıllık emekliliğinden fazla kazandın."
+- Sonra mağaza açılır ve rastgele bir olay gelir.
+
+## 3. "Gerçek yüz" mekaniği (imza mekanik)
+
+X'te sana saldıran bazı hesaplar abone listende çıkar. Hepsi kurmaca tiplerdir ve siyasi yelpazenin her yerinden gelir, kimse muaf değil:
+
+| Hesap tipi | X'te yazdığı | Abone listesinde |
+|---|---|---|
+| @AileDegerleriTR | "Bu ahlaksızlığa dur denmeli." | 3 aydır abone, en çok bahşiş veren 2. kişi |
+| @SigmaErkekKocu | "Kadınlar sadece paraya bakar." | Her gün "nasılsın" yazıyor |
+| @KapitalizmEleştirisi | "Bedenin metalaşması..." | Yıllık abonelik almış, indirimden |
+| @IliskiKocu_Dr | "Sağlıklı ilişki sınır koymaktır." | Sınır tanımıyor |
+| @YabanciAjanAvcisi | "Bunlar hep dış güçlerin oyunu." | Ödemeyi yurt dışı kartla yapıyor |
+
+Oyuncunun seçimi:
+- **İfşa et:** takipçi ve gündem artar, operasyon riski ve kavga artar
+- **Sessiz kal:** bahşiş devam eder
+- **Şantaj:** seçenek olarak görünür ama seçilince oyun karakteri "Bu ben değilim" der ve reddeder. Oyun kötüye kullanım fikrini ödüllendirmez.
+
+## 4. Riskler ve göstergeler
+
+- **Para (TL ve $):** kur her gün oynar
+- **Abone mutluluğu:** cevap kalitesiyle değişir
+- **Enerji:** her eylem harcar, uyku doldurur
+- **Aile radarı:** dolarsa "pazar kahvaltısı sorgusu" sahnesi gelir
+- **Vergi borcu:** muhasebeci tutulmazsa birikir
+- **Operasyon riski:** gösteriş yaptıkça artar. Şubat 2026 operasyonunun hicvi: "Sabah 6, kapı çalıyor." Gerçek kişiler ya da olayın detayları kullanılmaz.
+
+**Ana gerilim:** para kazanmak kolay, harcamak riskli. Pahalı şeyler aldıkça "görünürlük" ve operasyon riski artar.
+
+## 5. Para ve mağaza (kazandıkça al)
+
+Mağazada beş bölüm var. Her ürünün etkisi ve fiyatı tasarım aşamasında dengelenecek.
+
+**Ekipman (çekim kalitesi):**
+- Çamaşır mandalıyla sabitlenmiş telefon
+- Tripod
+- Ring light
+- Softbox
+- Yeni nesil telefon
+- Profesyonel mikrofon (ASMR nişi açılır)
+
+**Oda (3D'de görünür, nişleri açar):**
+- Kirli halıdan pembe LED'e, oradan stüdyoya geçiş
+- Kütüphane duvar kâğıdı
+- Sahte jakuzi
+- Ofis dekoru
+- Yeşil perde (arka plana Dubai ekle)
+
+**Gardırop:** takım forması (derbi günü bonusu), takım elbise, kedi kulağı bandı, eşofman takımı, abiye.
+
+**Hayat (gösteriş = risk):**
+- Annene bulaşık makinesi (aile radarı düşer, "parayı nereden buldun" sorusu gelir)
+- Kombi değişimi
+- Kiranı 1 yıl peşin ödemek (ev sahibi şüphelenir)
+- Gram altın
+- Yerli elektrikli otomobil
+- Dubai tatili
+- En pahalısı: "Dubai'ye taşın" (bitiş seçeneği)
+
+**Hizmetler:**
+- Muhasebeci (vergi borcu düşer)
+- Avukat (operasyon riski düşer)
+- Premium VPN
+- "Chatter" (mesajlara senin yerine cevap veren kişi): sektör hicvi. Senin adına yazan kişi Pendik'te yaşayan 52 yaşında bir amca. Cevapları bazen çok tuhaf, abone mutluluğu rastgele değişir.
+
+## 6. Olay günleri (gündem göndermeleri)
+
+| Olay | Etkisi |
+|---|---|
+| Derbi günü | Forma giyersen bahşiş artar, kaybeden taraftar aboneliği iptal eder |
+| 29 Ekim tatili | Aile ziyareti, aile radarı +30 |
+| Siber Dünya Savaşı | Yabancı abone akını, otomatik çeviri kaosu |
+| Bant daraltması | Yükleme mini oyunu, VPN gerekli |
+| Kur şoku | Dolar kazancın bir gecede değerlenir, akrabalar borç istemeye başlar |
+| Ana para kararı bekleniyor | Fon mağduru aboneler toplu bahşiş verir ya da toplu iptal eder |
+
+## 7. Sonlar
+
+- **Dubai'ye taşındın:** en yüksek para sonu
+- **Sabah 6 operasyonu:** risk dolarsa. "Mal varlığına el konuldu: 1 ring light, 3 kedi kulağı."
+- **Pazar kahvaltısı:** aile öğrendi. Ama annen sonunda kendi hesabını açıyor.
+- **Muhasebeci sonu:** vergi borcu yüzünden muhasebecine çalışmaya başladın
+- **Gerçek yüzleri ifşa eden:** X'in kahramanı oldun, para yok
+- **Normal sona dönüş:** KPSS'yi kazandın, hesabı kapattın. 1 hafta sonra memur maaşına bakıp hesabı tekrar açtın.
+
+Sonda X'te paylaşma düğmesi skoru tweet metnine çevirir.
+
+## 8. Çok oyunculu (ikinci sürüm)
+
+- Her oyuncunun karakteri ve en iyi oturumu "Keşfet" vitrininde görünür.
+- Diğer oyuncular vitrindeki karakterlere oyun içi parayla abone olabilir. Bu, sahibinin haftalık puanına eklenir.
+- Etkileşim sadece hazır tepkilerle olur (🔥, 💀, "link bio'da"). Serbest metin yok.
+- **Haftalık liste**, her pazartesi sıfırlanır:
+  - En çok kazanan
+  - En çok abone
+  - Hiç operasyon yemeden en yüksek
+  - En çok "gerçek yüz" ifşa eden
+- Altyapı: Supabase ya da Cloudflare Worker (ücretsiz kota yeter), kullanıcı adı filtresi, şikâyet düğmesi.
+
+## 9. 3D yaklaşımı
+
+- **Motor:** Three.js
+- **Karakterler:** CC0 lisanslı low-poly modüler karakter paketleri (ör. Quaternius) temel alınır.
+  - Boy ve kilo kemik ölçekleme ile ayarlanır.
+  - Saç, gözlük ve aksesuar takılabilir parçalar.
+  - Renkler malzeme renkleriyle değiştirilir.
+- **Oda:** tek bir 3D oda. Mağazadan alınan eşyalar odada belirir.
+- **Kamera:** çekim sırasında "telefon kamerası" görünümüne geçer.
+- **Performans:** düşük poligon, tek ışık ve gölge. Hedef: orta seviye telefonda 60 fps.
+
+## 10. Aşamalar
+
+1. **v1:** karakter oluşturma, 7 günlük tek oyunculu döngü, mağaza, sonlar, X'te paylaşma
+2. **v2:** hesaplar, Keşfet vitrini, haftalık liste
+3. **v3:** yeni olaylar, gündeme göre güncellenen mesaj paketleri (mesajlar ayrı bir veri dosyasında tutulur, kod değiştirmeden güncellenebilir)
+
+## Açık sorular
+
+- Ana karakterin başlangıç yaşı varsayılan olarak kaç olsun?
+- Mesaj tiplerinden hangileri kalsın, hangileri çıksın?
+- "Gerçek yüz" hesap tipleri yeterince dengeli mi?
+- Oyunun adı "Link Bio'da" uygun mu?
