@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Keşfete Düş</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="16 yaşındasın, okulların açılmasına 7 gün var. Hedef: TikTok fenomeni olmak. Sorun: videon X'e düşerse.">
+<meta name="theme-color" content="#0e0c12">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Keşfete Düş">
+<meta property="og:description" content="16 yaşındasın, okulların açılmasına 7 gün var. Hedef: fenomen olmak. Sorun: videon X'e düşerse.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Keşfete Düş">
+<meta name="twitter:description" content="Fenomen olmaya çalış. Videon X'e düşmesin. (Düşecek.)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800;900&family=Onest:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Düzen: telefon genişliğinde tek sütun; oyun ekranı bir TikTok akışı, ceza ekranı bir X zaman tüneli. */
+:root{
+  --bg:#0e0c12; --panel:#18151e; --panel2:#221e2a; --line:#302a3a;
+  --fg:#f4f0f7; --muted:#a39bad;
+  --cyan:#25f4ee; --cyan-a:rgba(37,244,238,.22); --pink:#fe2c55; --pink-a:rgba(254,44,85,.18);
+  --sun:#ffd25e; --ok:#3ddc84;
+  --xbg:#000; --xline:#2f3336; --xfg:#e7e9ea; --xmuted:#71767b; --xblue:#1d9bf0;
+  --f-display:'Unbounded','Arial Black',system-ui,sans-serif;
+  --f-body:'Onest',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  -webkit-tap-highlight-color:transparent}
+.app{max-width:440px;margin:0 auto;padding-block:18px 40px;display:flex;flex-direction:column;gap:16px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+
+.glitch{font-family:var(--f-display);font-weight:900;letter-spacing:-.02em;line-height:.95;
+  text-shadow:-3px 0 var(--cyan),3px 0 var(--pink);text-wrap:balance;margin:0}
+.eyebrow{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0}
+.h{font-family:var(--f-display);font-weight:800;font-size:20px;margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:0}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:16px;font-family:var(--f-display);font-weight:800;font-size:16px;
+  background:var(--pink);color:#fff;text-align:center;text-decoration:none;letter-spacing:.01em}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:var(--panel2);color:var(--fg)}
+.btn.x{background:var(--xfg);color:#000}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>.btn{flex:1 1 140px;width:auto}
+
+/* başlangıç */
+.start{display:flex;flex-direction:column;gap:18px;padding-top:12px}
+.start .glitch{font-size:clamp(44px,14vw,64px)}
+.lead{font-size:17px;margin:0}
+.handle{display:flex;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:0 14px}
+.handle span{font-family:var(--f-mono);color:var(--cyan);font-weight:700}
+.handle input{flex:1;min-width:0;background:transparent;border:0;color:var(--fg);font:500 16px var(--f-mono);padding:15px 6px;outline:none}
+details{background:var(--panel);border-radius:14px;padding:12px 14px}
+summary{cursor:pointer;font-weight:700}
+details ul{margin:10px 0 0;padding-left:18px;color:var(--muted);display:grid;gap:6px}
+.best{font-family:var(--f-mono);font-size:12px;color:var(--muted);margin:0}
+
+/* üst bilgi */
+.hud{display:grid;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+.hud-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.hud-top b{font-size:18px;color:var(--fg);font-variant-numeric:tabular-nums}
+.meters{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.meter{display:grid;gap:4px;font-size:12px;color:var(--muted)}
+.meter div{display:flex;justify-content:space-between}
+.meter b{font-family:var(--f-mono);color:var(--fg);font-variant-numeric:tabular-nums}
+.bar{height:6px;border-radius:3px;background:var(--panel2);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:3px;transition:width .5s}
+#mCringe{background:var(--pink)} #mMom{background:var(--sun)}
+
+.stage{display:flex;flex-direction:column;gap:14px}
+
+/* trend kartları */
+.cards{display:grid;gap:10px}
+.card{display:grid;gap:6px;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px}
+.card:hover{border-color:var(--cyan)}
+.card .tag{font-family:var(--f-mono);font-size:12px;color:var(--cyan)}
+.card .t{font-weight:700;font-size:16px}
+.card .d{color:var(--muted);font-size:14px}
+.stats{display:flex;gap:12px;flex-wrap:wrap;font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.stats .r{color:var(--cyan)} .stats .c{color:var(--pink)} .stats .m{color:var(--sun)}
+
+.caps{display:grid;gap:8px}
+.cap{text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px 14px;display:grid;gap:4px}
+.cap:hover{border-color:var(--pink)}
+.cap .t{font-weight:500}
+
+/* telefon / video */
+.phone{position:relative;width:min(100%,calc(min(58vh,540px)*9/16));aspect-ratio:9/16;max-width:100%;margin:0 auto;border-radius:22px;overflow:hidden;
+  border:1px solid var(--line);user-select:none;-webkit-user-select:none}
+.scene{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;align-content:center;gap:2px 8px;
+  font-size:clamp(40px,13vw,64px);padding:24px;line-height:1.1}
+.scene span{display:inline-block}
+.dance .scene span:nth-child(odd){animation:bop .5s ease-in-out infinite alternate}
+.dance .scene span:nth-child(even){animation:bop .5s ease-in-out .25s infinite alternate}
+@keyframes bop{from{transform:translateY(0) rotate(-4deg)}to{transform:translateY(-10px) rotate(4deg)}}
+.phone.hit .scene{animation:pop .3s}
+.phone.miss .scene{animation:shake .35s}
+@keyframes pop{50%{transform:scale(1.08)}}
+@keyframes shake{25%{transform:translateX(-8px) rotate(-3deg)}75%{transform:translateX(8px) rotate(3deg)}}
+.rec{position:absolute;top:12px;left:12px;font:700 12px var(--f-mono);background:rgba(0,0,0,.45);padding:4px 8px;border-radius:6px;color:#fff}
+.rec::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--pink);margin-right:6px;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.flash{position:absolute;left:12px;right:12px;top:44px;text-align:center;font-weight:700;font-size:14px;color:#fff;
+  background:rgba(0,0,0,.55);border-radius:10px;padding:8px;opacity:0;transition:opacity .15s}
+.flash.on{opacity:1}
+.overlay{position:absolute;left:0;right:56px;bottom:0;padding:14px;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.6));display:grid;gap:3px;font-size:13px}
+.overlay b{font-size:14px}
+.overlay .snd{font-size:12px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rail{position:absolute;right:8px;bottom:18px;display:grid;gap:14px;text-align:center;color:#fff;font:700 11px var(--f-mono);text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.rail span{display:block;font-size:24px;line-height:1.1}
+
+.timing{position:relative;height:46px;border-radius:12px;background:var(--panel2);overflow:hidden;border:1px solid var(--line)}
+.zone{position:absolute;top:0;bottom:0;background:var(--cyan-a);border-left:2px solid var(--cyan);border-right:2px solid var(--cyan)}
+.needle{position:absolute;top:0;bottom:0;width:4px;margin-left:-2px;background:var(--fg);border-radius:2px;box-shadow:0 0 8px var(--fg)}
+.shots{display:flex;justify-content:center;gap:8px}
+.shots i{width:12px;height:12px;border-radius:50%;background:var(--panel2);border:1px solid var(--line)}
+.shots i.s1{background:var(--ok);border-color:var(--ok)} .shots i.s5{background:var(--sun);border-color:var(--sun)} .shots i.s0{background:var(--pink);border-color:var(--pink)}
+.hint{text-align:center;color:var(--muted);font-size:13px;margin:0}
+
+/* sonuç */
+.nums{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.num{background:var(--panel);border-radius:12px;padding:10px;display:grid;gap:2px}
+.num small{color:var(--muted);font-size:11px}
+.num b{font:700 17px var(--f-mono);font-variant-numeric:tabular-nums}
+.num.up b{color:var(--ok)}
+.comments{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.comments li{display:grid;grid-template-columns:32px 1fr;gap:10px;animation:in .3s both}
+@keyframes in{from{opacity:0;transform:translateY(6px)}}
+.av{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;color:#000}
+.comments .u{font-size:12px;color:var(--muted)}
+.comments .tx{font-size:14px;min-width:0;overflow-wrap:anywhere}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:700 12px var(--f-mono);padding:5px 9px;border-radius:999px;background:var(--panel2)}
+.chip.g{color:var(--ok)} .chip.c{color:var(--pink)} .chip.m{color:var(--sun)}
+
+/* X ekranı */
+.xwrap{background:var(--xbg);color:var(--xfg);border:1px solid var(--xline);border-radius:16px;overflow:hidden;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.xhead{padding:10px 14px;border-bottom:1px solid var(--xline);font-weight:800;font-size:17px;display:flex;justify-content:space-between;align-items:center}
+.xhead small{font:700 11px var(--f-mono);color:var(--pink);letter-spacing:.08em}
+.tw{display:grid;grid-template-columns:40px 1fr;gap:10px;padding:12px 14px;border-bottom:1px solid var(--xline)}
+.tw .av{width:40px;height:40px}
+.tw .who{font-size:14px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tw .who b{color:var(--xfg)} .tw .who span{color:var(--xmuted)}
+.tick{display:inline-block;width:15px;height:15px;border-radius:50%;background:var(--xblue);color:#fff;font-size:10px;text-align:center;line-height:15px;margin-left:3px;vertical-align:-2px}
+.tw .tx{font-size:15px;margin-top:2px;overflow-wrap:anywhere}
+.tw .meta{display:flex;justify-content:space-between;color:var(--xmuted);font-size:13px;margin-top:8px;max-width:320px}
+.mini{margin-top:8px;border:1px solid var(--xline);border-radius:14px;overflow:hidden;display:grid;grid-template-columns:84px 1fr}
+.mini .thumb{aspect-ratio:9/16;display:grid;place-items:center;font-size:30px}
+.mini .cap2{padding:10px;font-size:13px;color:var(--xmuted);display:grid;align-content:center;gap:4px;min-width:0}
+.mini .cap2 b{color:var(--xfg)}
+
+/* bildirim olayı */
+.notif{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px;display:grid;gap:8px}
+.notif .napp{display:flex;justify-content:space-between;font:500 12px var(--f-mono);color:var(--muted)}
+.notif .from{font-weight:700}
+.notif p{margin:0;font-size:16px}
+.choices{display:grid;gap:8px}
+.choice{text-align:left;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:13px 14px;font-weight:500}
+.choice:hover{border-color:var(--cyan)}
+.result{margin:0;color:var(--fg);background:var(--panel2);border-radius:12px;padding:12px}
+
+/* final */
+.end{display:flex;flex-direction:column;gap:16px;padding-top:8px}
+.end .glitch{font-size:clamp(34px,11vw,52px)}
+.end .nums{grid-template-columns:repeat(2,1fr)}
+.fine{font-size:12px;color:var(--muted);margin:0;text-align:center}
+
+@media (prefers-reduced-motion:reduce){
+  .dance .scene span,.phone.hit .scene,.phone.miss .scene,.comments li,.rec::before{animation:none}
+}
+</style>
+</head>
+<body>
+<main class="app" id="app"></main>
+<script>
+'use strict';
+/* ---------- yardımcılar ---------- */
+const R = (a, b) => a + Math.random() * (b - a);
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const clamp = (v, a = 0, b = 100) => Math.max(a, Math.min(b, v));
+const fmt = n => Math.round(n).toLocaleString('tr-TR');
+const kisa = n => n >= 1e6 ? (n / 1e6).toFixed(1).replace('.', ',') + ' Mn'
+  : n >= 1e4 ? Math.round(n / 1e3) + ' B'
+  : n >= 1e3 ? (n / 1e3).toFixed(1).replace('.', ',') + ' B' : String(Math.round(n));
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const AV_RENK = ['#25f4ee', '#fe2c55', '#ffd25e', '#3ddc84', '#b69cff', '#ff9f5a'];
+const av = (ad, cls = 'av') => `<div class="${cls}" style="background:${AV_RENK[[...ad].reduce((s, c) => s + c.charCodeAt(0), 0) % AV_RENK.length]}">${esc([...ad.replace(/^@/, '')][0].toUpperCase())}</div>`;
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) { } }
+};
+const titret = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) { } };
+
+/* ---------- içerik ---------- */
+const GUNLER = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+const GUN_GIRIS = [
+  'Okulların açılmasına 7 gün var. Hedef: fenomen olmak.',
+  'Dünkü videon hâlâ dönüyor. Ya da dönmüyor, emin değilsin.',
+  'Annen "bugün ne yapacaksın" diye sordu. "İçerik" dedin.',
+  'Haftanın ortası. Algoritma seni izliyor.',
+  'Cuma akşamı. Herkes dışarıda, sen ring light\'ın önündesin.',
+  'Cumartesi. Herkes telefonda, keşfet trafiği zirvede.',
+  'Son gün. Yarın okul var. Bu video her şeyi değiştirebilir.'
+];
+
+const TRENDLER = [
+  { id: 'dans', tag: '#KafaSallaDansı', t: 'Dans trendi', d: 'Odanın ortasında. Arkada kurumaya asılmış çamaşırlar.', sahne: ['🕺', '🧺', '🧦'], bg: ['#3a1c71', '#d76d77'], erisim: 1300, cringe: 35, anne: 5, fiil: 'Ritme gir',
+    yorum: ['dans:7 çamaşırlar:10 ✨', 'arkadaki çorap daha iyi oynuyor', 'kanka bu dans değil tutulma'] },
+  { id: 'pov', tag: '#pov', t: 'POV: öğretmene yakalanan ben', d: 'Tek başına 4 karakteri oynuyorsun. Peruk yerine annenin eşarbı.', sahne: ['🧑‍🏫', '😳', '🧕'], bg: ['#0f2027', '#2c5364'], erisim: 900, cringe: 40, anne: 10, fiil: 'Repliği yakala',
+    yorum: ['öğretmen karakteri neden fısıldıyor', 'annenin eşarbı mı o 😭', 'oscarlık performans (değil)'] },
+  { id: 'grwm', tag: '#grwm', t: 'GRWM: okula hazırlan', d: 'Okul tatilde. Önemli değil, estetik önemli.', sahne: ['🪞', '🎒', '☕'], bg: ['#ee9ca7', '#ffdde1'], erisim: 800, cringe: 30, anne: 0, fiil: 'Geçiş efektini tuttur',
+    yorum: ['okul tatilde değil mi?', 'çantada kitap yok sadece şarj aleti', 'estetik ama boş'] },
+  { id: 'sokak', tag: '#sokakröportajı', t: 'Sokak röportajı', d: '"Sence asgari ücret ne kadar?" Mikrofon: şampuan şişesi.', sahne: ['🎤', '🧴', '👴'], bg: ['#134e5e', '#71b280'], erisim: 1500, cringe: 25, anne: 5, fiil: 'Amcayı durdur',
+    yorum: ['amca "sana ne" dedi efsane', 'mikrofon niye köpürüyor', 'bu dayı keşfete düşer sen düşmezsin'] },
+  { id: 'mukbang', tag: '#mukbang', t: 'Mukbang: 4 lahmacun, 1 ayran', d: 'Lahmacunlar akşam yemeğiydi. ASMR için mikrofonu yanağına dayadın.', sahne: ['🫓', '🫓', '🥛', '😋'], bg: ['#f12711', '#f5af19'], erisim: 1100, cringe: 45, anne: 12, fiil: 'Isırma anını yakala',
+    yorum: ['şapırtı sesi beni travmatize etti', 'akşam yemeği nerede diye soran annen', 'ayranı bitirme sahnesi epik'] },
+  { id: 'aglama', tag: '#duygusal', t: 'Duygusal video', d: '"Herkes beni yanlış anladı." Gözyaşı için soğan doğradın.', sahne: ['🥲', '🧅', '🎻'], bg: ['#1f1c2c', '#928dab'], erisim: 1000, cringe: 55, anne: 5, fiil: 'Gözyaşını tam zamanında akıt',
+    yorum: ['kimse seni yanlış anlamadı kardeşim kimse seni tanımıyor', 'masadaki soğan 💀', 'ağladım (gülmekten)'] },
+  { id: 'luks', tag: '#lüksyaşam', t: 'Lüks hayat: sabah rutinim', d: 'Komşunun Doblo\'sunun önünde güneş gözlüğüyle poz. Doblo da komşunun değil.', sahne: ['😎', '🚐', '💸'], bg: ['#141e30', '#c9a227'], erisim: 1300, cringe: 60, anne: 15, fiil: 'Pozu tuttur',
+    yorum: ['abi doblo lüks mü oldu', 'arkadan araba sahibi koşarak geliyor', 'bu ne özgüven hocam'] },
+  { id: 'motivasyon', tag: '#motivasyon', t: 'Motivasyon: sabah 5\'te kalkan kazanır', d: 'Saat 14.30. Yeni uyandın. Arka planda pijaman görünüyor.', sahne: ['⏰', '💪', '🛏️'], bg: ['#232526', '#ff512f'], erisim: 1000, cringe: 65, anne: 0, fiil: 'Ciddi yüzü tut',
+    yorum: ['saat 14.30 yazıyor arkada', 'sen önce yatağını topla', 'motive oldum: uyumaya'] },
+  { id: 'kripto', tag: '#finans', t: 'Finans tavsiyesi: bu coin 100x yapar', d: 'Cüzdanında 37 lira var. Grafik için kareli defter kullandın.', sahne: ['📈', '🚀', '🪙'], bg: ['#0f0c29', '#24c6dc'], erisim: 1400, cringe: 70, anne: 10, fiil: 'Grafiği göster',
+    yorum: ['kareli defterden grafik okuma hocam', 'yatırım tavsiyesi değildir yazmayı unuttun', '37 liramı yatırdım şimdi 12 lira'] },
+  { id: 'canli', tag: '#canlıyayın', t: 'Canlı yayın: gül atın aslanlar', d: '3 izleyici. Biri teyzen, biri bot, biri de yanlışlıkla girdi.', sahne: ['📱', '🌹', '🦁'], bg: ['#42275a', '#734b6d'], erisim: 700, cringe: 75, anne: 15, fiil: 'İzleyiciyi tut',
+    yorum: ['teyzen 1 gül attı (0,40 TL)', 'yanlışlıkla girdim çıkamıyorum', 'aslanlarım dediği 3 kişi'] },
+  { id: 'saka', tag: '#şaka', t: 'Şaka videosu: kardeşini korkut', d: 'Kardeşin 9 yaşında ve doğruca annene koşuyor.', sahne: ['👻', '🧒', '🏃'], bg: ['#000000', '#434343'], erisim: 1600, cringe: 35, anne: 25, fiil: 'Tam anında fırla',
+    yorum: ['kardeşin seni annene ispiyonlarken kayıt devam ediyor', 'çocuk travma geçirdi sen takipçi', 'sonda terlik geliyor mu'] },
+  { id: 'tepki', tag: '#tepki', t: 'Tepki videosu', d: 'Başkasının videosuna ağzını açıp 10 saniye "şok" yüzle bakıyorsun.', sahne: ['😮', '📺', '😮'], bg: ['#1d4350', '#a43931'], erisim: 1100, cringe: 40, anne: 0, fiil: 'Şok yüzü tuttur',
+    yorum: ['ağzını kapat sinek girecek', 'orijinal videoyu izledim seninkine gerek kalmadı', 'tepkin bile kopya'] },
+  { id: 'arabesk', tag: '#arabesk', t: 'Dudak senkronu: yağmurlu cam', d: 'Yağmur yok. Camı bahçe hortumuyla ıslattın.', sahne: ['🎙️', '🌧️', '🚿'], bg: ['#2b5876', '#4e4376'], erisim: 1000, cringe: 50, anne: 10, fiil: 'Dudağı senkronla',
+    yorum: ['hortum kadraja girmiş', 'güneş açıkken yağmur? 🤨', 'dudak bir yerde ses bir yerde'] },
+  { id: 'filtre', tag: '#yapayzeka', t: 'Yapay zekâ filtresi: Osmanlı\'da ben', d: 'Filtre seni paşa yaptı. Altına "kanımda var" yazdın.', sahne: ['👳', '🤖', '⚔️'], bg: ['#4b134f', '#c94b4b'], erisim: 1300, cringe: 45, anne: 0, fiil: 'Filtreyi oturt',
+    yorum: ['kanımda var dediğin şey filtre', 'paşa olmuşsun ama sesin aynı', 'filtre kapanınca çok üzüldüm'] }
+];
+
+const ACIKLAMALAR = [
+  { t: 'Sonuna kadar izle 😳', kat: 1.2, cringe: 8 },
+  { t: 'Bu video silinmeden izle ⚠️', kat: 1.3, cringe: 14 },
+  { t: 'Kimse bunu konuşmuyor ama...', kat: 1.15, cringe: 10 },
+  { t: '#keşfet #keşfetbeniöneçıkar #fyp #viral #türkiye', kat: 1.25, cringe: 18 },
+  { t: 'Beğenmeyen 7 yıl şanssız 💔', kat: 1.35, cringe: 24 },
+  { t: '1 beğeni = 1 dua 🤲', kat: 1.3, cringe: 22 },
+  { t: 'Annem bu videoyu görmesin 🤫', kat: 1.2, cringe: 12 },
+  { t: 'Ben normal bir insanım 🙂', kat: 1.05, cringe: 4 },
+  { t: '💀💀💀', kat: 1.0, cringe: 0 },
+  { t: 'part 1 (part 2 gelmeyecek)', kat: 1.1, cringe: 6 },
+  { t: 'Hayat bana bunu öğretti...', kat: 1.15, cringe: 16 }
+];
+
+const ISABET = ['Akıcı!', 'Tam ritim', 'Keşfet kokusu aldım', 'Bu açı iyi', 'Işık mükemmel'];
+const IDARE = ['İdare eder', 'Biraz geç kaldın', 'Montajda kurtarırız'];
+const KACTI = ['Annen kadraja girdi: "Yemek hazır!"', 'Telefon düştü', 'Kardeşin arkada burnunu karıştırıyor', 'Kedi bardağı devirdi',
+  'Ring light söndü', 'Wi-Fi gitti', 'Teyzen aradı, çekim durdu', 'Kafanı rafa çarptın', 'Kapı zili çaldı: kargo'];
+
+const Y_GENEL = ['efsane_kanka|kral 👑', 'ilkyorumben|ilk yorum ben 🥇', 'zeynep.0612|keşfetten geldim 🙋‍♀️', 'mert_bjk|devamı gelsin', 'ayse_nur|kanka çok iyisin ❤️'];
+const Y_CRINGE = ['ikincielutanc|ikinci elden utandım', 'gece_kuşu|bu ne kardeşim 💀', 'kurtaraniz|biri bu çocuğu durdursun', 'derscalis_|ders çalış kardeşim',
+  'emre.k|izledim pişmanım', 'not_hoca|bunu okul grubuna atıyorum', 'cringealarmi|🚨🚨🚨'];
+const Y_KOTU = ['dikeyci|dikey çek şunu', 'ses_yok|ses gitmiş kanka', 'kamera_titrek|kamera deprem bölgesinde mi', 'kedisever|arkadaki kedi daha yetenekli'];
+const Y_IYI = ['montajci_burak|montaj temiz 👌', 'ritimkral|ritim tam yerinde', 'fyp_avcisi|bu keşfete düşer'];
+const Y_AKRABA = ['Teyzen 🌹|Maşallah yeğenim artist olmuş 🌹🌹🌹', 'Annen|Ne zaman ders çalışıyorsun?', 'Kuzen Burak|ahahahah okul grubuna attım',
+  'Babam|Bu ne hal', 'Halan|Kızım/oğlum üşütme 🧣'];
+const Y_BOT = ['takip4takip|Takip edene takip 🔁', 'freefollowers_tr|Profilime bak 🔥 ücretsiz takipçi', 'zincirmesaj|Bu yorumu 5 kişiye göndermezsen...',
+  'kripto_sinyal|DM at 🚀 100x sinyal'];
+
+const X_TWEET = ["türkiye'de gençlik bitti arkadaşlar 💀", 'bunu izledikten sonra telefonu kapatıp 10 dakika duvara baktım',
+  'algoritma bunu bana neden gösterdi, ne yaptım ben', '16 yaşında bu çocuk. 16.', "gen z'nin son hali, bu tarihi not edin",
+  "tiktok'u kapatın artık ya"];
+const X_YANIT = [
+  { n: 'Ekonomist Dayı', h: '@ekonomist_dayi', t: 'Asgari ücret bu seviyedeyken gençlerin yaptığına bakın. Bu ülke böyle mi kalkınacak?', v: true },
+  { n: '85 Nostalji', h: '@85likler', t: 'Biz bu yaşta sokakta top oynuyorduk, dizlerimizde yara vardı. Şimdiki nesil...', v: false },
+  { n: 'Kitap Kurdu', h: '@kitapkurdu__', t: 'Ben 16 yaşında Dostoyevski okuyordum (okumuyordum)', v: false },
+  { n: 'Meraklı Vatandaş', h: '@merakli_vatandas', t: '@grok bu doğru mu', v: false },
+  { n: 'ratio', h: '@ratiokral', t: 'ratio + takipçin yok + annen haklı', v: false },
+  { n: 'Thread Adamı', h: '@thread_adami', t: 'Bu videodan çıkarılacak 12 girişimcilik dersi 🧵 1/27', v: true },
+  { n: 'Kemal', h: '@kemal_premium', t: 'Bunu 2019\'da söylemiştim. Kimse dinlemedi.', v: true },
+  { n: 'Yorgun Beyaz Yaka', h: '@plaza_ruhu', t: 'Mesaiden önce bunu izleyip hayatımı sorguladım. Teşekkürler.', v: false },
+  { n: 'gece 3', h: '@uyuyamayan', t: "gece 3'te bunu izliyorum, tiktok'a geçmeme 1 adım kaldı", v: false },
+  { n: 'TikTok Kaçağı', h: '@tiktokkacagi', t: "X'e normal insanlar burada diye geçtim. Sonra bu yanıtları okudum.", v: false },
+  { n: 'Siyaset Bilimci (ödüllü)', h: '@analizci', t: 'Bu video aslında toplumsal çözülmenin bir semptomu. Kaydedin.', v: true },
+  { n: 'Bot', h: '@user84736291', t: 'Harika içerik! Profilimdeki linke tıkla 💋', v: false },
+  { n: 'Eski Takipçi', h: '@sessiz_izleyici', t: 'Alıntılayanların hepsi videoyu 4 kere izlemiş, ona bakın', v: false }
+];
+
+/* fx: f takipçi, c cringe, m anne sabrı, ring ring light */
+const OLAYLAR = [
+  { id: 'teyze', app: 'Facebook', from: 'Teyzen', t: 'Videonu paylaştı: "Maşallah yeğenim artist olmuş 🌹🌹🌹" 47 beğeni, hepsi 55 yaş üstü.',
+    s: [{ l: 'Bırak paylaşsın', fx: { f: 150, c: 10 }, r: 'Teyzenin arkadaşları seni takip etti. Her videona "Amin" yazıyorlar.' },
+        { l: 'Silmesini rica et', fx: { m: -10 }, r: 'Teyzen küstü. Annen: "Teyzeni neden üzdün?"' }] },
+  { id: 'marka', app: 'Instagram DM', from: 'Mucize Boy Çayı', t: 'İşbirliği teklifi! "Mucize Boy Uzatma Çayı" tanıtımı. Ücret: 3 kutu çay.',
+    s: [{ l: 'Kabul et, ilk sponsorum!', fx: { f: 250, c: 15, m: -5 }, r: 'Çayı annen içti. Boyu uzamadı ama yorumlar coştu.' },
+        { l: 'Reddet, ilkelerim var', fx: { m: 5 }, r: 'İlkeli fenomen oldun. Kimse fark etmedi.' }] },
+  { id: 'anne', app: 'WhatsApp', from: 'Annem', t: 'Ya o telefonu bırakırsın ya da ben bırakırım. Seçim senin.',
+    s: [{ l: 'Bulaşıkları yıka', fx: { m: 25, f: 60 }, r: 'Yıkarken gizlice "temizlik rutinim" çektin. 60 takipçi geldi.' },
+        { l: '"Anne bu benim kariyerim"', fx: { m: -20, c: 5 }, r: 'Annen 4 saniye sessiz kaldı. Bu iyiye işaret değil.' }] },
+  { id: 'sinif', app: 'WhatsApp', from: '10-C Sınıf Grubu 📚', t: 'Videon grupta dönüyor. 43 mesaj, hepsi gülme emojisi.',
+    s: [{ l: 'Gururla "beğenmeyi unutmayın" yaz', fx: { f: 120, c: 12 }, r: 'Ekran görüntün okul açılınca panoya asılacak.' },
+        { l: 'Gruptan çık', fx: { c: -5 }, r: 'Herkes neden çıktığını biliyor. Ama en azından sessiz.' }] },
+  { id: 'duet', app: 'TikTok', from: 'Ünlü bir hesap', t: 'Videonu düetledi. Yüzünde tek bir ifade var: 😐',
+    s: [{ l: 'Teşekkür videosu çek', fx: { f: 500, c: 15 }, r: 'Teşekkür videon düetten çok izlendi. Kimse nedenini bilmiyor.' },
+        { l: 'Görmezden gel', fx: { f: 200 }, r: 'Sessiz kaldın, gizemli göründün. 200 kişi merak etti.' }] },
+  { id: 'baba', app: 'WhatsApp', from: 'Babam', t: 'Bu fenomenlik para ediyor mu?',
+    s: [{ l: 'Bakiyeyi göster: 4,20 TL', fx: { m: 8 }, r: 'Babam güldü. Annene söylemeyeceğine söz verdi.' },
+        { l: '"Yakında kendi coinimi çıkaracağım"', fx: { m: -15, c: 10 }, r: 'Babam aile grubuna "Bu çocuk ne diyor" yazdı.' }] },
+  { id: 'ring', app: 'Trendyol', from: 'Kampanya', t: 'Ring light 899 TL. Senin harçlığın 900 TL.',
+    s: [{ l: 'Al! Işık her şeydir', fx: { ring: true, m: -5 }, r: 'Artık her şey parlıyor. Çekimler daha kolay olacak (yeşil alan büyüdü).' },
+        { l: 'Masa lambası yeter', fx: { m: 5 }, r: 'Masa lambası sarı yanıyor. Videolar 2008 havasında.' }] },
+  { id: 'flood', app: 'X', from: '@analizci', t: 'Senin hakkında 34 tweetlik flood yazdı: "Gen Z\'nin çöküşü üzerine."',
+    s: [{ l: 'Alıntılayıp cevap ver', fx: { f: 400, c: 20 }, r: 'Cevabını 2 milyon kişi gördü. Hepsi seninle dalga geçiyordu.' },
+        { l: 'Uyu', fx: { f: 200, m: 5 }, r: 'Uyudun. Flood 3 milyon gördü. Hiçbir şey yapmadan ünlü oldun.' }] },
+  { id: 'ogretmen', app: 'TikTok', from: 'Edebiyat Öğretmenin', t: 'Seni takip etmeye başladı. Profil fotoğrafı: Yahya Kemal.',
+    s: [{ l: 'Onu da takip et', fx: { m: 5, c: 5 }, r: 'Videolarına "Kompozisyon yazsan da böyle yaratıcı olsan" yorumu yaptı.' },
+        { l: 'Hesabı gizliye al', fx: { f: -50 }, r: 'Gizliye aldın. 50 takipçi kaçtı, öğretmen zaten görmüştü.' }] }
+];
+
+/* ---------- durum ---------- */
+const ADIM = 4; // her videoda çekim sayısı
+let S = null, dongu = 0;
+const app = document.getElementById('app');
+
+function yeniOyun(ad) {
+  S = { ad, gun: 0, fol: 0, cringe: 10, anne: 100, ring: false, kullanilan: [], olaylar: [], enIyi: { izlenme: 0, t: '' }, viralSayi: 0, v: null };
+}
+
+/* ---------- ekranlar ---------- */
+function hud() {
+  if (!S) return '';
+  return `<div class="hud">
+    <div class="hud-top"><span>GÜN ${Math.min(S.gun + 1, 7)}/7 · ${GUNLER[Math.min(S.gun, 6)].toUpperCase()}</span><span><b>${fmt(S.fol)}</b> takipçi</span></div>
+    <div class="meters">
+      <div class="meter"><div><span>Cringe</span><b>%${Math.round(S.cringe)}</b></div><div class="bar"><i id="mCringe" style="width:${S.cringe}%"></i></div></div>
+      <div class="meter"><div><span>Annenin sabrı</span><b>%${Math.round(S.anne)}</b></div><div class="bar"><i id="mMom" style="width:${S.anne}%"></i></div></div>
+    </div></div>`;
+}
+function ciz(icerik) {
+  cancelAnimationFrame(dongu);
+  app.innerHTML = hud() + `<section class="stage">${icerik}</section>`;
+  window.scrollTo(0, 0);
+}
+function telefon(v, ekstra = '', sinif = '') {
+  const t = v.trend;
+  return `<div class="phone ${sinif}" id="phone" style="background:linear-gradient(160deg,${t.bg[0]},${t.bg[1]})">
+    <div class="scene">${t.sahne.map(e => `<span>${e}</span>`).join('')}</div>${ekstra}</div>`;
+}
+const noktalar = (n, max) => '●'.repeat(n) + '○'.repeat(max - n);
+
+function baslangic() {
+  S = null;
+  const enIyi = +store.get('kd-eniyi') || 0;
+  app.innerHTML = `<div class="start">
+    <p class="eyebrow">Yaz tatilinin son haftası</p>
+    <h1 class="glitch">KEŞFETE<br>DÜŞ</h1>
+    <p class="lead">16 yaşındasın. Okulların açılmasına 7 gün var. Hedefin TikTok'ta fenomen olmak. Tek sorun şu: videon X'e düşerse internetin en acımasız yorumcuları seni bekliyor.</p>
+    <label class="handle" for="ad"><span>@</span><input id="ad" maxlength="18" autocomplete="off" spellcheck="false" value="${esc(store.get('kd-ad') || 'efsane.efe')}" aria-label="Kullanıcı adın"></label>
+    <button class="btn" id="basla">Hesabı aç, başla</button>
+    <details><summary>Nasıl oynanır?</summary><ul>
+      <li>Her gün bir trend ve bir açıklama seç.</li>
+      <li>Çekimde beyaz çizgi yeşil alandayken dokun. 4 sahne var.</li>
+      <li>Cringe arttıkça videon X'e düşme ihtimali artar. X'e düşmek çok izlenme getirir ama annen de görür.</li>
+      <li>Annenin sabrı biterse telefona el konur. Oyun biter.</li>
+    </ul></details>
+    ${enIyi ? `<p class="best">En iyi skorun: ${fmt(enIyi)} takipçi</p>` : ''}
+  </div>`;
+  const inp = document.getElementById('ad');
+  document.getElementById('basla').onclick = () => {
+    const ad = (inp.value || '').replace(/[^\p{L}\p{N}._]/gu, '').slice(0, 18) || 'efsane.efe';
+    store.set('kd-ad', ad);
+    yeniOyun(ad);
+    trendSec();
+  };
+}
+
+function trendSec() {
+  const secenek = shuffle(TRENDLER.filter(t => !S.kullanilan.includes(t.id))).slice(0, 3);
+  ciz(`<h2 class="h">Bugün ne çekiyoruz?</h2><p class="sub">${GUN_GIRIS[S.gun]}</p>
+    <div class="cards">${secenek.map((t, i) => `<button class="card" data-i="${i}">
+      <span class="tag">${t.tag}</span><span class="t">${esc(t.t)}</span><span class="d">${esc(t.d)}</span>
+      <span class="stats"><span class="r">Erişim ${noktalar(Math.min(4, Math.ceil(t.erisim / 400)), 4)}</span><span class="c">Cringe ${noktalar(Math.ceil(t.cringe / 15), 5)}</span>${t.anne ? `<span class="m">Anne −${t.anne}</span>` : ''}</span>
+    </button>`).join('')}</div>`);
+  app.querySelectorAll('.card').forEach(b => b.onclick = () => {
+    const t = secenek[+b.dataset.i];
+    S.kullanilan.push(t.id);
+    S.v = { trend: t };
+    aciklamaSec();
+  });
+}
+
+function aciklamaSec() {
+  const secenek = shuffle(ACIKLAMALAR).slice(0, 3);
+  ciz(`<h2 class="h">Açıklamayı yaz</h2><p class="sub">${esc(S.v.trend.t)}. Altına ne yazıyoruz?</p>
+    <div class="caps">${secenek.map((a, i) => `<button class="cap" data-i="${i}"><span class="t">${esc(a.t)}</span>
+      <span class="stats"><span class="r">Erişim ×${a.kat.toFixed(2).replace('.', ',')}</span><span class="c">Cringe +${a.cringe}</span></span></button>`).join('')}</div>`);
+  app.querySelectorAll('.cap').forEach(b => b.onclick = () => { S.v.ack = secenek[+b.dataset.i]; cekim(); });
+}
+
+function cekim() {
+  const v = S.v;
+  v.sonuc = [];
+  ciz(`<h2 class="h">${esc(v.trend.fiil)}!</h2>
+    ${telefon(v, '<div class="rec" id="rec">REC 00:00</div><div class="flash" id="flash"></div>', 'dance')}
+    <div class="timing" id="timing"><div class="zone" id="zone"></div><div class="needle" id="needle"></div></div>
+    <div class="shots" id="shots">${'<i></i>'.repeat(ADIM)}</div>
+    <button class="btn" id="cek">ÇEK</button>
+    <p class="hint">Beyaz çizgi yeşil alandayken dokun. Telefona dokunmak ya da boşluk tuşu da olur.</p>`);
+  const needle = document.getElementById('needle'), zoneEl = document.getElementById('zone'), flash = document.getElementById('flash'),
+    phone = document.getElementById('phone'), rec = document.getElementById('rec');
+  const hiz = 1.9 + S.gun * 0.28;
+  const genislik = Math.max(0.1, 0.2 - S.gun * 0.013) + (S.ring ? 0.06 : 0);
+  let merkez = 0, kilit = false, t0 = performance.now(), poz = 0;
+  const yeniAlan = () => { merkez = R(genislik / 2 + 0.05, 1 - genislik / 2 - 0.05); zoneEl.style.left = (merkez - genislik / 2) * 100 + '%'; zoneEl.style.width = genislik * 100 + '%'; };
+  yeniAlan();
+  const kare = now => {
+    const s = (now - t0) / 1000;
+    poz = (1 - Math.cos(s * hiz)) / 2;
+    needle.style.left = poz * 100 + '%';
+    rec.textContent = 'REC 00:' + String(Math.floor(s) % 60).padStart(2, '0');
+    dongu = requestAnimationFrame(kare);
+  };
+  dongu = requestAnimationFrame(kare);
+
+  const vur = () => {
+    if (kilit || v.sonuc.length >= ADIM) return;
+    kilit = true;
+    const d = Math.abs(poz - merkez);
+    const p = d <= genislik / 2 ? 1 : d <= genislik / 2 + 0.07 ? 0.5 : 0;
+    v.sonuc.push(p);
+    const nokta = document.querySelectorAll('#shots i')[v.sonuc.length - 1];
+    nokta.className = p === 1 ? 's1' : p === 0.5 ? 's5' : 's0';
+    flash.textContent = p === 1 ? pick(ISABET) : p === 0.5 ? pick(IDARE) : pick(KACTI);
+    flash.classList.add('on');
+    phone.classList.remove('hit', 'miss'); void phone.offsetWidth;
+    phone.classList.add(p > 0 ? 'hit' : 'miss');
+    titret(p > 0 ? 15 : [30, 40, 30]);
+    setTimeout(() => {
+      flash.classList.remove('on');
+      if (v.sonuc.length >= ADIM) { cancelAnimationFrame(dongu); hesapla(); paylas(); }
+      else { yeniAlan(); kilit = false; }
+    }, 650);
+  };
+  document.getElementById('cek').onclick = vur;
+  phone.onclick = vur;
+  document.onkeydown = e => { if ((e.code === 'Space' || e.code === 'Enter') && document.getElementById('cek')) { e.preventDefault(); vur(); } };
+}
+
+function hesapla() {
+  const v = S.v, t = v.trend, a = v.ack;
+  const q = v.sonuc.reduce((s, x) => s + x, 0) / ADIM;
+  v.q = q;
+  v.vc = clamp(t.cringe + a.cringe + (q < 0.5 ? 15 : 0) - (q >= 0.9 ? 8 : 0) + R(-8, 8));
+  let izl = t.erisim * a.kat * (0.45 + q) * R(0.7, 1.5) + S.fol * R(2.5, 4.5);
+  v.viral = v.vc >= 68 || (v.vc >= 50 && Math.random() < 0.45);
+  if (v.viral) { izl = izl * R(3, 5) + R(5000, 12000); S.viralSayi++; }
+  v.izlenme = Math.round(izl);
+  v.begeni = Math.round(izl * R(0.04, 0.12) * (0.5 + q));
+  v.yorumSayi = Math.max(3, Math.round(v.begeni * R(0.02, 0.06)));
+  v.kazanc = Math.round(izl * (0.035 + 0.07 * q) * (v.viral ? 0.6 : 1));
+  v.xKazanc = v.viral ? Math.round(v.kazanc * 0.55) : 0;
+  S.fol += v.kazanc - v.xKazanc; // X kısmı X ekranında eklenir
+  S.cringe = clamp(S.cringe * 0.55 + v.vc * 0.6);
+  S.anne = clamp(S.anne - t.anne);
+  if (v.izlenme > S.enIyi.izlenme) S.enIyi = { izlenme: v.izlenme, t: t.t };
+  document.onkeydown = null;
+}
+
+function yorumlar(v) {
+  const out = [pick(v.trend.yorum).replace(/^/, 'izleyici' + Math.floor(R(10, 999)) + '|')];
+  if (v.vc >= 50) out.push(...shuffle(Y_CRINGE).slice(0, 2)); else out.push(pick(Y_GENEL), pick(Y_CRINGE));
+  out.push(pick(v.q < 0.5 ? Y_KOTU : Y_IYI), pick(Y_AKRABA), pick(Y_BOT));
+  const ikinci = v.trend.yorum.filter(y => !out[0].endsWith(y));
+  out.splice(3, 0, 'yorumcu_' + Math.floor(R(100, 9999)) + '|' + pick(ikinci));
+  return out.map(s => { const [u, t] = s.split('|'); return { u, t }; });
+}
+
+function paylas() {
+  const v = S.v;
+  const ekstra = `<div class="overlay"><b>@${esc(S.ad)}</b><span>${esc(v.ack.t)}</span><span class="snd">♫ orijinal ses - ${esc(S.ad)}</span></div>
+    <div class="rail"><div><span>❤️</span><em id="rLike">0</em></div><div><span>💬</span>${kisa(v.yorumSayi)}</div><div><span>↗️</span>${kisa(v.begeni * 0.08)}</div></div>`;
+  ciz(`<h2 class="h">Paylaşıldı</h2>
+    ${telefon(v, ekstra, 'dance')}
+    <div class="nums"><div class="num"><small>İzlenme</small><b id="nIzl">0</b></div><div class="num"><small>Beğeni</small><b id="nBeg">0</b></div><div class="num up"><small>Yeni takipçi</small><b id="nTak">+0</b></div></div>
+    <ul class="comments" id="yorumlar"></ul>
+    <div id="devam"></div>`);
+  const hedef = v.kazanc - v.xKazanc, bas = performance.now(), sure = 1600;
+  const say = now => {
+    const k = Math.min(1, (now - bas) / sure), e = 1 - Math.pow(1 - k, 3);
+    document.getElementById('nIzl').textContent = kisa(v.izlenme * e);
+    document.getElementById('nBeg').textContent = kisa(v.begeni * e);
+    document.getElementById('rLike').textContent = kisa(v.begeni * e);
+    document.getElementById('nTak').textContent = '+' + fmt(hedef * e);
+    if (k < 1) dongu = requestAnimationFrame(say);
+  };
+  dongu = requestAnimationFrame(say);
+  const liste = document.getElementById('yorumlar'), ys = yorumlar(v);
+  ys.forEach((y, i) => setTimeout(() => {
+    if (!liste.isConnected) return;
+    liste.insertAdjacentHTML('beforeend', `<li>${av(y.u)}<div><div class="u">${esc(y.u)}</div><div class="tx">${esc(y.t)}</div></div></li>`);
+    if (i === ys.length - 1) sonrakiDugme();
+  }, 500 + i * 380));
+  function sonrakiDugme() {
+    const d = document.getElementById('devam');
+    if (!d) return;
+    if (v.viral) {
+      d.innerHTML = `<button class="btn x" id="ileri">Videon X'e düştü →</button>`;
+      document.getElementById('ileri').onclick = xEkrani;
+    } else {
+      d.innerHTML = `<button class="btn" id="ileri">Devam</button>`;
+      document.getElementById('ileri').onclick = gunSonu;
+    }
+  }
+}
+
+function xEkrani() {
+  const v = S.v, t = v.trend;
+  const ilk = pick(X_TWEET), yanitlar = shuffle(X_YANIT).slice(0, 5);
+  const xIzl = R(1.2e6, 4.5e6) * (0.6 + v.vc / 100);
+  S.fol += v.xKazanc;
+  S.anne = clamp(S.anne - 10);
+  const tw = (n, h, metin, ver, ek = '', meta = '') => `<div class="tw">${av(h)}<div style="min-width:0">
+    <div class="who"><b>${esc(n)}</b>${ver ? '<span class="tick">✓</span>' : ''} <span>${esc(h)} · ${Math.floor(R(1, 59))} dk</span></div>
+    <div class="tx">${esc(metin)}</div>${ek}${meta}</div></div>`;
+  const mini = `<div class="mini"><div class="thumb" style="background:linear-gradient(160deg,${t.bg[0]},${t.bg[1]})">${t.sahne[0]}</div>
+    <div class="cap2"><b>@${esc(S.ad)}</b><span>${esc(v.ack.t)}</span></div></div>`;
+  const meta = `<div class="meta"><span>💬 ${kisa(xIzl * 0.004)}</span><span>🔁 ${kisa(xIzl * 0.006)}</span><span>♡ ${kisa(xIzl * 0.03)}</span><span>📊 ${kisa(xIzl)}</span></div>`;
+  ciz(`<div class="xwrap">
+      <div class="xhead"><span>Gönderi</span><small>GÜNDEMDE</small></div>
+      ${tw('Cringe Arşivi', '@cringe_arsivi', ilk, true, mini, meta)}
+      ${yanitlar.map(y => tw(y.n, y.h, y.t, y.v)).join('')}
+    </div>
+    <div class="chips"><span class="chip g">+${fmt(v.xKazanc)} takipçi (nefret de izlenmedir)</span><span class="chip m">Anne −10 (kuzenin gönderdi)</span></div>
+    <button class="btn" id="ileri">TikTok'a dön</button>`);
+  document.getElementById('ileri').onclick = gunSonu;
+}
+
+function gunSonu() {
+  if (S.anne <= 0) return son();
+  if (S.gun >= 6) return son();
+  olay();
+}
+
+function olay() {
+  const havuz = OLAYLAR.filter(o => !S.olaylar.includes(o.id));
+  const o = pick(havuz.length ? havuz : OLAYLAR);
+  S.olaylar.push(o.id);
+  ciz(`<p class="eyebrow">Gece ${pick(['23.47', '00.12', '01.30', '22.58'])} · yeni bildirim</p>
+    <div class="notif"><div class="napp"><span>${esc(o.app)}</span><span>şimdi</span></div><div class="from">${esc(o.from)}</div><p>${esc(o.t)}</p></div>
+    <div class="choices" id="sec">${o.s.map((s, i) => `<button class="choice" data-i="${i}">${esc(s.l)}</button>`).join('')}</div>
+    <div id="sonuc"></div>`);
+  app.querySelectorAll('.choice').forEach(b => b.onclick = () => {
+    const s = o.s[+b.dataset.i], fx = s.fx, chip = [];
+    if (fx.f) { S.fol = Math.max(0, S.fol + fx.f); chip.push(`<span class="chip g">${fx.f > 0 ? '+' : '−'}${fmt(Math.abs(fx.f))} takipçi</span>`); }
+    if (fx.c) { S.cringe = clamp(S.cringe + fx.c); chip.push(`<span class="chip c">Cringe ${fx.c > 0 ? '+' : '−'}${Math.abs(fx.c)}</span>`); }
+    if (fx.m) { S.anne = clamp(S.anne + fx.m); chip.push(`<span class="chip m">Anne ${fx.m > 0 ? '+' : '−'}${Math.abs(fx.m)}</span>`); }
+    if (fx.ring) { S.ring = true; chip.push(`<span class="chip g">Ring light alındı</span>`); }
+    document.getElementById('sec').remove();
+    document.getElementById('sonuc').innerHTML = `<p class="result">${esc(s.r)}</p><div class="chips" style="margin-top:10px">${chip.join('')}</div>
+      <button class="btn" id="ileri" style="margin-top:14px">${S.anne <= 0 ? 'Eyvah' : 'Uyu, yarın yeni gün'}</button>`;
+    app.querySelector('.hud').outerHTML = hud();
+    document.getElementById('ileri').onclick = () => { if (S.anne <= 0) return son(); S.gun++; trendSec(); };
+  });
+}
+
+function son() {
+  const f = S.fol, c = S.cringe;
+  let baslik, metin;
+  if (S.anne <= 0) { baslik = 'TELEFONA EL KONULDU'; metin = `Annen telefonu üst rafa, misafir takımının arkasına sakladı. Kariyerin ${S.gun + 1}. günde bitti. Takipçilerin hâlâ "part 2 nerede" diye soruyor.`; }
+  else if (f >= 30000 && c >= 55) { baslik = "X'İN MASKOTU"; metin = `Herkes seni tanıyor, kimse seni sevmiyor. Ekşi'de başlığın açıldı: "${S.ad}". İlk entry: "bu ne ya". İkinci entry: "bence sanatçı".`; }
+  else if (f >= 30000) { baslik = 'FENOMEN'; metin = 'Okul açıldı. Müdür bile selfie istedi. Annen hâlâ "ders" diyor ama artık daha sessiz söylüyor.'; }
+  else if (f >= 10000) { baslik = 'MİKRO FENOMEN'; metin = 'Mahallenin fırıncısı seni tanıyor. Ekmekte 1 lira indirim aldın. Kariyerin bu.'; }
+  else if (c >= 55) { baslik = 'CRINGE EFSANESİ'; metin = "Takipçin az ama ekran görüntülerin X'te sonsuza kadar dolaşacak. 2034'te biri seni yine alıntılayacak."; }
+  else { baslik = 'YAZ BİTTİ'; metin = `${fmt(f)} takipçi. ${Math.min(23, Math.round(f * 0.1))} tanesi bot, 6 tanesi akraba. Seneye tekrar dene.`; }
+  const eskiEnIyi = +store.get('kd-eniyi') || 0;
+  if (f > eskiEnIyi) store.set('kd-eniyi', String(Math.round(f)));
+  const url = /^https?:$/.test(location.protocol) && !/claude\.(ai|site)|claudeusercontent/.test(location.hostname) ? location.href.split('#')[0] : '';
+  const paylasMetni = `Keşfete Düş'te 7 günde ${fmt(f)} takipçi kastım. Sonuç: ${baslik}. Cringe: %${Math.round(c)} 💀\n#KeşfeteDüş`;
+  const xLink = 'https://x.com/intent/tweet?text=' + encodeURIComponent(paylasMetni) + (url ? '&url=' + encodeURIComponent(url) : '');
+  cancelAnimationFrame(dongu);
+  document.onkeydown = null;
+  app.innerHTML = `<div class="end">
+    <p class="eyebrow">${S.anne <= 0 ? 'Oyun bitti' : 'Okullar açıldı'} · @${esc(S.ad)}</p>
+    <h1 class="glitch">${baslik}</h1>
+    <p class="lead">${esc(metin)}</p>
+    <div class="nums">
+      <div class="num"><small>Takipçi</small><b>${fmt(f)}</b></div>
+      <div class="num"><small>Cringe</small><b>%${Math.round(c)}</b></div>
+      <div class="num"><small>En çok izlenen</small><b>${kisa(S.enIyi.izlenme)}</b></div>
+      <div class="num"><small>X'e düşme</small><b>${S.viralSayi} kez</b></div>
+    </div>
+    ${f > eskiEnIyi && eskiEnIyi ? '<p class="fine">Yeni rekor!</p>' : ''}
+    <div class="row"><a class="btn x" href="${xLink}" target="_blank" rel="noopener">X'te paylaş</a><button class="btn ghost" id="tekrar">Tekrar oyna</button></div>
+  </div>`;
+  document.getElementById('tekrar').onclick = baslangic;
+}
+
+baslangic();
+</script>
+</body>
+</html>
