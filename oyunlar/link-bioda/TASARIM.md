@@ -1,13 +1,24 @@
-# Link Bio'da — Tasarım Taslağı (v0.2)
+# Link Bio'da — Tasarım Taslağı (v0.3)
 
-> Durum: tasarım aşaması, kod yok. Bu belge konuştukça güncellenecek.
+> Durum: dikey dilim geliştiriliyor. Bu belge konuştukça güncellenecek.
+
+## v0.3 kararları (bu bölüm aşağıdakilerle çelişirse bu geçerlidir)
+
+- **Süre:** tek oturum değil, kariyer modu. Yaklaşık 30 oyun günü, gün başına 3–4 dakika, toplam 1,5–2 saat. İlerleme kaydedilir, "Devam et" ile sürer.
+- **Gün döngüsü (kokoreççi gibi):** Sabah hazırlık → Canlı yayın (gerçek zamanlı) → Yayın sonrası X paylaşımı → Gece seçimi (DM'ler / klip / erken uyku) → Gün sonu raporu ve mağaza → Gece olayı → Ertesi gün.
+- **Canlı yayın:** sohbetten süreli istekler gelir (dans, sohbet, şarkı, selam, poz, teşekkür). Doğru hareket bahşiş getirir. Aynı anda ilgi, enerji ve oda olayları yönetilir: annenin kapıyı çalması, bant daraltması, şarj, troll, kedi, komşunun matkabı, ışık, telefonun kayması.
+- **Yayın sonrası X paylaşımı:** yayıncı kendi X hesabında yayına göre oluşan seçeneklerden birini paylaşır. Paylaşım ertesi günün izleyicisini, takipçiyi, aile radarını ve operasyon riskini değiştirir. Yanıtlar X tiplerinden gelir.
+- **Adalet:** kimlik, yönelim ve görünüm kazancı etkilemez. Kazancı etkileyen iki seçim yaş grubu (genç / yetişkin / olgun) ve yayın tarzıdır (tatlı / gizemli / entel / sporcu / komik). Günün trendi bu gruplardan eşit olasılıkla seçilir, yani her karakterin uzun vadede eşit şansı olur. Her tarzın mağazada eşit fiyatlı bir dekor eşyası var. Haftalık modda herkese aynı tohum (aynı olaylar) verilir.
+- **Yayın saati seçimi:** 21.00 (çok izleyici, annenin kapıyı çalma ihtimali yüksek), 23.00 (dengeli), 02.00 (az izleyici, yüksek bahşiş, ertesi gün yorgunluk).
+- **Bölümler:** çocukluk odası → kiralık 1+1 → stüdyo daire → Dubai.
+- **Dikey dilim (ilk sürüm):** karakter oluşturma, çocukluk odası, 3 günlük döngü, mağaza, 3 günlük hikâye ve dilim sonu ekranı.
 
 ## Özet
 
 24 yaşında (ya da oyuncunun seçtiği yaşta, en az 18) bir karakter, geçim derdinden "içerik üreticisi" olmaya karar veriyor. Oyuncu 7 gün boyunca çekim yapıyor, abone mesajlarına cevap veriyor, X'te tanıtım yapıyor, kazandığı parayla bir şeyler alıyor ve bunları yaparken ailesinden, vergi dairesinden ve "sabah 6 operasyonundan" kaçmaya çalışıyor.
 
 - **Platform adı oyunda:** "FanKasa" (parodi; gerçek marka adı kullanılmıyor)
-- **Süre:** tek oturum, 15–20 dakika, 7 oyun günü
+- **Süre:** kariyer modu, ~30 oyun günü (bkz. v0.3 kararları)
 - **Ton:** yüzeyde hafif ve absürt; altında "gerçek yüz" teması. Espri karakterin kimliğiyle değil, etrafındaki insanların ikiyüzlülüğüyle yapılır.
 - **Görsel:** 3D (Three.js), stilize low-poly karakterler ve oda
 - **Kitle:** X kullanıcıları. Göndermeler X dilini, Türkiye gündemini ve X tiplerini bilen birinin güleceği şekilde yazılır.
