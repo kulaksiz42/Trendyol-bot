@@ -25,16 +25,16 @@ window.VERI = {
     { id: 'lezbiyen', ad: 'Lezbiyen' }, { id: 'biseksuel', ad: 'Biseksüel' }
   ],
   SILUET: [
-    { id: 'dar', ad: 'Dar omuz' }, { id: 'dengeli', ad: 'Dengeli' }, { id: 'genis', ad: 'Geniş omuz' }
+    { id: 'a', ad: 'Kıvrımlı' }, { id: 'b', ad: 'Geniş omuzlu' }
   ],
   TEN: ['#f6d7c3', '#eac0a0', '#d9a07a', '#b97a52', '#8d5634', '#5e3a24'],
   SAC: [
-    { id: 'kisa', ad: 'Kısa' }, { id: 'uzun', ad: 'Uzun' }, { id: 'topuz', ad: 'Topuz' },
-    { id: 'kivircik', ad: 'Kıvırcık' }, { id: 'atkuyrugu', ad: 'At kuyruğu' }, { id: 'kel', ad: 'Kel' }
+    { id: 'kisa', ad: 'Yandan ayrık' }, { id: 'uzun', ad: 'Uzun' }, { id: 'topuz', ad: 'Topuz' },
+    { id: 'kisakesim', ad: 'Kısa kesim' }, { id: 'kazinmis', ad: 'Kazınmış' }, { id: 'kel', ad: 'Kel' }
   ],
   SAC_RENK: ['#1d1512', '#4a2e1f', '#8a5a33', '#d6a85c', '#a8322d', '#e7e2da', '#6d4bd1'],
   SAKAL: [
-    { id: 'yok', ad: 'Yok' }, { id: 'kirli', ad: 'Kirli sakal' }, { id: 'biyik', ad: 'Bıyık' }, { id: 'tam', ad: 'Sakal' }
+    { id: 'yok', ad: 'Yok' }, { id: 'kirli', ad: 'Kirli sakal' }, { id: 'tam', ad: 'Sakal' }
   ],
   GOZLUK: [
     { id: 'yok', ad: 'Yok' }, { id: 'yuvarlak', ad: 'Yuvarlak' }, { id: 'kalin', ad: 'Kalın çerçeve' }, { id: 'gunes', ad: 'Güneş gözlüğü' }

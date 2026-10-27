@@ -276,6 +276,56 @@
     const kas = 0.058 + P.kas * 0.012; J.kas1.position.y = kas; J['kas-1'].position.y = kas;
   }
 
+  /* ---------- hazır model için gözlük ve aksesuar ---------- */
+  function aksesuar3(g, L, c) {
+    const gx = L.gozGen * 0.27, gz = L.goz.z + 0.022, gy = L.goz.y;
+    if (c.gozluk && c.gozluk !== 'yok') {
+      const kare = c.gozluk !== 'yuvarlak';
+      const cer = malz(kare ? '#1b1b1f' : '#b8963e', { roughness: 0.3, metalness: kare ? 0 : 0.8 });
+      for (const s of [-1, 1]) {
+        const h = new T.Mesh(new T.TorusGeometry(kare ? 0.024 : 0.021, kare ? 0.0045 : 0.003, kare ? 6 : 8, kare ? 4 : 24), cer);
+        if (kare) h.rotation.z = Math.PI / 4;
+        h.position.set(s * gx, gy, gz); g.add(h);
+        if (c.gozluk === 'gunes') { const cam = new T.Mesh(new T.PlaneGeometry(0.033, 0.033), malz('#101018', { roughness: 0.1 })); cam.position.set(s * gx, gy, gz - 0.002); g.add(cam); }
+        const sap = kutu(0.004, 0.004, 0.1, cer); sap.position.set(s * (gx + 0.03), gy + 0.004, gz - 0.05); g.add(sap);
+      }
+      const kopru = kutu(gx * 2 - 0.045, 0.004, 0.004, cer); kopru.position.set(0, gy + 0.006, gz + 0.002); g.add(kopru);
+    }
+    const altin = malz('#d4af37', { metalness: 0.9, roughness: 0.25 });
+    if (c.aksesuar === 'kolye') { const k = new T.Mesh(new T.TorusGeometry(0.068, 0.005, 6, 28), altin); k.rotation.x = Math.PI / 2 + 0.3; k.position.set(0, L.boyun.y - 0.005, L.boyun.z + 0.035); g.add(k); }
+    if (c.aksesuar === 'kupe') for (const s of [-1, 1]) { const k = kure(0.008, altin); k.position.set(s * (L.gozGen * 0.5 + 0.035), gy - 0.045, L.goz.z - 0.085); g.add(k); }
+    if (c.aksesuar === 'bere') {
+      const b = new T.Mesh(new T.SphereGeometry(0.112, 22, 12, 0, Math.PI * 2, 0, Math.PI * 0.5), malz('#c8553d'));
+      b.position.set(0, L.tepeY - 0.075, L.goz.z - 0.085); b.scale.y = 1.05; g.add(golge(b));
+      const kenar = new T.Mesh(new T.TorusGeometry(0.11, 0.014, 8, 26), malz('#a94530')); kenar.rotation.x = Math.PI / 2; kenar.position.copy(b.position); g.add(kenar);
+    }
+    if (c.kedikulak) {
+      const m = malz('#26232b'), ic = malz('#ff8fb1'), y = L.tepeY - 0.02, z = L.goz.z - 0.08;
+      const bant = new T.Mesh(new T.TorusGeometry(0.1, 0.006, 6, 24, Math.PI), m); bant.position.set(0, y - 0.09, z); g.add(bant);
+      for (const s of [-1, 1]) {
+        const kk = new T.Mesh(new T.ConeGeometry(0.035, 0.07, 4), m); kk.position.set(s * 0.06, y + 0.015, z); kk.rotation.z = -s * 0.35; g.add(golge(kk));
+        const ki = new T.Mesh(new T.ConeGeometry(0.022, 0.045, 4), ic); ki.position.set(s * 0.06, y + 0.008, z + 0.01); ki.rotation.z = -s * 0.35; g.add(ki);
+      }
+    }
+  }
+  function modelVarMi() { return !!(window.Model && Model.hazir()); }
+  function kisiKur(cfg) {
+    if (modelVarMi()) { try { return Model.kur(cfg, aksesuar3); } catch (e) { console.warn('model kurulamadı', e); } }
+    return karakterKur(cfg);
+  }
+  function kisiGuncelle(K, dt, z) { if (K.userData.model) Model.guncelle(K, dt); else karakterGuncelle(K, dt, z); }
+  function kisiOynat(K, ad, sure) { if (!K) return; if (K.userData.model) Model.oynat(K, ad, sure); else K.userData.anim = { ad, t: 0, sure: sure || 0 }; }
+  const ANNE = { boy: 162, kilo: 72, siluet: 'a', ten: '#eac0a0', sac: 'topuz', sacRenk: '#3b2a22', sakal: 'yok', gozluk: 'yuvarlak', aksesuar: 'yok', kiyafet: 'hirka', yas: 56 };
+  let sonCfg = null;
+  function anneKur() {
+    const eski = anne;
+    anne = kisiKur(ANNE);
+    if (!anne.userData.model) anne.traverse(o => { if (o.material && o.material.color && o.material.color.getHexString() === '6d7280') o.material.color.set('#7d4e57'); });
+    anne.position.set(0.82, 0, -1.95); anne.visible = eski ? eski.visible : false;
+    if (eski) { anne.position.copy(eski.position); scene.remove(eski); }
+    scene.add(anne);
+  }
+
   /* ---------- kedi ---------- */
   function kediKur() {
     const G = new T.Group();
@@ -462,14 +512,14 @@
     if (document.hidden) return;
     const dt = Math.min(0.05, saat.getDelta()), z = saat.elapsedTime;
     if (oyuncu) {
-      karakterGuncelle(oyuncu, dt, z);
+      kisiGuncelle(oyuncu, dt, z);
       if (kameraMod === 'kabin') {
         if (!surukle) donus += dt * 0.25;
         oyuncu.rotation.y += (Math.sin(donus) * 0.9 - oyuncu.rotation.y) * Math.min(1, dt * 6);
       } else oyuncu.rotation.y += (0 - oyuncu.rotation.y) * Math.min(1, dt * 6);
     }
     if (anne) {
-      karakterGuncelle(anne, dt, z);
+      kisiGuncelle(anne, dt, z);
       if (anneDurum) {
         anneDurum.t += dt;
         const ac = anneDurum.giris ? clamp(anneDurum.t / 0.6, 0, 1) : 1 - clamp(anneDurum.t / 0.6, 0, 1);
@@ -498,7 +548,7 @@
     }
     if (O.ringIsik && O.ring.visible) O.ringIsik.intensity = 1.1;
     // yayında kameranın önündeki telefon ve halka gizlenir
-    if (O.telefon) { const y = kameraMod === 'yayin'; O.telefon.getObjectByName('tel').visible = !y; O.ringHalka.visible = !y; O.tripod.visible = O.tripodVar && !y; }
+    if (O.telefon) { const y = kameraMod === 'yayin'; O.telefon.visible = kameraMod !== 'kabin'; O.telefon.getObjectByName('tel').visible = !y; O.ringHalka.visible = !y; O.tripod.visible = O.tripodVar && !y; }
     // kamera
     kameraHedef();
     const kk = 1 - Math.exp(-4 * dt);
@@ -540,9 +590,7 @@
       saat = new T.Clock();
       odaKur();
       kedi = kediKur(); kedi.visible = false; scene.add(kedi);
-      anne = karakterKur({ boy: 162, kilo: 72, siluet: 'dengeli', ten: '#eac0a0', sac: 'kisa', sacRenk: '#3b2a22', sakal: 'yok', gozluk: 'yuvarlak', aksesuar: 'yok', kiyafet: 'esofman', yas: 56 });
-      anne.traverse(o => { if (o.material && o.material.color && o.material.color.getHexString() === '6d7280') o.material.color.set('#7d4e57'); });
-      anne.position.set(0.82, 0, -1.95); anne.visible = false; scene.add(anne);
+      anneKur();
       if (window.ResizeObserver) new ResizeObserver(boyutla).observe(kap); else window.addEventListener('resize', boyutla);
       boyutla();
       // sürükleyerek döndürme (karakter oluşturucu)
@@ -551,18 +599,23 @@
       el.addEventListener('pointermove', e => { if (surukle) donus = surukle.d + (e.clientX - surukle.x) * 0.01; });
       el.addEventListener('pointerup', () => { surukle = null; });
       calisiyor = true; this.hazir = true; kare();
+      // hazır modeller arkadan yüklenir; gelince karakterler yenilenir
+      if (window.Model) Model.yukle().then(() => { anneKur(); if (sonCfg) this.karakter(sonCfg); if (this.modelGeldi) this.modelGeldi(); }).catch(e => console.warn('3D modeller yüklenemedi, basit karakter kullanılıyor', e));
       return true;
     },
     tasi(konteyner) { if (!renderer || kap === konteyner) return; kap = konteyner; kap.prepend(renderer.domElement); boyutla(); },
     karakter(cfg) {
       if (!scene) return;
-      if (oyuncu) { scene.remove(oyuncu); oyuncu.traverse(o => { if (o.geometry) o.geometry.dispose(); }); }
-      oyuncu = karakterKur(cfg); scene.add(oyuncu);
+      if (oyuncu) { scene.remove(oyuncu); if (!oyuncu.userData.model) oyuncu.traverse(o => { if (o.geometry) o.geometry.dispose(); }); }
+      sonCfg = cfg;
+      const anim = oyuncu ? oyuncu.userData.anim : null;
+      oyuncu = kisiKur(cfg); scene.add(oyuncu);
+      if (anim && anim.ad !== 'bekle') kisiOynat(oyuncu, anim.ad, anim.sure ? Math.max(0.1, anim.sure - anim.t) : 0);
     },
     oda(env, tarz) { odaUygula(env || {}, tarz); },
     kamera(mod) { kameraMod = mod; },
-    oynat(ad, sure) { if (oyuncu) oyuncu.userData.anim = { ad, t: 0, sure: sure || 0 }; },
-    anneGir() { anneDurum = { giris: true, t: 0 }; if (anne) anne.userData.anim = { ad: 'sok', t: 0, sure: 0 }; },
+    oynat(ad, sure) { kisiOynat(oyuncu, ad, sure); },
+    anneGir() { anneDurum = { giris: true, t: 0 }; kisiOynat(anne, 'sok', 0); },
     anneCik() { if (anneDurum || (anne && anne.visible)) anneDurum = { giris: false, t: 0 }; },
     kediGec(sure = 6) { if (!kedi) return; kedi.visible = true; kedi.position.set(O.pervaz.x - O.pervaz.w / 2, 1.12, -1.45); kedi.scale.setScalar(0.9); kediYuru = { t: 0, sure }; },
     titret(sn = 5) { isikTitreme = sn; },

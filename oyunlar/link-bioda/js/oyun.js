@@ -34,7 +34,18 @@
   /* ---------- kayıt ---------- */
   let S = null;
   function kaydet() { try { localStorage.setItem(KAYIT, JSON.stringify(S)); } catch (e) { } }
-  function yukle() { try { const r = localStorage.getItem(KAYIT); const d = r ? JSON.parse(r) : null; return d && d.surum === V.SURUM ? d : null; } catch (e) { return null; } }
+  function yukle() {
+    try {
+      const r = localStorage.getItem(KAYIT); const d = r ? JSON.parse(r) : null;
+      if (!d || d.surum !== V.SURUM) return null;
+      // eski kayıtlardaki artık olmayan görünüm seçeneklerini karşılıklarına çevir
+      const k = d.karakter;
+      if (k.siluet !== 'a' && k.siluet !== 'b') k.siluet = /erkek/.test(k.kimlik) ? 'b' : 'a';
+      if (!V.SAC.some(x => x.id === k.sac)) k.sac = k.sac === 'kivircik' ? 'kisakesim' : 'uzun';
+      if (k.sakal === 'biyik') k.sakal = 'tam';
+      return d;
+    } catch (e) { return null; }
+  }
   function sil() { try { localStorage.removeItem(KAYIT); } catch (e) { } }
 
   function yeniDurum(k) {
@@ -149,7 +160,7 @@
   function karakterOlustur() {
     ekran('karakter', 'kabin');
     const k = {
-      ad: '', kullanici: '', kimlik: 'kadin', yonelim: 'hetero', yas: 24, boy: 168, kilo: 62, siluet: 'dengeli',
+      ad: '', kullanici: '', kimlik: 'kadin', yonelim: 'hetero', yas: 24, boy: 168, kilo: 62, siluet: 'a',
       ten: V.TEN[1], sac: 'uzun', sacRenk: V.SAC_RENK[1], sakal: 'yok', gozluk: 'yok', aksesuar: 'yok',
       tarz: 'tatli', gecmis: 'ogrenci', kiyafet: 'tisort'
     };
@@ -216,8 +227,8 @@
   }
   function varsayilanGorunum(k) {
     // kimlik seçimi sadece başlangıç görünümünü önerir; her şey sonradan değiştirilebilir
-    const m = { kadin: ['uzun', 'yok'], erkek: ['kisa', 'kirli'], transkadin: ['uzun', 'yok'], transerkek: ['kisa', 'biyik'], nonbinary: ['atkuyrugu', 'yok'] }[k.kimlik];
-    if (m) { k.sac = m[0]; k.sakal = m[1]; }
+    const m = { kadin: ['uzun', 'yok', 'a'], erkek: ['kisa', 'kirli', 'b'], transkadin: ['uzun', 'yok', 'a'], transerkek: ['kisa', 'tam', 'b'], nonbinary: ['kisakesim', 'yok', 'a'] }[k.kimlik];
+    if (m) { k.sac = m[0]; k.sakal = m[1]; k.siluet = m[2]; }
   }
   function rastgeleKarakter(k) {
     const r = Math.random, s = a => a[Math.floor(r() * a.length)];
