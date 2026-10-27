@@ -33,7 +33,11 @@
     if (yukleniyor) return yukleniyor;
     if (!T.GLTFLoader || !T.SkeletonUtils) return Promise.reject(new Error('yükleyici yok'));
     const L = new T.GLTFLoader();
-    const al = u => new Promise((ok, hata) => L.load(YOL + u, ok, undefined, hata));
+    // .glb sunulmayan ortamlarda (ör. Claude sayfası) aynı dosyanın base64 metin kopyası denenir
+    const ikili = u => fetch(YOL + u).then(r => { if (!r.ok) throw new Error(u); return r.arrayBuffer(); })
+      .catch(() => fetch(YOL + u.replace(/\.glb$/, '.b64.txt')).then(r => { if (!r.ok) throw new Error(u); return r.text(); })
+        .then(t => { const s = atob(t.trim()), b = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) b[i] = s.charCodeAt(i); return b.buffer; }));
+    const al = u => ikili(u).then(buf => new Promise((ok, hata) => L.parse(buf, '', ok, hata)));
     yukleniyor = Promise.all(['govde_a.glb', 'govde_b.glb', 'saclar.glb', 'animasyon.glb'].map(al)).then(([a, b, s, an]) => {
       const saclar = {};
       s.scene.updateMatrixWorld(true);
