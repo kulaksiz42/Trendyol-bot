@@ -1,4 +1,4 @@
-/* Link Bio'da — oyun verisi.
+/* Özel Dans — oyun verisi.
    İçerik (mesajlar, olaylar, mağaza, hikâye) burada durur; kod değiştirmeden güncellenebilir.
    Tüm hesaplar ve kişiler kurmacadır. */
 'use strict';
@@ -64,11 +64,31 @@ window.VERI = {
   BASLANGIC_PARA: 6000,
 
   /* ---------- yayın ---------- */
+  /* tema.gerek: kıyafet etiketi ya da eşya. Eksikse bahşiş düşer. */
   TEMALAR: [
-    { id: 'sohbet', ad: 'Sohbet gecesi', acik: 'Dertleş, gündemi konuş.', agirlik: { konus: 4, selam: 2, tesekkur: 1, poz: 1, sarki: 1, dans: 1 } },
-    { id: 'dans', ad: 'Dans gecesi', acik: 'Trend dansları, halay, ne gelirse.', agirlik: { dans: 4, poz: 2, selam: 1, konus: 1, sarki: 1, tesekkur: 1 } },
-    { id: 'asmr', ad: 'ASMR gecesi', acik: 'Fısılda. Mikrofon varsa tam verim.', gerek: 'mikrofon', agirlik: { konus: 4, sarki: 2, tesekkur: 1, selam: 1, poz: 1, dans: 0.4 } },
-    { id: 'kostum', ad: 'Kostüm gecesi', acik: 'Kedi kulağı, forma ya da şık kıyafet varsa tam verim.', gerek: 'kostum', agirlik: { poz: 4, dans: 2, konus: 1, selam: 1, sarki: 1, tesekkur: 1 } }
+    { id: 'sohbet', ad: 'Sohbet gecesi', acik: 'Dertleş, gündemi konuş, biraz da cilveleş.', agirlik: { konus: 4, opucuk: 2, tesekkur: 1, poz: 1, ozel: 0.6, dans: 1 } },
+    { id: 'dans', ad: 'Dans gecesi 🔥', acik: 'Trend dansları, göbek dansı, ne gelirse.', agirlik: { dans: 4, ozel: 2, poz: 1.5, opucuk: 1, konus: 1, tesekkur: 1 } },
+    { id: 'ozelgece', ad: 'Gece yarısı özel', acik: 'Işıklar kısık, istekler cesur. Cesur kıyafet ister.', gerek: 'cesur', agirlik: { ozel: 4, poz: 2, opucuk: 2, dans: 1, konus: 1, tesekkur: 1 } },
+    { id: 'havuz', ad: 'Havuz başı (balkon)', acik: 'Şişme havuz, balkon, bikini ya da mayo şart.', gerek: 'havuz', agirlik: { poz: 3, dans: 2, ozel: 1.5, opucuk: 1, konus: 1, tesekkur: 1 } },
+    { id: 'fitness', ad: 'Fitness gecesi', acik: 'Esneme, mekik, "formda kal" sohbeti. Spor kıyafeti ister.', gerek: 'fitness', agirlik: { dans: 2, poz: 2.5, konus: 1.5, ozel: 1, opucuk: 0.6, tesekkur: 1 } },
+    { id: 'asmr', ad: 'ASMR gecesi', acik: 'Fısılda. Mikrofon varsa tam verim.', gerek: 'mikrofon', agirlik: { konus: 4, opucuk: 2, tesekkur: 1, poz: 1, ozel: 1, dans: 0.4 } }
+  ],
+  /* cesaret: 0 gündelik, 1 iddialı, 2 cesur, 3 iç giyim. Bahşişi artırır, riski de. */
+  KIYAFETLER: [
+    { id: 'tisort', ad: 'Tişört + kot', cesaret: 0, etiket: [] },
+    { id: 'esofman', ad: 'Eşofman', cesaret: 0, etiket: [] },
+    { id: 'atlet', ad: 'Atlet + şort', cesaret: 1, etiket: ['fitness'] },
+    { id: 'croptop', ad: 'Crop top + kot şort', cesaret: 1, etiket: [] },
+    { id: 'forma', ad: 'Forma + şort', cesaret: 0, etiket: ['kostum'] },
+    { id: 'sik', ad: 'Şık gömlek', cesaret: 0, etiket: ['kostum'] },
+    { id: 'fitness', ad: 'Spor sütyeni + tayt', cesaret: 1, etiket: ['fitness'] },
+    { id: 'acikgomlek', ad: 'Açık saten gömlek', cesaret: 2, etiket: ['cesur'] },
+    { id: 'mini', ad: 'Dekolteli body + mini etek + file çorap', cesaret: 2, etiket: ['cesur'] },
+    { id: 'gece', ad: 'Straplez gece elbisesi', cesaret: 2, etiket: ['cesur'] },
+    { id: 'mayo', ad: 'Mayo şort', cesaret: 2, etiket: ['havuz'] },
+    { id: 'bikini', ad: 'Bikini', cesaret: 2, etiket: ['havuz', 'cesur'] },
+    { id: 'gecelik', ad: 'Saten gecelik', cesaret: 3, etiket: ['cesur'] },
+    { id: 'dantel', ad: 'Dantel iç çamaşırı + file çorap', cesaret: 3, etiket: ['cesur'] }
   ],
   SAATLER: [
     { id: '21', ad: '21.00 · Akşam kuşağı', acik: 'Çok izleyici. Ev uyanık, annen kapıyı çalabilir.', izleyici: 1.2, bahsis: 1, anne: 2, yorgunluk: 0 },
@@ -78,31 +98,42 @@ window.VERI = {
   AKSIYONLAR: [
     { id: 'konus', ad: 'Sohbet', tus: '1', sure: 1.6, enerji: 3 },
     { id: 'dans', ad: 'Dans', tus: '2', sure: 2.4, enerji: 7 },
-    { id: 'sarki', ad: 'Şarkı', tus: '3', sure: 2.2, enerji: 5 },
-    { id: 'selam', ad: 'Selam', tus: '4', sure: 1.3, enerji: 2 },
+    { id: 'ozel', ad: 'Özel dans', tus: '3', sure: 2.8, enerji: 8 },
+    { id: 'opucuk', ad: 'Öpücük', tus: '4', sure: 1.3, enerji: 2 },
     { id: 'poz', ad: 'Poz', tus: '5', sure: 1.5, enerji: 3 },
     { id: 'tesekkur', ad: 'Teşekkür', tus: '6', sure: 1.4, enerji: 2 }
   ],
   ISTEK: {
-    konus: ['{hitap} bugün nasıl geçti?', 'sizde kira ne kadar oldu?', "KPSS'ye mi çalışayım, kurye mi olayım?", 'derbiyi kim alır?',
-      '690 liralık mercimek çorbası hakkında yorum?', 'bana hayat tavsiyesi ver', "Grok'a sordum bilmedi, sen söyle: aşk nedir?"],
-    konus_asmr: ['fısıldayarak vergi beyannamesi oku 🎧', 'fısıltıyla kira sözleşmesi oku', 'kur kaç oldu fısılda', 'bana fısıltıyla "ana para gelecek" de'],
-    dans: ['dans et dans 🕺', 'o trend dansını yap', 'halay çek!', '90lar pop dansı lütfen', 'derbi sevinci dansı', 'aura farming dansı'],
-    sarki: ['bir arabesk patlat', 'doğum günüm, şarkı söyler misin 🎂', 'Karadeniz şivesiyle şarkı', 'ninni söyle, uyuyacağım', 'reklam jingle\'ı söyle'],
-    selam: ["Kayseri'ye selam ver!", "Almanya'dan selamlar, bize de selam 🇩🇪", "Pendik'e selam", 'annem uyudu, ona selam (sessizce)', 'işyerindeyim, patrona çaktırmadan selam'],
-    poz: ['kameraya göz kırp 😉', 'o havalı pozu ver', 'aura farming yap', 'sigma bakışı at', 'kedi pozu ver 🐱'],
+    konus: ['{hitap} bugün nasıl geçti?', 'sizde kira ne kadar oldu?', 'sevgilin var mı? (soruyorum sadece)', 'ilk aşkını anlat 🙈',
+      '690 liralık mercimek çorbası hakkında yorum?', 'bana hayat tavsiyesi ver', "Grok'a sordum bilmedi, sen söyle: aşk nedir?", 'en utandığın anı anlat'],
+    konus_asmr: ['fısıldayarak vergi beyannamesi oku 🎧', 'kulağıma "iyi geceler" fısılda', 'fısıltıyla kira sözleşmesi oku', 'bana fısıltıyla "ana para gelecek" de'],
+    dans: ['dans et dans 💃', 'o trend dansını yap', 'halay çek!', '90lar pop dansı lütfen', 'omuz dansı 🔥', 'aura farming dansı'],
+    ozel: ['göbek dansı yap 🔥', 'yavaş yavaş dans et 👀', 'saçlarını savur', 'bu şarkıda bir özel dans?', 'kalçayla ritim tut 💃', 'sadece benim için dans et 🥺'],
+    opucuk: ["Kayseri'ye öpücük gönder 💋", "Almanya'dan selamlar, bize de bir öpücük 🇩🇪", 'doğum günüm, bir öpücük 🎂', 'işyerindeyim, çaktırmadan öpücük', 'eşim yanımda, sessiz bir öpücük 🤫'],
+    poz: ['kameraya göz kırp 😉', 'o ateşli pozu ver 🔥', 'aura farming yap', 'yandan poz lütfen', 'dudak büzme pozu 😗', 'kombini göster 👀'],
     tesekkur: ['ilk kez abone oldum 🥹', 'bahşiş attım, teşekkür bekliyorum', 'ana paramdan arttırdım, teşekkür et', '3 yayındır buradayım, bir teşekkür?']
   },
+  /* cesur kıyafet ya da tema varken arada gelen "özel istek"ler: Özel dans ile karşılanır, bahşiş 3 kat, ardından sansür gelir */
+  CESUR_ISTEK: ['üstünü değiştir 👀', 'o geceliği giy lütfen 🙏', 'kameraya biraz yaklaş 😏', 'ışıkları kıs 🕯️', 'file çoraplar nerede 👀',
+    'yatağın üstünde dans 😳', 'bir tur dön 💃', 'sadece 5 saniye, ciddiyim 🥺'],
+  SANSUR: [
+    { tip: 'etiket', metin: 'SANSÜR', sohbet: ['SANSÜR NE YAAA 😭', 'tam o an...', 'bahşişimi geri istiyorum (istemiyorum)'] },
+    { tip: 'kedi', metin: 'Kedi kameranın önüne oturdu', sohbet: ['kedi bile utandı 😹', 'KEDİ ÇEKİL', 'kedi kıskanıyor'] },
+    { tip: 'net', metin: 'Tam o an internet gitti', sohbet: ['ŞAKA MISIN', 'bant daraltması ahlak polisi çıktı', 'VPN VPN VPN'] },
+    { tip: 'anne', metin: 'Kapıdan ses geldi', sohbet: ['ANNE GELİYOR 💀', 'kapıyı kilitle kapıyı', 'hayatımın en gergin 5 saniyesi'] }
+  ],
   KULLANICI: ['Kayserili_Mehmet', 'muhasebeci_ilker', 'gececi_34', 'KPSSci_Elif', 'fonmagduru_77', 'plaza_ruhu', 'AnkaraKedisi',
     'uykusuz_umut', 'emekli_hakan_58', 'tir_soforu_06', 'Hans_aus_Koeln', 'ChenWei_88', 'dubai_emlakci', 'sessiz_izleyici',
     'ibo_kombici', 'sigma_baris', 'aura_farmer_06', 'delulu_deniz', 'bitcoinci_cem', 'Tokatli_Ayhan', 'Rizeli_Kader', 'nobetci_eczaci'],
   SOHBET: {
-    genel: ['selam {hitap} 👋', 'ilk defa geldim', 'keşfetten geldim', 'ses geliyor mu?', 'arkadaki çamaşırlar 💀', 'kedi nerede kedi',
+    genel: ['selam {hitap} 👋', 'bu ışıkta çok tehlikelisin 🔥', 'özel yayın ne zaman 👀', 'ben sadece dansa bakıyorum (yalan)',
+      '{unvan} kalbim duracak', 'ekranı sildim yine buğulandı', 'annem ne izliyorsun dedi, belgesel dedim', 'o kombin bahşişi hak ediyor 💸',
+      'ses kapalı izliyorum, işteyim 🤫', "DM'den özel paket var mı", 'kombin 10/10 🔥', 'evli değilim (evliyim)', 'nefesim kesildi (merdiven çıktım)', 'ilk defa geldim', 'keşfetten geldim', 'ses geliyor mu?', 'arkadaki çamaşırlar 💀', 'kedi nerede kedi',
       'işten yeni geldim', 'asgari ücretle abone oldum, değerini bil', "VPN'siz giremedim", "Grok'a sordum seni tanımıyor",
       'annem uyudu mu diye kontrol ettim 🤫', 'çay koydum geliyorum', '6-7', 'aura +100', 'delulu ama mutluyum', 'bu ışık ne {hitap}',
       'yayın kaçta bitiyor', '{unvan} 👑', 'yarın erken kalkacağım ama buradayım', 'ekran donuyor mu bende mi'],
-    troll: ['bu ne ya ahlak kalmadı', 'çalışsana, iş mi bu', 'KRİPTO SİNYAL İÇİN DM 🚀🚀', 'annene söyleyeceğim', 'İFŞA EDİYORUM (hiçbir şey bilmiyorum)', 'bunlar hep dış güçlerin oyunu'],
-    bahsis: ['kira katkısı', 'çorba parası', 'ana para gelince daha fazla', "KPSS'yi kazanınca bir daha", 'kur arttı, bahşiş değerlendi', 'sadece iyi hisset diye']
+    troll: ['bu ne ya ahlak kalmadı', 'ahlak bekçisi geldi 🚨 (bahşiş attı)', "bunu RTÜK'e şikâyet ediyorum (abone oldum)", 'çalışsana, iş mi bu', 'KRİPTO SİNYAL İÇİN DM 🚀🚀', 'annene söyleyeceğim', 'İFŞA EDİYORUM (hiçbir şey bilmiyorum)', 'bunlar hep dış güçlerin oyunu'],
+    bahsis: ['kombin parası 🔥', 'o dans için', 'gözlerine', 'kira katkısı', 'çorba parası', 'ana para gelince daha fazla', "KPSS'yi kazanınca bir daha", 'kur arttı, bahşiş değerlendi', 'sadece iyi hisset diye']
   },
   GUNDEM: {
     derbi: ['dünkü derbiden sonra moralim bozuk, beni neşelendir', 'forma giysene', 'derbi kaç bitti biri söylesin', 'hakem yine...'],
@@ -129,6 +160,8 @@ window.VERI = {
     anne: { metin: 'Annem yayına girdi. Hayatım bitti ama izlenme rekoru kırdım 💀', etki: { takipciKat: 3, yarin: 0.3, aile: 10, viral: 0.5 } },
     tesekkur: { metin: '{bahsisci} 3 yayındır ilk bahşişçi. Sen bir efsanesin 👑', etki: { takipciKat: 0.8, sadakat: 8 } },
     durust: { metin: 'İnsanlar beni yargılıyor ama kira %80 arttı, onu kimse yargılamıyor 🙂', etki: { takipciKat: 2.2, yarin: 0.2, risk: 6, aile: 5 } },
+    cesur: { metin: 'Bu gece özel yayın var 🔥 Sadece cesur olanlar. Link bio\'da 🔗', etki: { takipciKat: 3.2, yarin: 0.45, risk: 9, aile: 6, viral: 0.35 } },
+    kombin: { metin: 'Bugünkü kombin nasıl? 👀 (cevap vermeyen 7 yıl şanssız)', etki: { takipciKat: 2, yarin: 0.25, risk: 3 } },
     gundem: { metin: '{gundemTweet}', etki: { takipciKat: 2.5, yarin: 0.35, kumar: 0.4 } },
     hic: { metin: '', etki: { risk: -2 } }
   },
@@ -151,6 +184,17 @@ window.VERI = {
       { n: 'Plaza Ruhu', h: '@plaza_ruhu', t: 'Ben 9 saat Excel\'e bakıyorum, o 3 saatte benim aylığımı kazanıyor. Mesaj alındı.' },
       { n: 'Ratio', h: '@ratiokral', t: 'ratio + link bio\'da + annen haklı' },
       { n: 'Fon Mağduru', h: '@anapara_bekliyorum', t: 'Ana paramız fonda, gündem bu mu? (abone oldum bu arada)' }
+    ],
+    cesur: [
+      { n: 'Ahlak Bekçisi', h: '@AileDegerleriTR', t: 'Böyle paylaşımlara dur denmeli! Saat kaçta demiştiniz?', v: true },
+      { n: 'Sigma Koç', h: '@SigmaErkekKocu', t: 'Değer kaybı. (Bildirimleri açtım, araştırma için.)', v: true },
+      { n: 'Fitness Dayı', h: '@fit_dayi_44', t: 'Form güzel. Antrenman programı atayım mı, DM 💪' },
+      { n: 'Ekşi Botu', h: '@eksi_gundem', t: 'başlık açıldı: "özel dans yapan @{kullanici}" (14 entry)' },
+      { n: 'Evli Hesap', h: '@mutlu_aile_babasi', t: 'Rezalet. (Bu yanıtı eşime göstermek için yazıyorum)' }
+    ],
+    kombin: [
+      { n: 'Moda Polisi', h: '@kombin_polisi', t: 'File çorap + bot kombini 2014 Kadıköy. Yine de 9/10.' },
+      { n: 'Teyze Hesap', h: '@nurten_59', t: 'Üşütme kızım/oğlum 🧣🌹' }
     ],
     anne: [
       { n: 'Anneler Birliği', h: '@annelerbirligi', t: 'Anne haklı. Saat kaç olmuş.' },
@@ -185,6 +229,18 @@ window.VERI = {
     { id: 'aile', from: 'Tokatli_Ayhan', t: 'Yanlışlıkla ekran görüntünü aile grubuna attım. Nasıl silinir??',
       s: [{ l: '"Herkesten sil\'e bas, HEMEN"', fx: { sadakat: 5 }, c: 'Silindi. Ama halası görmüş, "bu kim" diye soruyor.' },
           { l: '"Kendi problemin"', fx: { sadakat: -5, takipci: 30 }, c: 'Aile grubu sana abone oldu. 4 kişi.' }] },
+    { id: 'ayak', from: 'ayak_sever_58', t: 'Sadece ayak fotoğrafı istiyorum. Başka bir şey değil. Muhasebeciyim, ciddiyim.',
+      s: [{ l: 'Fiyatı ikiye katla', fx: { para: 900, risk: 3 }, c: 'Ödedi. Faturayı "kırtasiye gideri" diye kesti.' },
+          { l: '"Kedimin patisini atayım mı?"', fx: { sadakat: 3, takipci: 20 }, c: 'Kabul etti. Kediye de abone oldu.' }] },
+    { id: 'evli', from: 'sadik_koca_34', t: 'Sadece benim için dans et. Eşim yanımda uyuyor, sesi kıstım.',
+      s: [{ l: '"Özel dans 500 TL"', fx: { para: 500, risk: 2 }, c: 'Ödedi. Bir saat sonra eşi de abone oldu, aynı karttan.' },
+          { l: '"Eşine selam söyle"', fx: { sadakat: -2, kanit: 1 }, c: 'Engelledi. Profil fotoğrafı düğün fotoğrafıydı. Ekran görüntüsü aldın.' }] },
+    { id: 'ahlakci', from: 'ailedeg_gizli42', t: 'Bu kıyafetle yayın yapmanız çok yanlış. Bir daha ne zaman giyeceksiniz? (sormak için soruyorum)',
+      s: [{ l: '"Cuma 23.00"', fx: { para: 400, kanit: 1 }, c: 'Bildirimleri açtı. 400 TL "hayır duası" bahşişi geldi.' },
+          { l: 'Ekran görüntüsü al', fx: { kanit: 1, risk: 2 }, c: '"Gerçek yüz" dosyasına bir sayfa daha eklendi.' }] },
+    { id: 'kostum', from: 'cosplay_cem', t: 'Kedi kulağıyla dans eder misin? Kedim de izliyor, o da istiyor.',
+      s: [{ l: '"Kediye özel dans"', fx: { para: 250, takipci: 30 }, c: 'Cem: Kedim mırladı. Bu bir onaydır.' },
+          { l: '"Kedin abone olsun"', fx: { takipci: 15 }, c: 'Kedi abone oldu. Hesabın en sadık izleyicisi artık bir tekir.' }] },
     { id: 'sahte', from: 'user_0093', t: 'Yapay zekâyla senin fotoğrafını ürettim, bak 😏',
       s: [{ l: 'Engelle ve şikâyet et', fx: { risk: -3 }, c: 'Platform hesabı kapattı. Doğru hamle.' },
           { l: '"Avukatıma iletiyorum"', fx: { risk: -1 }, c: 'Avukatın yok ama blöf işe yaradı. Hesabını sildi.' }] }
@@ -204,9 +260,18 @@ window.VERI = {
     { id: 'tarz_gizemli', kat: 'Oda', tarz: 'gizemli', ad: 'Mor lav lambası', fiyat: 1000, acik: 'Gizemli tarzında bahşiş +%15.' },
     { id: 'tarz_sporcu', kat: 'Oda', tarz: 'sporcu', ad: 'Dambıl seti', fiyat: 1000, acik: 'Sporcu tarzında bahşiş +%15.' },
     { id: 'tarz_komik', kat: 'Oda', tarz: 'komik', ad: 'Lastik tavuk', fiyat: 1000, acik: 'Komik tarzında bahşiş +%15.' },
-    { id: 'kedikulak', kat: 'Gardırop', ad: 'Kedi kulağı bandı', fiyat: 350, aksesuar: true, acik: 'Kostüm gecesi için.' },
-    { id: 'forma', kat: 'Gardırop', ad: 'Mahalle takımı forması', fiyat: 1200, kiyafet: true, acik: 'Kostüm gecesi ve derbi günleri için.' },
-    { id: 'sik', kat: 'Gardırop', ad: 'Şık kıyafet', fiyat: 2500, kiyafet: true, acik: 'Bahşiş +%8. Annen "nereye gidiyorsun" der.' },
+    { id: 'kedikulak', kat: 'Gardırop', ad: 'Kedi kulağı bandı', fiyat: 350, aksesuar: true, acik: 'Gece yarısı özelde bahşiş +%10.' },
+    { id: 'croptop', kat: 'Gardırop', ad: 'Crop top + kot şort', fiyat: 900, kiyafet: true, acik: 'İddialı. Bahşiş +%8.' },
+    { id: 'fitness', kat: 'Gardırop', ad: 'Spor sütyeni + tayt', fiyat: 1100, kiyafet: true, acik: 'Fitness gecesi için. Bahşiş +%8.' },
+    { id: 'forma', kat: 'Gardırop', ad: 'Mahalle takımı forması', fiyat: 1200, kiyafet: true, acik: 'Derbi günleri için.' },
+    { id: 'mayo', kat: 'Gardırop', ad: 'Mayo şort', fiyat: 700, kiyafet: true, acik: 'Havuz başı için. Cesur: bahşiş +%16, risk artar.' },
+    { id: 'bikini', kat: 'Gardırop', ad: 'Bikini', fiyat: 1300, kiyafet: true, acik: 'Havuz başı ve gece yarısı özel için. Bahşiş +%16, risk artar.' },
+    { id: 'acikgomlek', kat: 'Gardırop', ad: 'Açık saten gömlek', fiyat: 1400, kiyafet: true, acik: 'Düğmeler göbeğe kadar açık. Bahşiş +%16, risk artar.' },
+    { id: 'mini', kat: 'Gardırop', ad: 'Dekolteli body + mini etek + file çorap', fiyat: 1900, kiyafet: true, acik: 'Gece yarısı özel için. Bahşiş +%16, risk artar.' },
+    { id: 'gece', kat: 'Gardırop', ad: 'Straplez gece elbisesi', fiyat: 2600, kiyafet: true, acik: 'Kırmızı saten. Bahşiş +%16, risk artar.' },
+    { id: 'gecelik', kat: 'Gardırop', ad: 'Saten gecelik', fiyat: 1700, kiyafet: true, acik: 'İç giyim. Bahşiş +%24. Annen görürse her şey biter.' },
+    { id: 'dantel', kat: 'Gardırop', ad: 'Dantel iç çamaşırı + file çorap', fiyat: 2200, kiyafet: true, acik: 'İç giyim. Bahşiş +%24, risk çok artar.' },
+    { id: 'sik', kat: 'Gardırop', ad: 'Şık gömlek', fiyat: 2500, kiyafet: true, acik: 'Annen "nereye gidiyorsun" der.' },
     { id: 'enerji', kat: 'Tüketim', ad: 'Enerji içeceği (3\'lü)', fiyat: 150, stok: 3, acik: 'Yayında +35 enerji.' },
     { id: 'bulasik', kat: 'Hayat', ad: 'Annene bulaşık makinesi', fiyat: 18000, acik: 'Aile radarı −30. Ama "parayı nereden buldun?"', fx: { aile: -30, risk: 8 } },
     { id: 'altin', kat: 'Hayat', ad: 'Gram altın', fiyat: 4000, acik: 'Birikim. Risk +3.', fx: { risk: 3 }, birikir: true }
@@ -215,7 +280,7 @@ window.VERI = {
   /* ---------- hikâye ---------- */
   GUNLER: [
     { gundem: ['derbi', 'siber'],
-      sabah: { from: 'Kuzen Deniz', t: 'Hesabı açtın mı? İlk yayında panik yapma. Sohbetten gelen isteklere bak, doğru tuşa bas. Kapıyı da kilitle 😅' },
+      sabah: { from: 'Kuzen Deniz', t: 'DansKasa hesabını açtın mı? İlk yayında panik yapma, isteklere bak, doğru tuşa bas. Altın renkli "özel istek" gelirse Özel dans ile karşıla, bahşişi üç katı. Kapıyı da kilitle 😅' },
       gece: { from: 'Kardeşin', t: 'Odandan gece müzik sesi geliyordu. Ne yapıyorsun?',
         s: [{ l: '"Ders çalışıyorum, müzikli"', fx: { aile: 5 }, c: 'Kardeşin: "Sen hiç ders çalışmadın ki." Annene söylemedi. Henüz.' },
             { l: '"Sus, al sana 200 TL"', fx: { para: -200, aile: -5, bayrak: 'kardesHarclik' }, c: 'Kardeşin parayı aldı. "Haftaya yine konuşuruz" dedi.' }] } },
@@ -227,7 +292,7 @@ window.VERI = {
             { l: '"Astroloji yayını yapıyorum"', fx: { takipci: 60, risk: 2 }, c: 'Saadet teyze abone olmak istiyor. Burcu sorulmadan söyledi: Akrep.' }] } },
     { gundem: ['tatil', 'bant'],
       sabah: { from: 'Kuzen Deniz', t: 'X\'te biri senin hakkında yazmaya başlamış: @AileDegerleriTR. Takma kafana. Ama paylaşımlarına dikkat.' },
-      gece: { from: 'FanKasa', t: 'Yeni abone listende tanıdık bir hesap var: @ailedeg_gizli42. Profil fotoğrafı, @AileDegerleriTR ile aynı kedi.',
+      gece: { from: 'DansKasa', t: 'Yeni abone listende tanıdık bir hesap var: @ailedeg_gizli42. Profil fotoğrafı, @AileDegerleriTR ile aynı kedi.',
         s: [{ l: 'Ekran görüntüsü al, sakla', fx: { kanit: 1 }, c: '"Gerçek yüz" dosyası açıldı (1/3). Daha fazla kanıt lazım.' },
             { l: 'Görmezden gel', fx: { para: 300 }, c: 'Gece 03.12\'de 300 TL bahşiş geldi. Not: "Allah ıslah etsin."' }] } }
   ]

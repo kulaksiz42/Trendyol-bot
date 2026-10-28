@@ -2,6 +2,16 @@
 
 > Durum: dikey dilim geliştiriliyor. Bu belge konuştukça güncellenecek.
 
+## v0.4 kararları (en günceli; aşağıdakilerle çelişirse bu geçerlidir)
+
+- **Ad:** "Özel Dans". Oyun içindeki platformun adı "DansKasa". Repo klasörü şimdilik `link-bioda` olarak kaldı.
+- **Ton:** daha cüretkâr ve imalı, yetişkin temalı. Sınır: çıplaklık ve açık cinsel eylem yok. Cesur anlar her zaman komik bir sansürle kesilir: dev "SANSÜR" etiketi, kedi, Wi-Fi kopması ya da kapıdaki anne.
+- **Kıyafetler (cesaret 0-3):** tişört, eşofman, atlet, crop top, forma, şık gömlek, spor sütyeni+tayt, açık saten gömlek, dekolteli body+mini etek+file çorap, straplez gece elbisesi, mayo şort, bikini, saten gecelik, dantel iç çamaşırı+file çorap. Cesaret bahşişi (%8/seviye) ve riski artırır. Annen cesur kıyafetle yakalarsa aile radarı daha çok artar.
+- **Temalar:** sohbet, dans, gece yarısı özel (cesur kıyafet ister), havuz başı (bikini/mayo), fitness, ASMR.
+- **Hareketler:** sohbet, dans, özel dans (göbek dansı, yavaş kalça sallama, saç savurma), öpücük, poz, teşekkür.
+- **Özel istek:** cesur kıyafet ya da gece yarısı özelde altın renkli istekler gelir ("üstünü değiştir 👀"). Özel dans ile karşılanır, bahşiş 3 kat, ardından sansür olayı ve risk artışı.
+- **X paylaşımı:** "Bu gece özel yayın var 🔥" ve "Bugünkü kombin nasıl? 👀" seçenekleri eklendi.
+
 ## v0.3 kararları (bu bölüm aşağıdakilerle çelişirse bu geçerlidir)
 
 - **Süre:** tek oturum değil, kariyer modu. Yaklaşık 30 oyun günü, gün başına 3–4 dakika, toplam 1,5–2 saat. İlerleme kaydedilir, "Devam et" ile sürer.
