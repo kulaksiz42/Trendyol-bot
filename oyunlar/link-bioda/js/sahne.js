@@ -16,7 +16,7 @@
   let isikTitreme = 0, karanlik = 0;
   let kediYuru = null, anneDurum = null;
   let calisiyor = false;
-  let kompozit = null, kameraEfekt = null, bloom = null;
+  let kompozit = null, kameraEfekt = null, bloom = null, fotoIste = null, mumModu = 0;
 
   /* ---------- yardımcılar ---------- */
   const malz = (renk, o = {}) => new T.MeshStandardMaterial(Object.assign({ color: renk, roughness: 0.85, metalness: 0 }, o));
@@ -525,6 +525,10 @@
     const h = oyuncu ? oyuncu.userData.h : 1;
     if (kameraMod === 'kabin') { hedefPos.set(0, 1.0 * h + 0.1, 3.1); hedefBak.set(0, 0.95 * h, 0); camera.fov = 32; }
     else if (kameraMod === 'yayin') { hedefPos.set(0, 1.42 * h + 0.12, 1.5); hedefBak.set(0, 1.3 * h + 0.1, -0.3); camera.fov = 44; }
+    else if (kameraMod === 'foto_ayna') { hedefPos.set(0.95, 1.42 * h + 0.06, 1.25); hedefBak.set(0, 1.18 * h + 0.06, 0); camera.fov = 36; }
+    else if (kameraMod === 'foto_yatak') { hedefPos.set(-0.55, 0.95, 1.55); hedefBak.set(0.05, 1.2 * h + 0.04, -0.2); camera.fov = 40; }
+    else if (kameraMod === 'foto_mum') { hedefPos.set(0.35, 1.5 * h + 0.1, 0.95); hedefBak.set(0, 1.42 * h + 0.08, 0); camera.fov = 32; }
+    else if (kameraMod === 'foto_neon') { hedefPos.set(0, 1.25 * h + 0.06, 1.75); hedefBak.set(0, 1.55 * h, -0.6); camera.fov = 44; }
     else if (kameraMod === 'yakin') { hedefPos.set(0.5, 1.5 * h + 0.1, 1.2); hedefBak.set(0, 1.45 * h + 0.1, 0); camera.fov = 35; }
     else { hedefPos.set(2.5, 2.25, 3.3); hedefBak.set(-0.3, 1.0, -0.5); camera.fov = 48; }
     camera.updateProjectionMatrix();
@@ -567,13 +571,13 @@
     }
     // ışık titremesi ve karanlık
     if (O.lamba) {
-      const hedefL = 0.95 * (1 - karanlik * 0.75);
+      const hedefL = 0.95 * (1 - Math.max(karanlik, mumModu) * 0.75);
       O.lamba.intensity = isikTitreme > 0 ? hedefL * (0.3 + Math.random() * 0.8) : hedefL;
       if (isikTitreme > 0) isikTitreme -= dt;
     }
     if (O.ringIsik && O.ring.visible) O.ringIsik.intensity = 1.1;
     // yayında kameranın önündeki telefon ve halka gizlenir
-    if (O.telefon) { const y = kameraMod === 'yayin'; O.telefon.visible = kameraMod !== 'kabin'; O.telefon.getObjectByName('tel').visible = !y; O.ringHalka.visible = !y; O.tripod.visible = O.tripodVar && !y; }
+    if (O.telefon) { const y = kameraMod === 'yayin'; O.telefon.visible = kameraMod !== 'kabin' && !kameraMod.startsWith('foto'); O.telefon.getObjectByName('tel').visible = !y; O.ringHalka.visible = !y; O.tripod.visible = O.tripodVar && !y; }
     // kamera
     kameraHedef();
     const kk = 1 - Math.exp(-4 * dt);
@@ -592,6 +596,16 @@
       kameraEfekt.uniforms.uGuc.value += ((kameraMod === 'yayin' ? 1 : 0.55) - kameraEfekt.uniforms.uGuc.value) * Math.min(1, dt * 4);
       kompozit.render(dt);
     } else renderer.render(scene, camera);
+    // fotoğraf: çizimden hemen sonra tuvali oku ve küçült
+    if (fotoIste) {
+      const cb = fotoIste; fotoIste = null;
+      try {
+        const src = renderer.domElement, W = 300, H = 400, c = document.createElement('canvas'); c.width = W; c.height = H;
+        const g = c.getContext('2d'), sw = src.width, sh = src.height, oran = Math.min(sw / W, sh / H);
+        g.drawImage(src, (sw - W * oran) / 2, (sh - H * oran) / 2, W * oran, H * oran, 0, 0, W, H);
+        cb(c.toDataURL('image/jpeg', 0.72));
+      } catch (e) { cb(null); }
+    }
   }
 
   function boyutla() {
@@ -686,6 +700,8 @@
     karart(k) { karanlik = clamp(k, 0, 1); },
     egil(v) { egiklikHedef = v; },
     durdur() { calisiyor = false; },
+    fotograf(cb) { fotoIste = cb; if (!calisiyor) this.devam(); },
+    mum(k) { mumModu = k ? 0.6 : 0; },
     devam() { if (!calisiyor && renderer) { calisiyor = true; saat.getDelta(); kare(); } }
   };
 })();

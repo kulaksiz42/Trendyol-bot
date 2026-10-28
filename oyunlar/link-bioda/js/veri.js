@@ -88,8 +88,54 @@ window.VERI = {
     { id: 'mayo', ad: 'Mayo şort', cesaret: 2, etiket: ['havuz'] },
     { id: 'bikini', ad: 'Bikini', cesaret: 2, etiket: ['havuz', 'cesur'] },
     { id: 'gecelik', ad: 'Saten gecelik', cesaret: 3, etiket: ['cesur'] },
-    { id: 'dantel', ad: 'Dantel iç çamaşırı + file çorap', cesaret: 3, etiket: ['cesur'] }
+    { id: 'dantel', ad: 'Dantel iç çamaşırı + file çorap', cesaret: 3, etiket: ['cesur'] },
+    { id: 'havlu', ad: 'Sadece havlu (duştan yeni çıktım)', cesaret: 3, etiket: ['cesur', 'havuz'] },
+    { id: 'gomlek', ad: 'Sadece bol gömlek', cesaret: 2, etiket: ['cesur'] },
+    { id: 'korse', ad: 'Deri korse + mini etek', cesaret: 3, etiket: ['cesur'] }
   ],
+  /* ---------- içerik çekimi (kilitli içerik) ---------- */
+  CEKIM_SET: [
+    { id: 'ayna', ad: 'Ayna karşısı', acik: 'Klasik. Telefon elde, yandan açı.', bonus: 0 },
+    { id: 'yatak', ad: 'Yatak başı', acik: 'Saten çarşaf, alçak açı. Abonelerin favorisi.', bonus: 0.08 },
+    { id: 'mum', ad: 'Mum ışığı', acik: 'Loş, yakın plan. "Bu gece sadece sen ve ben" havası.', bonus: 0.1 },
+    { id: 'neon', ad: 'Neon altında', acik: 'Pembe ışık, gece kulübü havası.', bonus: 0.05 }
+  ],
+  CEKIM_POZ: [
+    { id: 'poz', ad: 'Poz' }, { id: 'opucuk', ad: 'Öpücük' }, { id: 'ozel', ad: 'Dans karesi' }, { id: 'sergile', ad: 'Bel kırma' }
+  ],
+  ALTYAZI: ['Kilidi açan bilir 😏', 'Bu gece sadece sen ve ben 🕯️', 'Yayında gösteremediğim kare 🙈', 'Yatağın sol tarafı boş 🥀',
+    'Duştan yeni çıktım… 🚿', 'Sadece abonelere 🔒', 'Bunu annem görmesin 🤫', 'Saat 02.00 kafası 🌙', 'Özel isteğiniz üzerine 💋'],
+  /* ---------- DM: istekler, özel siparişler, flört, tacizciler ---------- */
+  DM_ISTEK: [
+    { t: 'Bugünkü yayından sonra uyuyamadım. Kilitli bir şey var mı? 👀', ces: 1, teklif: [5, 12] },
+    { t: 'Gecelikli bir fotoğrafın var mı… sadece bakmak için 🥺', ces: 3, teklif: [15, 30] },
+    { t: 'Havluyla bir kare? Duştan yeni çıkmış gibi 😳', ces: 3, teklif: [12, 26] },
+    { t: 'Dantelli olanlardan bir set? Fiyat sorun değil (sorun)', ces: 3, teklif: [20, 45] },
+    { t: 'Mum ışığında bir fotoğraf… sadece benim için.', ces: 2, set: 'mum', teklif: [12, 28] },
+    { t: 'Fitness kıyafetiyle bir kare, motivasyon için 💪 (motivasyon değil)', ces: 1, teklif: [6, 14] },
+    { t: 'Eşim uyuyor, sessiz bir şey at 🤫', ces: 2, teklif: [10, 22] },
+    { t: 'Bikinili? Yaz bitti ama ben bitmedim ☀️', ces: 2, teklif: [9, 20] },
+    { t: 'Yatakta çekilmiş bir şey var mı? Saten çarşaflı olan 🔥', ces: 2, set: 'yatak', teklif: [12, 30] },
+    { t: 'Sadece gömlekle bir sabah karesi… kahve benden ☕', ces: 2, teklif: [10, 24] }
+  ],
+  DM_OZEL: [
+    { t: 'Adımı kâğıda yazıp tut, öyle bir fotoğraf. Sadece benim. $40 veririm.', ces: 1, teklif: 40 },
+    { t: 'Doğum günüm 🎂 Sadece bana özel, mum ışığında bir kare? $60', ces: 2, set: 'mum', teklif: 60 },
+    { t: 'Kırmızı elbiseyle, yatak başında. Kimseye gösterme. $80', ces: 2, set: 'yatak', teklif: 80 },
+    { t: 'Dantelli, neon altında, adımı söyleyen bir kare. $120. Ciddiyim.', ces: 3, set: 'neon', teklif: 120 }
+  ],
+  DM_FLORT: ['Bu gece rüyamdaydın. Kötü bir şey yoktu (vardı) 😇', 'Gülüşün beni bitiriyor', 'Bir kahveye ne dersin? Sadece kahve. Kahve.',
+    'Uyuyamıyorum, senin yüzünden 🌙', 'O kombin hâlâ aklımda 🔥', 'Bugün sesini duymadan uyuyamam', 'Bana bir sesli mesaj at, bahşişi ben bilirim'],
+  DM_SAPIK: [
+    { t: 'Önce bedava at, beğenirsem öderim 😏', tur: 'bedava' },
+    { t: 'Gerçek adın ne? Hangi semttesin? Tanışalım.', tur: 'ifsa' },
+    { t: 'Ekran görüntülerin bende. $200 atmazsan ailene gönderirim.', tur: 'santaj' }
+  ],
+  AILE: {
+    dusuk: [['Annem', 'Günaydın 🌸 kahvaltı hazır, soğumadan gel'], ['Teyzem', '(İletildi) Bu mesajı 10 kişiye gönderin yoksa…'], ['Babam', 'Doğalgaz faturası geldi 💸 kimse kombiye dokunmasın'], ['Kardeşim', '😏']],
+    orta: [['Annem', 'Gece 2\'de odanın ışığı yanıyordu. Ne yapıyorsun o saatte?'], ['Kardeşim', 'Odandan yine müzik geliyordu… 200 TL ve unuttum'], ['Teyzem', 'Kızım/oğlum seni internette gördüm galiba?? 🤔'], ['Babam', 'Kargo geldi, senin adına. Kutuda ne var?']],
+    yuksek: [['Babam', 'Banka aradı. Hesabına yurt dışından para giriyormuş?'], ['Annem', 'Akşam hepimiz evdeyiz. Konuşacağız.'], ['Kardeşim', 'Kuzen Burak bir link attı gruba… sildim ama herkes gördü'], ['Teyzem', 'Komşu Saadet bir şeyler anlattı, inanmadım tabii 🙄']]
+  },
   SAATLER: [
     { id: '21', ad: '21.00 · Akşam kuşağı', acik: 'Çok izleyici. Ev uyanık, annen kapıyı çalabilir.', izleyici: 1.2, bahsis: 1, anne: 2, yorgunluk: 0 },
     { id: '23', ad: '23.00 · Gece', acik: 'Dengeli.', izleyici: 1, bahsis: 1, anne: 1, yorgunluk: 0 },
@@ -281,6 +327,9 @@ window.VERI = {
     { id: 'gece', kat: 'Gardırop', ad: 'Straplez gece elbisesi', fiyat: 2600, kiyafet: true, acik: 'Kırmızı saten. Bahşiş +%16, risk artar.' },
     { id: 'gecelik', kat: 'Gardırop', ad: 'Saten gecelik', fiyat: 1700, kiyafet: true, acik: 'İç giyim. Bahşiş +%24. Annen görürse her şey biter.' },
     { id: 'dantel', kat: 'Gardırop', ad: 'Dantel iç çamaşırı + file çorap', fiyat: 2200, kiyafet: true, acik: 'İç giyim. Bahşiş +%24, risk çok artar.' },
+    { id: 'gomlek', kat: 'Gardırop', ad: 'Sadece bol gömlek', fiyat: 900, kiyafet: true, acik: '"Sabah kahvesi" karesi. Bahşiş +%16.' },
+    { id: 'havlu', kat: 'Gardırop', ad: 'Pamuklu havlu', fiyat: 400, kiyafet: true, acik: '"Duştan yeni çıktım." En cüretkâr ucuz eşya. Bahşiş +%24, risk çok artar.' },
+    { id: 'korse', kat: 'Gardırop', ad: 'Deri korse + mini etek', fiyat: 2900, kiyafet: true, acik: 'Parlak deri. Bahşiş +%24, risk çok artar.' },
     { id: 'sik', kat: 'Gardırop', ad: 'Şık gömlek', fiyat: 2500, kiyafet: true, acik: 'Annen "nereye gidiyorsun" der.' },
     { id: 'enerji', kat: 'Tüketim', ad: 'Enerji içeceği (3\'lü)', fiyat: 150, stok: 3, acik: 'Yayında +35 enerji.' },
     { id: 'bulasik', kat: 'Hayat', ad: 'Annene bulaşık makinesi', fiyat: 18000, acik: 'Aile radarı −30. Ama "parayı nereden buldun?"', fx: { aile: -30, risk: 8 } },

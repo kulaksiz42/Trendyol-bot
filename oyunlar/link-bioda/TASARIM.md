@@ -2,7 +2,17 @@
 
 > Durum: dikey dilim geliştiriliyor. Bu belge konuştukça güncellenecek.
 
-## v0.5 kararları (en günceli)
+## v0.6 kararları (en günceli)
+
+- **Format:** oyunun tamamı bir telefon. Bütçesiz, mobil tarayıcı ve X odaklı. Durum çubuğu (saat, pil = enerji), ana ekran (widget'lar, bildirimler, uygulama rozetleri), "Günü bitir".
+- **Uygulamalar:** DansKasa (panel, canlı yayın, kilitli içerik), Mesajlar (DM ekonomisi), X, Aile grubu, Kasabank, Kargola (mağaza), Kamera, Ayarlar.
+- **Kilitli içerik (PPV):** set (ayna, yatak başı, mum ışığı, neon) + kıyafet + poz ile 3D sahneden gerçek kare çekilir; fiyat ve altyazı seçilir; abonelere kilitli gönderilir ya da DM'de satılır. Önizlemeler bulanık. Cesaret satışı ve sızma riskini artırır; sızan içerik ertesi sabah X'te çıkar.
+- **DM ekonomisi:** istekler (teklifli), özel siparişler (set ve cesaret şartlı, yüksek ücret), flört (bahşiş), tacizciler (bedava isteyen, kişisel bilgi soran, şantajcı; doğru hamle engelle ve bildir), hikâye DM'leri.
+- **Aile grubu:** aile radarına göre mesajlar ve sorgulama.
+- **Gün sonu:** Kasabank ekstresi (yayın + PPV + DM − kesinti − kira), X için paylaşım kartı (görsel).
+- **Yeni kıyafetler:** havlu, sadece bol gömlek, deri korse + mini etek.
+
+## v0.5 kararları
 
 - **Gerçekçilik önceliği:** yayın, gerçek bir abonelik/canlı yayın platformu gibi hissettirmeli.
 - **Sohbet motoru (`js/sohbet.js`):** 28 kurmaca izleyici kişiliği (balina, sırnaşık, troll, pazarlıkçı, gizli muhafazakâr, kıskanç, esprili, yabancı, düzenli, yeni, sessiz) ve bot. Yazım tarzları (küçük harf, Türkçe karaktersiz, bağıran, harf hatalı, resmi), tekrar önleme, rozetler (VIP, abonelik ayı, YENİ, BOT). Mesajlar harekete, kıyafetin cesaretine, bahşişe, sessizliğe (8 sn hareketsizlikte sertleşir), hedefe ve olaylara tepki verir.

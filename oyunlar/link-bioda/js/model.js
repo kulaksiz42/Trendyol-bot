@@ -28,6 +28,9 @@
     dantel:     { ust: '#120a10', ust2: '#7a0f2a', alt: '#120a10', ayakR: '#120a10', ustUst: 'bra', ustAlt: 'gogusAlt', kol: 'yok', alt_: 'kucuk', ayak: 'yok', corap: 1, desen: 5 },
     gecelik:    { ust: '#c9a0dc', ust2: '#c9a0dc', alt: '#c9a0dc', ayakR: '#000', ustUst: 'bra', ustAlt: 'kalca', kol: 'yok', alt_: 'yok', ayak: 'yok', desen: 6, dekolte: 0.06 },
     acikgomlek: { ust: '#f4f1ea', ust2: '#f4f1ea', alt: '#1d1d24', ayakR: '#151515', ustUst: 'yaka', ustAlt: 'bel', kol: 'uzun', alt_: 'uzun', ayak: 'ayakkabi', dekolte: 0.34, desen: 6 },
+    havlu:      { ust: '#f4f1ec', ust2: '#f4f1ec', alt: '#f4f1ec', ayakR: '#000', ustUst: 'bra', ustAlt: 'kalca', kol: 'yok', alt_: 'yok', ayak: 'yok', desen: 7, duz: 0.3 },
+    gomlek:     { ust: '#eef1f6', ust2: '#eef1f6', alt: '#eef1f6', ayakR: '#000', ustUst: 'yaka', ustAlt: 'kalca', kol: 'uzun', alt_: 'yok', ayak: 'yok', dekolte: 0.15, duz: 0.6 },
+    korse:      { ust: '#0d0b0f', ust2: '#5a0f22', alt: '#0d0b0f', ayakR: '#0d0b0f', ustUst: 'bra', ustAlt: 'bel', kol: 'yok', alt_: 'mini', ayak: 'bot', corap: 1, desen: 6, parlak: 0.18 },
     mayo:       { ust: '#000', ust2: '#000', alt: '#1aa3a3', ayakR: '#000', ustUst: 'yok', ustAlt: 'yok', kol: 'yok', alt_: 'sort', ayak: 'yok' }
   };
   const SAC_DOSYA = { kisa: 'SimpleParted', uzun: 'Long', topuz: 'Buns', kazinmis: 'Buzzed', kisakesim: 'BuzzedFemale' };
@@ -137,6 +140,7 @@ varying vec3 vBind;
     kumas *= 1.0 - 0.32 * clamp(kenarU + kenarA + kenarK, 0.0, 1.0);
     // örgü dokusu (saten ve dantel hariç)
     if (uDesen < 4.5) kumas *= 1.0 + 0.045 * sin(kb.y * 700.0) * sin(kb.x * 700.0 + kb.z * 500.0);
+    if (uDesen > 6.5) kumas *= 0.9 + 0.12 * fract(sin(dot(floor(kb.xy * 900.0), vec2(12.9898, 78.233))) * 43758.5453);
     kumasMaske = clamp(max(max(ust, kolK), max(alt, ayak)), 0.0, 1.0);
     if (uDesen > 4.5 && uDesen < 5.5) {
       // dantel: ince desenden ten görünür, kenarda renkli şerit
