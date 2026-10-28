@@ -111,8 +111,18 @@ window.VERI = {
     ozel: ['göbek dansı yap 🔥', 'yavaş yavaş dans et 👀', 'saçlarını savur', 'bu şarkıda bir özel dans?', 'kalçayla ritim tut 💃', 'sadece benim için dans et 🥺'],
     opucuk: ["Kayseri'ye öpücük gönder 💋", "Almanya'dan selamlar, bize de bir öpücük 🇩🇪", 'doğum günüm, bir öpücük 🎂', 'işyerindeyim, çaktırmadan öpücük', 'eşim yanımda, sessiz bir öpücük 🤫'],
     poz: ['kameraya göz kırp 😉', 'o ateşli pozu ver 🔥', 'aura farming yap', 'yandan poz lütfen', 'dudak büzme pozu 😗', 'kombini göster 👀'],
+    kombin: ['kombin değiştir 👗', 'o elbiseyi giy', 'daha cesur bir şey giy', 'bikiniyi görelim', 'geceliği giy 🙏', 'başka kombin var mı'],
     tesekkur: ['ilk kez abone oldum 🥹', 'bahşiş attım, teşekkür bekliyorum', 'ana paramdan arttırdım, teşekkür et', '3 yayındır buradayım, bir teşekkür?']
   },
+  /* bahşiş menüsü (jeton). Menüden gelen istekler önceden ödenir. 1 jeton = $0,05 */
+  MENU: [
+    { aks: 'opucuk', ad: 'Öpücük', jeton: 25 },
+    { aks: 'konus', ad: 'İsmimi söyle / sohbet', jeton: 35 },
+    { aks: 'poz', ad: 'Poz', jeton: 50 },
+    { aks: 'dans', ad: 'Dans', jeton: 80 },
+    { aks: 'ozel', ad: 'Özel dans', jeton: 180 },
+    { aks: 'kombin', ad: 'Kombin değiştir', jeton: 350 }
+  ],
   /* cesur kıyafet ya da tema varken arada gelen "özel istek"ler: Özel dans ile karşılanır, bahşiş 3 kat, ardından sansür gelir */
   CESUR_ISTEK: ['üstünü değiştir 👀', 'o geceliği giy lütfen 🙏', 'kameraya biraz yaklaş 😏', 'ışıkları kıs 🕯️', 'file çoraplar nerede 👀',
     'yatağın üstünde dans 😳', 'bir tur dön 💃', 'sadece 5 saniye, ciddiyim 🥺'],

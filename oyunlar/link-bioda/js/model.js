@@ -130,6 +130,13 @@ varying vec3 vBind;
     if (uDesen > 2.5 && uDesen < 3.5) ustR = mix(ustR, uUst2, step(ax, 0.004) * on);
     vec3 altR = mix(uAlt, uAlt * 0.45, alt * step(uAltUst - 0.025, y) * uKemer);
     vec3 kumas = ustR * max(ust, kolK) + altR * alt * (1.0 - ust) + uAyak * ayak;
+    // dikiş: kumaş kenarlarında koyu çizgi (vücut boyası değil giysi görünsün)
+    float kenarU = ust * (1.0 - smoothstep(0.0, 0.009, min(y - uUstAlt, uUstUst - y)));
+    float kenarA = alt * (1.0 - ust) * (1.0 - smoothstep(0.0, 0.009, min(y - uAltAlt, uAltUst - y)));
+    float kenarK = kolK * (1.0 - smoothstep(0.0, 0.008, uKolBit - ax));
+    kumas *= 1.0 - 0.32 * clamp(kenarU + kenarA + kenarK, 0.0, 1.0);
+    // örgü dokusu (saten ve dantel hariç)
+    if (uDesen < 4.5) kumas *= 1.0 + 0.045 * sin(kb.y * 700.0) * sin(kb.x * 700.0 + kb.z * 500.0);
     kumasMaske = clamp(max(max(ust, kolK), max(alt, ayak)), 0.0, 1.0);
     if (uDesen > 4.5 && uDesen < 5.5) {
       // dantel: ince desenden ten görünür, kenarda renkli şerit
@@ -149,7 +156,8 @@ varying vec3 vBind;
         .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\n  roughnessFactor = mix(roughnessFactor, uPuruz, kumasMaske);')
         .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\n  normal = normalize(mix(normal, geometryNormal, kumasMaske * 0.9));');
     };
-    m.customProgramCacheKey = () => 'lbd-govde2';
+    if (window.__lbdEnv) { m.envMap = window.__lbdEnv; m.envMapIntensity = 0.4; }
+    m.customProgramCacheKey = () => 'lbd-govde3';
     return m;
   }
   function sacMalzemesi(asil, renk, opaklik = 1) {
@@ -159,6 +167,7 @@ varying vec3 vBind;
       Object.assign(sh.uniforms, u);
       sh.fragmentShader = 'uniform vec3 uSac;\n' + sh.fragmentShader.replace('#include <map_fragment>', '#include <map_fragment>\n  float sl = dot(diffuseColor.rgb, vec3(0.3, 0.59, 0.11));\n  diffuseColor.rgb = uSac * (0.45 + sl * 2.2);');
     };
+    if (window.__lbdEnv) { m.envMap = window.__lbdEnv; m.envMapIntensity = 0.3; }
     m.customProgramCacheKey = () => 'lbd-sac';
     if (opaklik < 1) { m.transparent = true; m.opacity = opaklik; m.depthWrite = false; }
     return m;

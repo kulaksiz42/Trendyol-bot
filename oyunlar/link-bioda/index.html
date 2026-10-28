@@ -136,7 +136,7 @@ details ul{margin:10px 0 0;padding-left:18px;color:var(--soluk);display:grid;gap
 .rozet.kirmizi{background:var(--kasa)}
 .nokta{width:7px;height:7px;border-radius:50%;background:#fff;animation:yan 1s steps(2) infinite}
 @keyframes yan{50%{opacity:.2}}
-.istekler{position:absolute;top:44px;right:8px;width:min(62%,250px);display:grid;gap:6px}
+.istekler{position:absolute;top:44px;right:8px;width:min(54%,230px);display:grid;gap:6px}
 .istek{display:grid;grid-template-columns:34px 1fr;gap:8px;align-items:center;background:rgba(18,12,24,.82);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:6px 8px;color:#fff;animation:gir .25s both}
 @keyframes gir{from{opacity:0;transform:translateX(16px)}}
 .istek .ik{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:18px;background:var(--kasa-a);border:1px solid var(--kasa)}
@@ -153,7 +153,7 @@ details ul{margin:10px 0 0;padding-left:18px;color:var(--soluk);display:grid;gap
 .sansur span{display:block;padding:14px 26px;background:repeating-linear-gradient(45deg,#0c0a10 0 12px,#1b1622 12px 24px);color:#fff;font:800 clamp(30px,10vw,52px) var(--f-baslik);letter-spacing:.08em;transform:rotate(-6deg);border:3px solid var(--kasa);box-shadow:0 10px 40px rgba(0,0,0,.6)}
 .sansur.kucuk span{font-size:18px;letter-spacing:0;padding:10px 16px}
 @keyframes sansur{from{opacity:0;transform:scale(1.4)}}
-.sohbet{position:absolute;left:8px;bottom:8px;width:min(70%,300px);display:flex;flex-direction:column;gap:3px;font-size:12.5px;line-height:1.3;
+.sohbet{position:absolute;left:8px;bottom:8px;width:min(66%,290px);display:flex;flex-direction:column;gap:3px;font-size:12px;line-height:1.3;
   -webkit-mask-image:linear-gradient(transparent,#000 35%);mask-image:linear-gradient(transparent,#000 35%)}
 .sohbet p{margin:0;background:rgba(10,6,14,.5);border-radius:8px;padding:3px 7px;color:#fff;overflow-wrap:anywhere;width:fit-content;max-width:100%}
 .sohbet p b{color:#d9b8ff;font-weight:700}
@@ -184,6 +184,37 @@ details ul{margin:10px 0 0;padding-left:18px;color:var(--soluk);display:grid;gap
 @keyframes titre2{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 .kucuk-sira{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:8px}
 .kucuk-sira .btn{font-size:14px;padding:11px 8px}
+.kucuk-sira.dort{grid-template-columns:repeat(4,1fr)}
+.kucuk-sira.dort .btn{font-size:13px;padding:11px 4px;position:relative;overflow:hidden}
+.btn.istenen{border-color:var(--kasa);box-shadow:inset 0 0 0 1px var(--kasa)}
+.btn .dolum{position:absolute;left:0;bottom:0;height:3px;background:var(--kasa);width:0}
+/* yayın üst katmanı: platform arayüzü */
+.profil{position:absolute;top:8px;left:8px;display:flex;align-items:center;gap:7px;background:rgba(8,5,12,.55);backdrop-filter:blur(8px);border-radius:999px;padding:4px 10px 4px 4px;max-width:70%}
+.pav{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:linear-gradient(135deg,var(--kasa),#7a2bff);color:#fff;flex:none}
+.pbil{display:grid;line-height:1.15;min-width:0}
+.pbil b{font-size:13px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pbil span{font-size:10.5px;color:#cbbfd6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tik2{display:inline-grid;place-items:center;width:13px;height:13px;border-radius:50%;background:#2aa7ff;color:#fff;font-size:8px;vertical-align:1px}
+.profil .rozet{padding:2px 6px;font-size:10px}
+.ust-sag{position:absolute;top:10px;right:8px;display:flex;gap:5px}
+.hedefk{position:absolute;top:48px;left:8px;width:min(44%,190px);background:rgba(8,5,12,.55);backdrop-filter:blur(8px);border-radius:10px;padding:6px 8px;display:grid;gap:4px}
+.hedef-ust{display:flex;justify-content:space-between;gap:6px;font-size:10.5px;color:#fff}
+.hedef-ust span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hedef-ust b{font-family:var(--f-mono);color:var(--altin);white-space:nowrap}
+.hedefbar{height:5px}.hedefbar i{background:linear-gradient(90deg,var(--altin),var(--kasa))}
+.menu-btn{position:absolute;left:8px;top:96px;border:1px solid rgba(245,196,81,.6);background:rgba(40,26,8,.75);color:var(--altin);border-radius:999px;padding:4px 10px;font:700 11px var(--f-mono)}
+body[data-ekran="yayin"] .istekler{top:44px}
+.sohbet p .roz{display:inline-block;font:700 9px var(--f-mono);padding:1px 4px;border-radius:4px;margin-right:4px;background:#5b3c8f;color:#fff;vertical-align:1px}
+.sohbet p .roz.vip{background:var(--altin);color:#1a1205}.sohbet p .roz.bot{background:#1f7a55}
+.sohbet p.bot{background:rgba(31,122,85,.35)}
+.sohbet p.kaba,.sohbet p.talep{background:rgba(120,30,40,.45)}
+.sohbet p.bahsis.buyuk{background:linear-gradient(90deg,rgba(245,196,81,.55),rgba(255,79,139,.4));font-weight:700}
+.ucan span.buyuk{font-size:30px;color:#fff;text-shadow:0 0 12px var(--kasa),0 2px 6px rgba(0,0,0,.6)}
+.istek.menu{border-color:rgba(122,168,255,.7)}.istek.menu .u{color:#a9c6ff;font-weight:700}
+.istek.balina{border-color:#7ee0ff;box-shadow:0 0 16px rgba(126,224,255,.35)}.istek.balina .u{color:#7ee0ff;font-weight:700}
+.yayin-durum .para{display:grid;line-height:1.1}
+.yayin-durum .para small{font-size:11px;color:var(--soluk);font-weight:500}
+.yayin-durum .para em{font-style:normal;font-size:11px;color:var(--soluk)}
 
 /* sonuçlar ve rapor */
 .sayilar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
@@ -236,8 +267,16 @@ details ul{margin:10px 0 0;padding-left:18px;color:var(--soluk);display:grid;gap
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/utils/SkeletonUtils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/environments/RoomEnvironment.js"></script>
 <script src="js/veri.js"></script>
 <script src="js/ses.js"></script>
+<script src="js/sohbet.js"></script>
 <script src="js/model.js"></script>
 <script src="js/sahne.js"></script>
 <script src="js/oyun.js"></script>

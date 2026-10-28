@@ -22,7 +22,7 @@
   const bul = (liste, id) => liste.find(x => x.id === id);
   const AV_RENK = ['#ff4f8b', '#f5c451', '#46d39a', '#7aa8ff', '#c79bff', '#ff9f5a'];
   const avatar = ad => `<div class="av" style="background:${AV_RENK[[...ad].reduce((s, c) => s + c.charCodeAt(0), 0) % AV_RENK.length]}">${esc([...ad.replace(/^@/, '')][0].toUpperCase())}</div>`;
-  const EMOJI = { konus: '💬', dans: '💃', ozel: '🔥', opucuk: '💋', poz: '📸', tesekkur: '🙏' };
+  const EMOJI = { konus: '💬', dans: '💃', ozel: '🔥', opucuk: '💋', poz: '📸', tesekkur: '🙏', kombin: '👗' };
   const GUN_ADI = ['Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar', 'Pazartesi'];
   const TARIH = gun => { const d = new Date(2026, 9, 26 + gun); return d.getDate() + ' ' + ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'][d.getMonth()]; };
 
@@ -295,6 +295,8 @@
   }
 
   /* ---------- canlı yayın ---------- */
+  const JETON = 0.05; // 1 jeton = $0,05
+  const jeton = n => sayi(n) + ' jeton';
   let Y = null;
   function yayin() {
     ekran('yayin', 'yayin');
@@ -302,19 +304,15 @@
     const trend = gunTrend(), tema = bul(V.TEMALAR, S.secim.tema), saat = bul(V.SAATLER, S.secim.saat);
     const gunV = V.GUNLER[S.gun - 1] || {};
     const temaEs = S.secim.tema === trend.tema;
-    let temaK = 1;
-    if (tema.gerek === 'mikrofon' && !S.env.mikrofon) temaK = 0.6;
-    if (tema.gerek && tema.gerek !== 'mikrofon' && !kostumVar(tema.gerek)) temaK = 0.6;
-    if (tema.id === 'ozelgece' && S.secim.kedikulak) temaK *= 1.1;
-    const ces = cesaret();
     Y = {
-      t: 0, izl: 1, ilgi: 60, enerji: S.enerji, bahsis: 0, abone: 0, istekler: [], sonraki: S.gun === 1 ? 3.5 : 2, sohbetT: 0.6,
-      mesgul: 0, aktifAks: null, sonAks: null, sonAksT: -99, karsilanan: 0, kacan: 0, enYuksek: 0, bahsisciler: {},
+      t: 0, izl: 1, ilgi: 60, enerji: S.enerji, bahsis: 0, jeton: 0, abone: 0, istekler: [], sonraki: S.gun === 1 ? 3.5 : 2, sohbetT: 0.4, botT: 12,
+      mesgul: 0, aktifAks: null, sonAks: null, sonAksT: -99, sonEylemT: 0, karsilanan: 0, kacan: 0, enYuksek: 0, bahsisciler: {},
       tehlike: null, plan: [], basarili: 0, basarisiz: 0, anneGirdi: false, karanlik: false, bitti: false, mola: false, sarjBitti: false,
-      taban: tabanIzleyici(trend), saat, tema, temaEs, temaK, gundem: gunV.gundem || [], ilkIstek: S.gun === 1, yonlendirme: S.gun === 1 ? 'istek' : null,
-      bahsisK: saat.bahsis * (S.env['tarz_' + K().tarz] ? 1.15 : 1) * (1 + ces * 0.08) * temaK, ces, cesurSay: 0,
-      sonCiz: 0
+      taban: tabanIzleyici(trend), saat, tema, temaEs, gundem: gunV.gundem || [], ilkIstek: S.gun === 1, yonlendirme: S.gun === 1 ? 'istek' : null,
+      cesurSay: 0, iade: 0, balinaT: R(35, 70), balinaKac: 0, sonCiz: 0, sessizUyari: 0,
+      hedef: { jeton: 500 + S.gun * 250, ad: sec(['Saç savurma maratonu', 'Kameraya yakın çekim', 'Gecelik gecesi 👀', 'Yatakta özel dans', '10 dakika ASMR']), tamam: false }
     };
+    bahsisKatsayi();
     // tehlike planı (tohumlu): her günün olayları aynı tohumla aynıdır
     const ag = { anne: 2 * saat.anne * ((gunV.ek && gunV.ek.etki && gunV.ek.etki.anneKat) || 1), net: S.env.modem ? 0.5 : 1, sarj: 1, troll: 1.4, kedi: 1.2, matkap: 0.8, isik: S.env.ringlight ? 0.3 : 1, tripod: S.env.tripod ? 0.3 : 1 };
     const adet = S.gun === 1 ? 3 : 4;
@@ -322,34 +320,43 @@
     const secilen = [];
     for (let i = 0; i < adet; i++) { const a = Object.assign({}, ag); secilen.forEach(s => { if (s !== 'anne') delete a[s]; }); secilen.push(agirlikliSec(a)); }
     Y.plan = zamanlar.map((z, i) => ({ z, tip: secilen[i] }));
-    if (Sahne.hazir) { Sahne.karakter(gorunum()); Sahne.oda(S.env); Sahne.karart(0); Sahne.egil(0); Sahne.oynat('selam', 1.5); }
+    const kim = kimlik();
+    Sohbet.baslat({ rnd, ad: K().ad, hitap: kim.hitap, unvan: kim.unvan, kiyafetAdi: () => kiyafetBilgi(S.secim.kiyafet).ad, hedefKalan: () => sayi(Math.max(0, Y.hedef.jeton - Y.jeton)) });
+    if (Sahne.hazir) { Sahne.karakter(gorunum()); Sahne.oda(S.env); Sahne.karart(0); Sahne.egil(0); Sahne.oynat('opucuk', 1.5); }
 
     ust.innerHTML = `
-      <div class="canli"><span class="rozet kirmizi"><span class="nokta"></span>CANLI</span><span class="rozet" id="ySaat">--:--</span><span class="rozet" id="yIzl">0 izleyici</span></div>
+      <div class="profil"><div class="pav">${esc([...K().ad][0].toUpperCase())}</div><div class="pbil"><b>${esc(K().ad)} <span class="tik2">✓</span></b><span>@${esc(K().kullanici)} · DansKasa</span></div>
+        <span class="rozet kirmizi"><span class="nokta"></span>CANLI</span></div>
+      <div class="ust-sag"><span class="rozet" id="yIzl">👁 0</span><span class="rozet" id="ySaat">--:--</span></div>
+      <div class="hedefk"><div class="hedef-ust"><span>🎯 ${esc(Y.hedef.ad)}</span><b id="yHedefS">0 / ${sayi(Y.hedef.jeton)}</b></div><div class="bar hedefbar"><i id="yHedef"></i></div></div>
+      <button class="menu-btn" id="menuBtn" aria-label="Bahşiş menüsü">💸 Menü</button>
       <div class="istekler" id="yIstek" aria-live="polite"></div>
       <div class="sohbet" id="ySohbet"></div>
       <div class="ucan" id="yUcan"></div>
       <div class="tehlike" id="yTeh" hidden></div>
-      ${Y.yonlendirme ? '<div class="yonlendir" id="yYon">İstek gelince aynı simgeli tuşa bas</div>' : ''}`;
+      ${Y.yonlendirme ? '<div class="yonlendir" id="yYon">İstek gelince aynı simgeli tuşa bas. 💸 jetonlu istekler önceden ödenmiştir.</div>' : ''}`;
     panel.innerHTML = `
-      <div class="yayin-durum"><span class="para" id="yPara">$0,00</span>
+      <div class="yayin-durum"><span class="para"><span id="yJeton">0</span><small> jeton</small><em id="yPara">$0,00</em></span>
         <div class="olc"><div><span>İlgi</span><b id="yIlgiS">60</b></div><div class="bar ilgi"><i id="yIlgi"></i></div></div>
         <div class="olc"><div><span>Enerji</span><b id="yEnS">0</b></div><div class="bar enerji"><i id="yEn"></i></div></div></div>
       <div class="aksiyonlar">${V.AKSIYONLAR.map(a => `<button class="aks" data-aks="${a.id}" aria-label="${a.ad} (${a.tus})"><kbd>${a.tus}</kbd><span class="em">${EMOJI[a.id]}</span><span class="ad">${a.ad}</span><i class="dolum"></i></button>`).join('')}</div>
-      <div class="kucuk-sira"><button class="btn ikincil" id="icBtn">Enerji içeceği (${S.stok.enerji || 0})</button><button class="btn ikincil" id="molaBtn">Mola</button><button class="btn ikincil" id="bitirBtn">Bitir</button></div>`;
-    panel.querySelectorAll('[data-aks]').forEach(b => b.onclick = () => aksiyon(b.dataset.aks));
+      <div class="kucuk-sira dort"><button class="btn ikincil" id="kombinBtn" data-aks="kombin">👗 Kombin<i class="dolum"></i></button><button class="btn ikincil" id="icBtn">⚡ İçecek (${S.stok.enerji || 0})</button><button class="btn ikincil" id="molaBtn">Mola</button><button class="btn ikincil" id="bitirBtn">Bitir</button></div>`;
+    panel.querySelectorAll('.aks[data-aks]').forEach(b => b.onclick = () => aksiyon(b.dataset.aks));
+    $('#kombinBtn').onclick = kombin;
     $('#icBtn').onclick = ic;
     $('#molaBtn').onclick = mola;
+    $('#menuBtn').onclick = menuGoster;
     $('#bitirBtn').onclick = () => onayla('Yayını şimdi bitirmek istiyor musun?', 'Bitir', () => bitir());
     document.onkeydown = e => {
       if (!Y || Y.bitti) return;
       if (e.key >= '1' && e.key <= '6') { aksiyon(V.AKSIYONLAR[+e.key - 1].id); e.preventDefault(); }
       else if (e.code === 'Space') { const b = document.querySelector('#yTeh:not([hidden]) .btn'); if (b) { b.click(); e.preventDefault(); } }
+      else if (e.key === 'k' || e.key === 'K') kombin();
       else if (e.key === 'e' || e.key === 'E') ic();
       else if (e.key === 'Escape' || e.key === 'p') mola();
     };
     document.onvisibilitychange = () => { if (document.hidden && Y && !Y.bitti && !Y.mola) mola(); };
-    sohbetEkle(null, `${esc(K().ad)} yayında! 🔴`, 'abone');
+    sohbetMesaj(Sohbet.bot(`${K().ad} yayında 🔴 Bahşiş menüsü için 💸 Menü'ye dokun. Bugünkü hedef: ${Y.hedef.ad}`));
     let son = performance.now();
     const dongu = now => {
       if (!Y || Y.bitti) return;
@@ -358,6 +365,25 @@
       Y.raf = requestAnimationFrame(dongu);
     };
     Y.raf = requestAnimationFrame(dongu);
+  }
+  function bahsisKatsayi() {
+    const tema = Y.tema;
+    let temaK = 1;
+    if (tema.gerek === 'mikrofon' && !S.env.mikrofon) temaK = 0.6;
+    if (tema.gerek && tema.gerek !== 'mikrofon' && !kostumVar(tema.gerek)) temaK = 0.6;
+    if (tema.id === 'ozelgece' && S.secim.kedikulak) temaK *= 1.1;
+    Y.ces = cesaret(); Y.temaK = temaK;
+    Y.bahsisK = Y.saat.bahsis * (S.env['tarz_' + K().tarz] ? 1.15 : 1) * (1 + Y.ces * 0.08) * temaK;
+  }
+  function menuGoster() {
+    if (!Y || Y.bitti) return;
+    Y.mola = true;
+    perde.innerHTML = `<div class="kart"><p class="etiket">Bahşiş menüsü · ${esc(K().ad)}</p>
+      <div class="dokum">${V.MENU.map(m => `<div><span>${EMOJI[m.aks] || '👗'} ${esc(m.ad)}</span><span>${jeton(m.jeton)}</span></div>`).join('')}</div>
+      <p class="dipnot">İzleyiciler bu menüden jeton gönderip ister. Jeton önceden ödenir; istek süresinde yapılmazsa izleyici parasını geri ister. 1 jeton = $0,05.</p>
+      <button class="btn" id="menuKapat">Yayına dön</button></div>`;
+    perde.hidden = false;
+    $('#menuKapat').onclick = () => { perde.hidden = true; Y.mola = false; };
   }
 
   function guncelle(dt) {
@@ -368,11 +394,13 @@
     const th = Y.tehlike;
     if (th && th.tip === 'matkap') dusus += 2;
     if (th && th.tip === 'troll') dusus += 1;
+    const sessiz = Y.mesgul > 0 ? 0 : Y.t - Y.sonEylemT;
+    if (sessiz > 8) dusus += 1.5;
     Y.ilgi = clamp(Y.ilgi - dusus * dt);
     Y.enerji = clamp(Y.enerji - 0.1 * dt);
     // izleyici
     const rampa = Math.min(1, 0.25 + Y.t / 25);
-    let hedef = Y.taban * (0.3 + Y.ilgi / 100 * 0.95) * rampa;
+    let hedef = Y.taban * (0.3 + Y.ilgi / 100 * 0.95) * rampa * (1 + Y.ces * 0.06);
     if (th && th.tip === 'net') hedef *= 0.4;
     Y.izl += (hedef - Y.izl) * Math.min(1, dt * 0.6) + (rnd() - 0.5) * dt * 2;
     Y.izl = Math.max(1, Y.izl);
@@ -381,30 +409,39 @@
     Y.sonraki -= dt;
     if (Y.sonraki <= 0 && Y.istekler.length < 3 && !(th && th.tip === 'sarj')) {
       istekEkle();
-      Y.sonraki = R(4.2, 7.2) * (Y.t > T * 0.6 ? 0.8 : 1) * (Y.ilkIstek && Y.karsilanan < 2 ? 1.6 : 1);
+      Y.sonraki = R(3.8, 6.8) * (Y.t > T * 0.6 ? 0.8 : 1) * (Y.ilkIstek && Y.karsilanan < 2 ? 1.6 : 1);
     }
     for (const ist of Y.istekler) ist.kalan -= dt;
     const kacanlar = Y.istekler.filter(i => i.kalan <= 0);
     if (kacanlar.length) {
       Y.istekler = Y.istekler.filter(i => i.kalan > 0);
-      kacanlar.forEach(i => { Y.kacan++; Y.ilgi = clamp(Y.ilgi - 7); sohbetEkle(i.u, sec(['tamam ya boşver 🙄', 'beni görmedi bile', 'başka yayına geçiyorum', 'hiç takmadı 😒'])); });
+      kacanlar.forEach(istekKacti);
       Ses.kacti(); istekCiz();
     }
-    // pasif gelir
-    const aboneP = Y.izl * 0.0016 * (Y.ilgi / 100) * (0.7 + S.sadakat / 170);
+    // abone ve küçük bahşişler
+    const aboneP = Y.izl * 0.0016 * (Y.ilgi / 100) * (0.7 + S.sadakat / 170) * (1 + Y.ces * 0.1);
     if (rnd() < aboneP * dt) {
-      Y.abone++; const u = sec(V.KULLANICI); sohbetEkle(u, 'abone oldu! 🎉', 'abone'); Ses.abone();
-      if (rnd() < 0.5 && Y.istekler.length < 3) istekEkle('tesekkur', u);
+      Y.abone++; const k = Sohbet.bahsisci(false); sohbetMesaj({ u: k.ad, renk: k.renk, rozet: 'YENİ', t: 'abone oldu! 🎉 ($' + V.ABONE_UCRET.toFixed(2).replace('.', ',') + ')', tur: 'abone' }); Ses.abone();
+      if (rnd() < 0.45 && Y.istekler.length < 3) istekEkle('tesekkur', k.ad);
     }
-    if (rnd() < Y.izl * 0.0012 * dt * (Y.ilgi / 60)) { const m = R(0.5, 2) * Y.bahsisK; bahsisAl(sec(V.KULLANICI), m, sablon(sec(V.SOHBET.bahsis))); }
-    // sohbet akışı
+    if (rnd() < Y.izl * 0.0016 * dt * (Y.ilgi / 60)) { const k = Sohbet.bahsisci(false); bahsisAl(k.ad, Math.round(R(10, 60) * Y.bahsisK), Sohbet.bahsisNotu(k)); }
+    // balina
+    Y.balinaT -= dt;
+    if (Y.balinaT <= 0 && !Y.tehlike) { balinaGeldi(); Y.balinaT = R(55, 95); }
+    // sohbet akışı: izleyici çoğaldıkça hızlanır
     Y.sohbetT -= dt;
     if (Y.sohbetT <= 0) {
-      Y.sohbetT = R(0.9, 2.2) * (Y.izl < 8 ? 1.6 : 1);
-      const havuz = rnd() < 0.3 && Y.gundem.length ? V.GUNDEM[sec(Y.gundem)] : V.SOHBET.genel;
-      const satir = sec(havuz);
-      const m = satir.match(/^(\w+): (.*)$/);
-      if (m) sohbetEkle(m[1], m[2]); else sohbetEkle(sec(V.KULLANICI), sablon(satir));
+      Y.sohbetT = Math.max(0.45, 2.2 - Y.izl * 0.035) * R(0.6, 1.4);
+      if (Y.gundem.length && rnd() < 0.12) { const sat = sec(V.GUNDEM[sec(Y.gundem)]); const m = sat.match(/^(\w+): (.*)$/); sohbetEkle(m ? m[1] : sec(V.KULLANICI), m ? m[2] : sablon(sat)); }
+      else { const m = Sohbet.ortam({ t: Y.t, sessiz, ces: Y.ces, gun: S.gun, hedefOran: Y.jeton / Y.hedef.jeton }); if (m) sohbetMesaj(m); }
+    }
+    if (sessiz > 9 && Y.t - Y.sessizUyari > 9) { Y.sessizUyari = Y.t; Sohbet.tepki('sessizlik', 2).forEach((m, i) => setTimeout(() => sohbetMesaj(m), i * 400)); }
+    // bot duyuruları
+    Y.botT -= dt;
+    if (Y.botT <= 0) {
+      Y.botT = R(22, 34);
+      sohbetMesaj(Sohbet.bot(sec([`🎯 Hedef: ${sayi(Y.jeton)} / ${sayi(Y.hedef.jeton)} jeton · ödül: ${Y.hedef.ad}`, '💸 Menü: öpücük 25 · poz 50 · dans 80 · özel dans 180 · kombin 350',
+        `👥 ${sayi(Y.izl)} kişi izliyor. Abone olmak ${usd(V.ABONE_UCRET)}.`, '🔇 Kaba mesajlar otomatik siliniyor (bazen)', '⏱️ Yavaş mod: 2 saniye'])));
     }
     // tehlikeler
     if (!Y.tehlike && Y.plan.length && Y.t >= Y.plan[0].z) tehlikeBasla(Y.plan.shift().tip);
@@ -420,7 +457,6 @@
       if (d) d.style.width = clamp((1 - Y.mesgul / Y.aksSure) * 100) + '%';
       if (Y.mesgul <= 0) aksiyonBit();
     }
-    // arayüz (saniyede ~12 kez)
     Y.sonCiz -= dt;
     if (Y.sonCiz <= 0) { Y.sonCiz = 0.08; yayinCiz(); }
     if (Y.t >= T) bitir();
@@ -430,10 +466,13 @@
     const bas = { '21': 21 * 60, '23': 23 * 60, '02': 2 * 60 }[Y.saat.id];
     const dk = Math.floor(bas + Y.t / V.YAYIN_SURE * 240) % 1440;
     $('#ySaat').textContent = String(Math.floor(dk / 60)).padStart(2, '0') + ':' + String(dk % 60).padStart(2, '0');
-    $('#yIzl').textContent = sayi(Y.izl) + ' izleyici';
+    $('#yIzl').textContent = '👁 ' + sayi(Y.izl);
+    $('#yJeton').textContent = sayi(Y.jeton);
     $('#yPara').textContent = usd(Y.bahsis + Y.abone * V.ABONE_UCRET);
     $('#yIlgi').style.width = Y.ilgi + '%'; $('#yIlgiS').textContent = Math.round(Y.ilgi);
     $('#yEn').style.width = Y.enerji + '%'; $('#yEnS').textContent = Math.round(Y.enerji);
+    $('#yHedef').style.width = clamp(Y.jeton / Y.hedef.jeton * 100) + '%';
+    $('#yHedefS').textContent = Y.hedef.tamam ? 'TAMAM 🎉' : sayi(Y.jeton) + ' / ' + sayi(Y.hedef.jeton);
     for (const ist of Y.istekler) {
       const el = document.getElementById('ist' + ist.id); if (!el) continue;
       el.querySelector('.sure i').style.width = clamp(ist.kalan / ist.sure * 100) + '%';
@@ -443,20 +482,31 @@
     panel.querySelectorAll('[data-aks]').forEach(b => b.classList.toggle('istenen', istenen.has(b.dataset.aks)));
   }
 
+  /* istek türleri: menu (jeton önceden ödendi), istek (ücretsiz, yapılırsa bahşiş gelebilir), cesur (özel istek: menü fiyatının katları, ardından sansür) */
   let istekSayac = 0;
   function istekEkle(zorla, kullanici) {
-    let aks = zorla || agirlikliSec(Y.tema.agirlik);
-    const u = kullanici || sec(V.KULLANICI);
-    let havuz = V.ISTEK[aks];
-    // cesur kıyafet ya da gece yarısı özelde arada "özel istek" gelir
-    const cesurSans = (Y.ces >= 1 || Y.tema.id === 'ozelgece') && !zorla ? 0.1 + Y.ces * 0.07 + (Y.tema.id === 'ozelgece' ? 0.1 : 0) : 0;
-    let cesur = false;
-    if (rnd() < cesurSans) { aks = 'ozel'; havuz = V.CESUR_ISTEK; cesur = true; }
+    let aks = zorla || agirlikliSec(Object.assign({ kombin: 0.35 + Y.ces * 0.1 }, Y.tema.agirlik));
+    let k = kullanici ? (Sohbet.kisi(kullanici) || { ad: kullanici, renk: '#d9b8ff' }) : (rnd() < 0.55 ? Sohbet.bahsisci(false) : sec(Sohbet.KISI));
+    let havuz = V.ISTEK[aks] || V.ISTEK.poz, tur = 'istek', jet = 0;
+    const cesurSans = (Y.ces >= 1 || Y.tema.id === 'ozelgece') && !zorla ? 0.08 + Y.ces * 0.06 + (Y.tema.id === 'ozelgece' ? 0.1 : 0) : 0;
+    const menu = bul(V.MENU, aks);
+    if (rnd() < cesurSans) { aks = 'ozel'; havuz = V.CESUR_ISTEK; tur = 'cesur'; jet = Math.round(R(2, 3.5) * 180 / 10) * 10; k = Sohbet.bahsisci(true); }
+    else if (aks === 'kombin' || (menu && !zorla && rnd() < 0.5)) { tur = 'menu'; jet = menu ? menu.jeton : 350; }
     if (aks === 'konus' && Y.tema.id === 'asmr') havuz = V.ISTEK.konus_asmr;
-    const sure = R(12, 16) * (Y.ilkIstek ? 1.4 : 1);
-    const odul = R(1.2, 3.2) * (1 + Y.izl / 35) * Y.bahsisK * (Y.temaEs ? 1.1 : 1);
-    Y.istekler.push({ id: ++istekSayac, aks, u, t: sablon(sec(havuz)), kalan: sure, sure, odul: odul * (cesur ? 3 : 1), cesur });
+    const sure = R(12, 16) * (Y.ilkIstek ? 1.4 : 1) * (tur === 'cesur' ? 1.2 : 1);
+    const ist = { id: ++istekSayac, aks, u: k.ad, renk: k.renk, t: sablon(sec(havuz)), kalan: sure, sure, tur, jet, cesur: tur === 'cesur' };
+    Y.istekler.push(ist);
+    if (jet) jetonAl(k.ad, jet, (tur === 'cesur' ? '🔥 ÖZEL İSTEK: ' : '') + ist.t, true);
     Ses.istek(); istekCiz();
+  }
+  function istekKacti(i) {
+    if (i.tur === 'balina') { Y.kacan++; Y.balinaKac++; Y.izl *= 0.9; S.sadakat = clamp(S.sadakat - 4); sohbetMesaj({ u: i.u, renk: i.renk, rozet: 'VIP', t: sec(Sohbet.AYRILIS), tur: 'kaba' }); sohbetMesaj(Sohbet.bot(`👋 ${i.u} yayından ayrıldı`)); return; }
+    Y.kacan++; Y.ilgi = clamp(Y.ilgi - (i.jet ? 12 : 6));
+    if (i.jet) {
+      Y.jeton = Math.max(0, Y.jeton - i.jet); Y.bahsis = Math.max(0, Y.bahsis - i.jet * JETON); Y.iade += i.jet;
+      sohbetMesaj({ u: i.u, renk: i.renk, t: sec(['parayı aldı yapmadı 😡 iade istiyorum', 'jetonumu geri ver', 'dolandırıcı mısın', 'bir daha bahşiş yok']), tur: 'kaba' });
+      sohbetMesaj(Sohbet.bot(`↩️ ${i.u} kullanıcısına ${jeton(i.jet)} iade edildi`));
+    } else sohbetMesaj({ u: i.u, renk: i.renk, t: sec(['tamam ya boşver 🙄', 'beni görmedi bile', 'başka yayına geçiyorum', 'hiç takmadı 😒']) });
   }
   function istekCiz() {
     const kap = $('#yIstek'); if (!kap) return;
@@ -464,24 +514,50 @@
     [...kap.children].forEach(c => { if (!var_.has(c.id)) c.remove(); });
     for (const ist of Y.istekler) {
       if (document.getElementById('ist' + ist.id)) continue;
-      kap.insertAdjacentHTML('beforeend', `<div class="istek${ist.cesur ? ' cesur' : ''}" id="ist${ist.id}"><span class="ik" aria-hidden="true">${EMOJI[ist.aks]}</span><div class="ic"><span class="u">${ist.cesur ? 'ÖZEL İSTEK · ' : ''}${esc(ist.u)} · ${bul(V.AKSIYONLAR, ist.aks).ad}</span><span class="t">${esc(ist.t)}</span><span class="sure"><i style="width:100%"></i></span></div></div>`);
+      const ad = ist.aks === 'kombin' ? 'Kombin' : bul(V.AKSIYONLAR, ist.aks).ad;
+      const etiket = ist.tur === 'cesur' ? `ÖZEL İSTEK · ${jeton(ist.jet)}` : ist.tur === 'menu' ? `💸 ${jeton(ist.jet)}` : 'istek';
+      kap.insertAdjacentHTML('beforeend', `<div class="istek ${ist.tur}" id="ist${ist.id}"><span class="ik" aria-hidden="true">${EMOJI[ist.aks] || '👗'}</span><div class="ic"><span class="u">${etiket} · ${esc(ist.u)} · ${ad}</span><span class="t">${esc(ist.t)}</span><span class="sure"><i style="width:100%"></i></span></div></div>`);
     }
   }
-  function sohbetEkle(u, t, tip = '') {
-    const kap = $('#ySohbet'); if (!kap) return;
-    kap.insertAdjacentHTML('beforeend', `<p class="${tip}">${u ? `<b>${esc(u)}</b> ` : ''}${esc(t)}</p>`);
+  function sohbetMesaj(m) {
+    const kap = $('#ySohbet'); if (!kap || !m) return;
+    const roz = m.rozet ? `<span class="roz ${m.rozet === 'VIP' ? 'vip' : m.rozet === 'BOT' ? 'bot' : ''}">${esc(m.rozet)}</span>` : '';
+    kap.insertAdjacentHTML('beforeend', `<p class="${m.tur || ''}">${roz}${m.u ? `<b style="color:${m.renk || '#d9b8ff'}">${esc(m.u)}</b> ` : ''}${esc(m.t)}</p>`);
     while (kap.children.length > 7) kap.firstElementChild.remove();
   }
-  function ucanYazi(metin) {
+  function sohbetEkle(u, t, tip = '') { const k = u && Sohbet.kisi(u); sohbetMesaj({ u, t, tur: tip, renk: k ? k.renk : null, rozet: k ? k.rozet : null }); }
+  function ucanYazi(metin, buyuk) {
     const kap = $('#yUcan'); if (!kap) return;
-    const s = document.createElement('span'); s.textContent = metin;
-    s.style.left = (30 + rnd() * 40) + '%'; s.style.top = (35 + rnd() * 25) + '%';
+    const s = document.createElement('span'); s.textContent = metin; if (buyuk) s.className = 'buyuk';
+    s.style.left = (25 + rnd() * 40) + '%'; s.style.top = (35 + rnd() * 25) + '%';
     kap.appendChild(s); setTimeout(() => s.remove(), 1300);
   }
-  function bahsisAl(u, miktar, not) {
-    Y.bahsis += miktar; Y.bahsisciler[u] = (Y.bahsisciler[u] || 0) + miktar;
-    sohbetEkle(u, `💸 ${usd(miktar)} gönderdi${not ? ': "' + not + '"' : ''}`, 'bahsis');
-    ucanYazi('+' + usd(miktar)); Ses.bahsis();
+  // jeton gelişi: hedef çubuğu, sohbet satırı, uçan yazı
+  function jetonAl(u, j, not, istekle) {
+    Y.jeton += j; Y.bahsis += j * JETON; Y.bahsisciler[u] = (Y.bahsisciler[u] || 0) + j * JETON;
+    const k = Sohbet.kisi(u) || {};
+    sohbetMesaj({ u, renk: k.renk, rozet: k.rozet, t: `💸 ${jeton(j)}${not ? ' · ' + not : ''}`, tur: j >= 300 ? 'bahsis buyuk' : 'bahsis' });
+    ucanYazi('+' + sayi(j), j >= 300); Ses.bahsis();
+    if (j >= 150 && !istekle && rnd() < 0.6) setTimeout(() => Sohbet.tepki('bahsis_tepki', 1).forEach(sohbetMesaj), 600);
+    if (!Y.hedef.tamam && Y.jeton >= Y.hedef.jeton) hedefTamam();
+  }
+  function bahsisAl(u, jet, not) { jetonAl(u, jet, not); }
+  function hedefTamam() {
+    Y.hedef.tamam = true; Ses.basari();
+    sohbetMesaj(Sohbet.bot(`🎉 HEDEF TAMAM! Ödül: ${Y.hedef.ad}`));
+    Sohbet.tepki('hedefTamam', 3).forEach((m, i) => setTimeout(() => sohbetMesaj(m), 300 + i * 300));
+    S.takipci += Math.round(Y.izl * 2); Y.ilgi = clamp(Y.ilgi + 20);
+    Y.istekler = Y.istekler.slice(0, 2);
+    const ist = { id: ++istekSayac, aks: 'ozel', u: 'HEDEF', renk: '#f5c451', t: 'Hedef ödülü: ' + Y.hedef.ad, kalan: 18, sure: 18, tur: 'cesur', jet: 0, cesur: true };
+    Y.istekler.push(ist); istekCiz();
+  }
+  function balinaGeldi() {
+    const k = Sohbet.bahsisci(true);
+    const j = Math.round(R(4, 12)) * 100;
+    jetonAl(k.ad, j, sec(['sen bunu hak ediyorsun 👑', 'bu gece benden', 'sadece bir teşekkür yeter', 'en sevdiğim yayıncı']));
+    Y.istekler = Y.istekler.filter(i => i.aks !== 'tesekkur' || i.u !== k.ad).slice(0, 2);
+    Y.istekler.push({ id: ++istekSayac, aks: 'tesekkur', u: k.ad, renk: k.renk, t: `${k.ad} ${sayi(j)} jeton attı, teşekkür bekliyor`, kalan: 9, sure: 9, tur: 'balina', jet: 0, balina: j });
+    istekCiz();
   }
 
   function sansurOlayi() {
@@ -493,8 +569,11 @@
     if (o.tip === 'anne') { tehlikeBasla('anne'); return; }
     if (o.tip === 'kedi') { Sahne.kediGec(4); Ses.miyav(); }
     if (o.tip === 'net') Y.izl *= 0.85;
-    const el = document.createElement('div'); el.className = 'sansur' + (o.tip === 'etiket' ? '' : ' kucuk');
-    el.innerHTML = `<span>${esc(o.tip === 'etiket' ? 'SANSÜR' : o.metin)}</span>`;
+    perdeYazi(o.tip === 'etiket' ? 'SANSÜR' : o.metin, o.tip !== 'etiket');
+  }
+  function perdeYazi(metin, kucuk) {
+    const el = document.createElement('div'); el.className = 'sansur' + (kucuk ? ' kucuk' : '');
+    el.innerHTML = `<span>${esc(metin)}</span>`;
     ust.appendChild(el); setTimeout(() => el.remove(), 1800);
   }
   const ANIM = { konus: 'konus', dans: 'dans', ozel: 'ozel', opucuk: 'opucuk', poz: 'poz', tesekkur: 'tesekkur' };
@@ -508,22 +587,42 @@
     Ses.tik();
     if (Sahne.hazir) Sahne.oynat(ANIM[id], sure);
   }
+  // yayında kıyafet değiştir: sahip olunan kıyafetler arasında bir sonrakine (daha cesura doğru) geçer
+  function kombin() {
+    if (!Y || Y.bitti || Y.mola || Y.mesgul > 0) return;
+    const sirali = S.kiyafetler.slice().sort((a, b) => kiyafetBilgi(a).cesaret - kiyafetBilgi(b).cesaret);
+    if (sirali.length < 2) { bildir('Başka kıyafetin yok. Mağazadan alabilirsin.'); return; }
+    Y.mesgul = 2; Y.aksSure = 2; Y.aktifAks = 'kombin'; Y.enerji = clamp(Y.enerji - 3);
+    perdeYazi('KOMBİN DEĞİŞİYOR…', true);
+    setTimeout(() => {
+      if (!Y || Y.bitti) return;
+      const i = sirali.indexOf(S.secim.kiyafet);
+      S.secim.kiyafet = sirali[(i + 1) % sirali.length];
+      bahsisKatsayi();
+      if (Sahne.hazir) { Sahne.karakter(gorunum()); Sahne.oynat('poz', 1.2); }
+      Sohbet.tepki('kiyafetDegisti', 2).forEach((m, k) => setTimeout(() => sohbetMesaj(m), k * 400));
+      sohbetMesaj(Sohbet.bot('👗 Yeni kombin: ' + kiyafetBilgi(S.secim.kiyafet).ad));
+    }, 700);
+  }
   function aksiyonBit() {
-    const id = Y.aktifAks; Y.aktifAks = null; Y.mesgul = 0;
-    panel.querySelectorAll('.aks .dolum').forEach(d => d.style.width = '0');
+    const id = Y.aktifAks; Y.aktifAks = null; Y.mesgul = 0; Y.sonEylemT = Y.t;
+    panel.querySelectorAll('.dolum').forEach(d => d.style.width = '0');
     if (id === 'ic') return;
     const i = Y.istekler.findIndex(x => x.aks === id);
     if (i >= 0) {
       const ist = Y.istekler.splice(i, 1)[0];
-      Y.karsilanan++; Y.ilgi = clamp(Y.ilgi + 14 + (Y.temaEs ? 3 : 0) + (id === 'tesekkur' ? 4 : 0));
-      bahsisAl(ist.u, ist.odul, ist.cesur ? 'özel istek 🔥' : null);
+      Y.karsilanan++; Y.ilgi = clamp(Y.ilgi + 14 + (Y.temaEs ? 3 : 0) + (id === 'tesekkur' ? 4 : 0) + (ist.jet ? 4 : 0));
+      if (ist.tur === 'istek' && rnd() < 0.65) jetonAl(ist.u, Math.round(R(15, 70) * Y.bahsisK), sec(['teşekkürler 💕', 'harikaydı', 'bir daha!', '']));
+      if (ist.tur === 'balina') { sohbetMesaj({ u: ist.u, renk: ist.renk, rozet: 'VIP', t: sec(['ismimi söyledi 🥹 yarın da buradayım', 'işte bu yüzden buradayım 👑', 'bir dahakine daha fazlası']) }); S.sadakat = clamp(S.sadakat + 3); }
       if (ist.cesur) sansurOlayi();
-      if (rnd() < 0.18) { Y.abone++; sohbetEkle(ist.u, 'abone oldu! 🎉', 'abone'); Ses.abone(); }
+      if (rnd() < 0.18) { Y.abone++; sohbetMesaj({ u: ist.u, renk: ist.renk, rozet: 'YENİ', t: 'abone oldu! 🎉', tur: 'abone' }); Ses.abone(); }
       istekCiz();
       if (Y.yonlendirme === 'istek') { Y.yonlendirme = null; const y = $('#yYon'); if (y) y.remove(); }
     } else if (Y.sonAks === id && Y.t - Y.sonAksT < 10) {
-      Y.ilgi = clamp(Y.ilgi - 5); sohbetEkle(sec(V.KULLANICI), `yine mi ${bul(V.AKSIYONLAR, id).ad.toLowerCase()} 🥱`);
+      Y.ilgi = clamp(Y.ilgi - 5); sohbetEkle(sec(V.KULLANICI), `yine mi ${(bul(V.AKSIYONLAR, id) || { ad: id }).ad.toLowerCase()} 🥱`);
     } else Y.ilgi = clamp(Y.ilgi + 3);
+    // izleyicilerin harekete tepkisi
+    if (id !== 'kombin' && rnd() < 0.85) Sohbet.tepki(id).forEach((m, k) => setTimeout(() => sohbetMesaj(m), 250 + k * 450));
     Y.sonAks = id; Y.sonAksT = Y.t;
   }
   function ic() {
@@ -531,7 +630,7 @@
     if (!(S.stok.enerji > 0)) { bildir('Enerji içeceğin kalmadı. Mağazadan alabilirsin.'); return; }
     S.stok.enerji--; Y.enerji = clamp(Y.enerji + 35); Y.mesgul = 1.2; Y.aksSure = 1.2; Y.aktifAks = 'ic';
     if (Sahne.hazir) Sahne.oynat('ic', 1.2);
-    $('#icBtn').textContent = `Enerji içeceği (${S.stok.enerji})`;
+    $('#icBtn').textContent = `⚡ İçecek (${S.stok.enerji})`;
   }
 
   /* ---------- tehlikeler ---------- */
@@ -620,7 +719,7 @@
     S.bugun = {
       bahsis: Y.bahsis, abone: Y.abone, aboneGelir: Y.abone * V.ABONE_UCRET, enYuksek: Math.round(Y.enYuksek),
       karsilanan: Y.karsilanan, kacan: Y.kacan, basarili: Y.basarili, basarisiz: Y.basarisiz, anneGirdi: Y.anneGirdi,
-      enBahsisci: enB ? enB[0] : null, sarjBitti: Y.sarjBitti, klip: 0, tweet: null, gece: null, ces: Y.ces, cesurSay: Y.cesurSay
+      enBahsisci: enB ? enB[0] : null, sarjBitti: Y.sarjBitti, klip: 0, tweet: null, gece: null, ces: Y.ces, cesurSay: Y.cesurSay, jeton: Y.jeton, iade: Y.iade, hedef: Y.hedef.tamam ? Y.hedef.ad : null
     };
     S.enerji = Y.enerji; S.abone += Y.abone; S.risk = clamp(S.risk + Y.ces * 1.5);
     S.takipci += Math.round(Y.enYuksek * 0.6 + Y.abone * 3);
@@ -659,6 +758,7 @@
         <div class="sayi"><small>Kaçan istek</small><b>${B.kacan}</b></div>
         <div class="sayi"><small>Olaylar</small><b>${B.basarili}/${B.basarili + B.basarisiz}</b></div>
       </div>
+      <p class="ipucu">${sayi(B.jeton || 0)} jeton toplandı${B.hedef ? ' · 🎯 hedef tamam: ' + esc(B.hedef) : ''}${B.iade ? ' · ↩️ ' + sayi(B.iade) + ' jeton iade edildi (ödenen istekleri kaçırdın)' : ''}.</p>
       <div class="grup"><span class="etiket">X'te ne paylaşacaksın? (@${esc(K().kullanici)})</span>
         <div class="secenekler">${secenek.map(s => `<button class="secenek" data-tweet="${s}"><b>${s === 'hic' ? 'Hiçbir şey paylaşma' : esc(metinler[s])}</b><span>${tweetIpucu(s)}</span></button>`).join('')}</div></div>`;
     panel.querySelectorAll('[data-tweet]').forEach(b => b.onclick = () => xPaylas(b.dataset.tweet, metinler[b.dataset.tweet]));

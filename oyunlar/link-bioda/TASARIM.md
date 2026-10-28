@@ -2,6 +2,18 @@
 
 > Durum: dikey dilim geliştiriliyor. Bu belge konuştukça güncellenecek.
 
+## v0.5 kararları (en günceli)
+
+- **Gerçekçilik önceliği:** yayın, gerçek bir abonelik/canlı yayın platformu gibi hissettirmeli.
+- **Sohbet motoru (`js/sohbet.js`):** 28 kurmaca izleyici kişiliği (balina, sırnaşık, troll, pazarlıkçı, gizli muhafazakâr, kıskanç, esprili, yabancı, düzenli, yeni, sessiz) ve bot. Yazım tarzları (küçük harf, Türkçe karaktersiz, bağıran, harf hatalı, resmi), tekrar önleme, rozetler (VIP, abonelik ayı, YENİ, BOT). Mesajlar harekete, kıyafetin cesaretine, bahşişe, sessizliğe (8 sn hareketsizlikte sertleşir), hedefe ve olaylara tepki verir.
+- **Jeton ekonomisi:** 1 jeton = $0,05. Bahşiş menüsü (öpücük 25, sohbet 35, poz 50, dans 80, özel dans 180, kombin 350). Menüden gelen istekler önceden ödenir; kaçırılırsa iade edilir ve izleyici kızar.
+- **Hedef çubuğu:** her yayının bir jeton hedefi ve ödülü var; dolunca kutlama, takipçi ve "hedef ödülü" özel isteği.
+- **Balina:** yayında 1-2 kez büyük bahşiş (400-1200 jeton) ve 9 saniyelik teşekkür beklentisi; teşekkür edilmezse yayından ayrılır.
+- **Kombin değiştirme:** yayında sahip olunan kıyafetler arasında geçiş (perde/sansür geçişiyle).
+- **Oda:** loş yayıncı odası (neon kalp ve tabela, saten yatak, mumlar, kadife perde, makyaj masası, tüylü halı). Çocuksu eşyalar kaldırıldı.
+- **Görüntü:** webcam görünümü (parlama, hafif kumlanma, köşe karartması, renk kayması, renk derecelendirme), saten ve cilde ortam yansıması, kıyafetlerde dikiş ve örgü dokusu.
+- **Sınır değişmedi:** çıplaklık ve açık cinsel betimleme yok.
+
 ## v0.4 kararları (en günceli; aşağıdakilerle çelişirse bu geçerlidir)
 
 - **Ad:** "Özel Dans". Oyun içindeki platformun adı "DansKasa". Repo klasörü şimdilik `link-bioda` olarak kaldı.
