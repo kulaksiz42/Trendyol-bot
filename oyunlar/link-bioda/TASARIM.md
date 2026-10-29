@@ -2,7 +2,28 @@
 
 > Durum: dikey dilim geliştiriliyor. Bu belge konuştukça güncellenecek.
 
-## v0.6 kararları (en günceli)
+## v0.7 kararları (en günceli): 30 günlük sezon
+
+Yol haritası: Aşama 1 sezon ekonomisi → Aşama 2 yayın kartı ve mekanikler → Aşama 3 haftalık krizler ve sonlar → Aşama 4 oyuncular tablosu.
+
+**Aşama 1 (bu sürüm):**
+- **Sezon:** 30 gün, 4 hafta. Her hafta pazartesi yeni sezon kodu (ör. 2026-H44). Tohum sezon kodundan türetilir; aynı hafta başlayan herkes aynı olaylarla, aynı gündemle oynar. Fark sadece kararlardan çıkar.
+- **Abonelik haftalık ($2,99):** her abone grubu katıldığı günden 7 gün sonra yeniler ya da bırakır. Yenileme oranı sadakat, son 7 günde yayın yapılan gün sayısı ve riske bağlı (%30–95).
+- **Giderler:** günlük yemek/yol/internet; 7., 14., 21. ve 28. günlerde haftalık kira (ilk hafta 4.000 TL, sonra %60 zamlı 6.400 TL).
+- **Kasabank kredi kartı:** hesap eksiye 15.000 TL'ye kadar düşebilir, günlük %0,15 faiz. Limit aşılırsa icra: oyun biter. Mağazadan kartla alışveriş yapılabilir.
+- **Vergi seçimi (3. gün):** içerik üreticisi hesabı (%15 stopaj, risk −8) ya da kişisel hesap (kesinti yok, gelirin %20'si vergi borcu olarak birikir). 22. gün e-tebligat: öde, muhasebeci tut (−%40) ya da itiraz et (kumar). 2 gün içinde ödenmezse haciz.
+- **Kur:** her gün −%0,4 ile +%0,9 arası oynar; 15. gün kur şoku.
+**Gerçek Türkiye rakamları (Ekim 2026 araştırması):**
+- Net asgari ücret 28.075,50 TL; 1 $ ≈ 49,8 TL (serbest piyasa, Ekim sonu).
+- İstanbul 1+1 kira: medyan ~25.000, ortalama ~35.000 TL/ay. Oyunda aile evinin kirası 32.000 TL, yarısı oyuncuda (haftalık 4.000); ayrı 1+1: 28.000 TL/ay.
+- Faturalar: elektrik+su+gaz ~3.100, internet ~660 TL/ay → günlük gider 350 TL (yemek, yol, fatura payı).
+- Vergi: GVK 20/B içerik üreticisi istisnası, bankada %15 stopaj, 2026 sınırı 5,3 milyon TL. Beyansız gelirde VUK 344 bir kat vergi ziyaı cezası; pişmanlıkla beyanda ceza yok, gecikme faizi %3,7/ay.
+- Şubat 2026 İstanbul merkezli operasyon: 25 şüpheli, 17 tutuklama; suçlama müstehcenlik ve kara para aklama; ~257–300 milyon TL varlığa (10 taşınmaz, 14 araç, altın, kripto) el konuldu. Oyundaki risk sonu buna göre yazıldı.
+- Kazanç iddiaları (Türk içerik üreticileri, haberler): ayda 100 $'dan 3–4 bin $'a; çok popüler hesaplar 20 bin $. Abonelik 5–45 $/ay. Oyun hedefi: ortalama oyuncu ayda ~1–2 bin $, iyi oyuncu 4–6 bin $.
+- Mağaza: dantel takım 150–600 TL, jartiyerli takım ~1.100, bikini ~650, ring light ~2.400, USB mikrofon ~3.500, iPhone 17 Pro 119.999 TL, gram altın ~6.400 TL.
+- **Sezon sonu:** puan = kasa + abone×220 + takipçi×3 − aile radarı×90 − risk×70 − ödenmemiş vergi. Duruma göre unvan (Stüdyo Kraliçesi/Kralı, Balina Çobanı, Kasabank Mağduru…) ve X paylaşımı.
+
+## v0.6 kararları
 
 - **Format:** oyunun tamamı bir telefon. Bütçesiz, mobil tarayıcı ve X odaklı. Durum çubuğu (saat, pil = enerji), ana ekran (widget'lar, bildirimler, uygulama rozetleri), "Günü bitir".
 - **Uygulamalar:** DansKasa (panel, canlı yayın, kilitli içerik), Mesajlar (DM ekonomisi), X, Aile grubu, Kasabank, Kargola (mağaza), Kamera, Ayarlar.

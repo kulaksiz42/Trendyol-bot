@@ -4,13 +4,30 @@
 'use strict';
 window.VERI = {
   SURUM: 1,
-  SON_GUN: 3,            // dikey dilim: 3 gün. Tam oyun ~30 gün olacak.
+  SON_GUN: 30,           // bir sezon: 30 gün, 4 hafta + final
   YAYIN_SURE: 180,       // canlı yayın, gerçek saniye
-  KUR_BASLANGIC: 42.8,   // 1 $ = TL
+  KUR_BASLANGIC: 49.8,   // 1 $ = TL (Ekim 2026 sonu serbest piyasa)
   ASGARI_UCRET: 28075.5, // 2026 net asgari ücret
   PLATFORM_KESINTI: 0.2,
-  ABONE_UCRET: 4.99,
-  GIDER: { kira: 500, internet: 35 }, // günlük TL
+  ABONE_UCRET: 2.99,     // haftalık abonelik; abone her 7 günde bir yeniler ya da bırakır
+  // Fiyatlar Ekim 2026 Türkiye'sine göre: net asgari ücret 28.075,50 TL, 1 $ ≈ 49,8 TL,
+  // İstanbul 1+1 kira 25–35 bin TL/ay, fatura (elektrik+su+gaz) ~3.100 + internet ~660 TL/ay.
+  GIDER: { gunluk: 350 }, // yemek, yol, fatura payı (günlük TL)
+  // aile evinin kirası 32.000 TL/ay; yarısı sende → haftalık 4.000 TL. 2. haftadan ev sahibinin %60 zammı.
+  KIRA: [4000, 6400, 6400, 6400],
+  KIRA_STUDYO: 7000,     // ayrı 1+1'e taşınırsan haftalık kira (28.000 TL/ay)
+  KART_LIMIT: 20000,     // Kasabank kredi kartı: hesap eksiye bu kadar düşebilir
+  KART_FAIZ: 0.0015,     // eksi bakiyeye günlük faiz (~%4,5 aylık; 2026 kart faizi aralığı)
+  // GVK 20/B: içerik üreticisi istisnası, bankada %15 stopaj (2026 sınırı 5,3 milyon TL).
+  // Kayıtdışı: kesinti yok, gelirin ~%20'si vergi borcu olarak birikir; denetimde bir kat vergi ziyaı cezası (VUK 344).
+  // Pişmanlıkla beyan: denetimden önce gelirsen ceza yok, sadece gecikme faizi (%3,7/ay).
+  VERGI: { stopaj: 0.15, kayitdisi: 0.2, ceza: 1, pismanlik: 0.04, musavir: 7500, secimGun: 3, denetimGun: 22, odemeSure: 2 },
+  HAFTALAR: [
+    { ad: 'Yatak odası', acik: 'İlk hafta. Kira günü 7. gün.' },
+    { ad: 'Büyüme', acik: 'Kiraya %60 zam geldi. Balinalar seni fark etti.' },
+    { ad: 'Para ve şüphe', acik: 'Para geliyor, aile ve banka soru soruyor.' },
+    { ad: 'Büyük karar', acik: 'Son hafta. Sezon 30. gün bitiyor.' }
+  ],
 
   /* ---------- karakter ---------- */
   KIMLIK: [
@@ -191,7 +208,7 @@ window.VERI = {
     ozel: ['göbek dansı yap 🔥', 'yavaş yavaş dans et 👀', 'saçlarını savur', 'bu şarkıda bir özel dans?', 'kalçayla ritim tut 💃', 'sadece benim için dans et 🥺'],
     opucuk: ["Kayseri'ye öpücük gönder 💋", "Almanya'dan selamlar, bize de bir öpücük 🇩🇪", 'doğum günüm, bir öpücük 🎂', 'işyerindeyim, çaktırmadan öpücük', 'eşim yanımda, sessiz bir öpücük 🤫'],
     poz: ['kameraya göz kırp 😉', 'o ateşli pozu ver 🔥', 'aura farming yap', 'yandan poz lütfen', 'dudak büzme pozu 😗', 'kombini göster 👀'],
-    kombin: ['kombin değiştir 👗', 'o elbiseyi giy', 'daha cesur bir şey giy', 'bikiniyi görelim', 'geceliği giy 🙏', 'başka kombin var mı'],
+    kombin: ['kombin değiştir 👗', 'o elbiseyi giy', 'daha cesur bir şey giy', 'dolapta ne var görelim', 'en cesur kombinini giy 🙏', 'başka kombin var mı'],
     tesekkur: ['ilk kez abone oldum 🥹', 'bahşiş attım, teşekkür bekliyorum', 'ana paramdan arttırdım, teşekkür et', '3 yayındır buradayım, bir teşekkür?']
   },
   /* bahşiş menüsü (jeton). Menüden gelen istekler önceden ödenir. 1 jeton = $0,05 */
@@ -338,45 +355,47 @@ window.VERI = {
 
   /* ---------- mağaza ---------- */
   MAGAZA: [
-    { id: 'tripod', kat: 'Ekipman', ad: 'Tripod', fiyat: 1200, acik: 'Telefon artık kaymaz. Kitap yığınına veda.' },
-    { id: 'ringlight', kat: 'Ekipman', ad: 'Ring light', fiyat: 3500, acik: 'Işık sorunu biter, izleyici +%10.' },
-    { id: 'powerbank', kat: 'Ekipman', ad: 'Powerbank', fiyat: 900, acik: 'Şarj krizi kendiliğinden çözülür.' },
-    { id: 'mikrofon', kat: 'Ekipman', ad: 'Mikrofon', fiyat: 2800, acik: 'ASMR gecelerinde tam verim.' },
-    { id: 'modem', kat: 'Ekipman', ad: 'Yeni modem', fiyat: 2200, acik: 'Bağlantı sorunları yarıya iner.' },
-    { id: 'led', kat: 'Oda', ad: 'LED şerit', fiyat: 1500, acik: 'İlgi daha yavaş düşer. Komşu teyze fark eder.' },
-    { id: 'kilit', kat: 'Oda', ad: 'Kapı kilidi', fiyat: 600, acik: 'Annen kapıyı açamaz. Ama şüphelenir.' },
-    { id: 'tarz_entel', kat: 'Oda', tarz: 'entel', ad: 'Kitaplık', fiyat: 1000, acik: 'Entel tarzında bahşiş +%15.' },
-    { id: 'tarz_tatli', kat: 'Oda', tarz: 'tatli', ad: 'Dev peluş ayı', fiyat: 1000, acik: 'Tatlı tarzında bahşiş +%15.' },
-    { id: 'tarz_gizemli', kat: 'Oda', tarz: 'gizemli', ad: 'Mor lav lambası', fiyat: 1000, acik: 'Gizemli tarzında bahşiş +%15.' },
-    { id: 'tarz_sporcu', kat: 'Oda', tarz: 'sporcu', ad: 'Dambıl seti', fiyat: 1000, acik: 'Sporcu tarzında bahşiş +%15.' },
-    { id: 'tarz_komik', kat: 'Oda', tarz: 'komik', ad: 'Lastik tavuk', fiyat: 1000, acik: 'Komik tarzında bahşiş +%15.' },
-    { id: 'kedikulak', kat: 'Gardırop', ad: 'Kedi kulağı bandı', fiyat: 350, aksesuar: true, acik: 'Gece yarısı özelde bahşiş +%10.' },
-    { id: 'croptop', kat: 'Gardırop', ad: 'Crop top + kot şort', fiyat: 900, kiyafet: true, acik: 'İddialı. Bahşiş +%8.' },
-    { id: 'fitness', kat: 'Gardırop', ad: 'Spor sütyeni + tayt', fiyat: 1100, kiyafet: true, acik: 'Fitness gecesi için. Bahşiş +%8.' },
-    { id: 'forma', kat: 'Gardırop', ad: 'Mahalle takımı forması', fiyat: 1200, kiyafet: true, acik: 'Derbi günleri için.' },
-    { id: 'mayo', kat: 'Gardırop', ad: 'Mayo şort', fiyat: 700, kiyafet: true, acik: 'Havuz başı için. Cesur: bahşiş +%16, risk artar.' },
-    { id: 'bikini', kat: 'Gardırop', ad: 'Üçgen bikini', fiyat: 1300, kiyafet: true, acik: 'Boyundan bağlamalı, mercan rengi. Havuz başı ve gece yarısı özel için. Bahşiş +%16, risk artar.' },
-    { id: 'leopar', kat: 'Gardırop', ad: 'Leopar bikini', fiyat: 1600, kiyafet: true, acik: '"Vahşi taraf." Havuz başı ve özel gece. Bahşiş +%16, risk artar.' },
-    { id: 'tekparca', kat: 'Gardırop', ad: 'Derin V mayo', fiyat: 1800, kiyafet: true, acik: 'Göbeğe inen V yaka, yüksek bacak kesimi. Bahşiş +%16, risk artar.' },
-    { id: 'slip', kat: 'Gardırop', ad: 'Slip mayo', fiyat: 800, kiyafet: true, acik: 'Mavi, dar, kısa. Havuz başı için. Bahşiş +%16, risk artar.' },
-    { id: 'lateks', kat: 'Gardırop', ad: 'Lateks tulum', fiyat: 3400, kiyafet: true, acik: 'Kapalı ama ayna gibi parlıyor. Kostüm istekleri de karşılar. Bahşiş +%16.' },
-    { id: 'boxer', kat: 'Gardırop', ad: 'Boxer + spor sütyeni', fiyat: 1000, kiyafet: true, acik: '"Yeni uyandım" iç giyimi. Bahşiş +%24, risk çok artar.' },
-    { id: 'ictakim', kat: 'Gardırop', ad: 'Saten iç çamaşırı takımı', fiyat: 2400, kiyafet: true, acik: 'Bordo saten, pudra biye. Bahşiş +%24, risk çok artar.' },
-    { id: 'jartiyer', kat: 'Gardırop', ad: 'Jartiyerli dantel takım', fiyat: 4200, kiyafet: true, acik: 'Siyah dantel, jartiyer, opak çorap. En cüretkâr: bahşiş +%32, risk uçar.' },
-    { id: 'filebody', kat: 'Gardırop', ad: 'File body + çizme', fiyat: 3800, kiyafet: true, acik: 'Boyundan bileğe file. En cüretkâr: bahşiş +%32, risk uçar.' },
-    { id: 'yag', kat: 'Bakım', ad: 'Vücut parıltı yağı', fiyat: 1100, acik: 'Ten ışıkta parlar. Poz ve havuz isteklerinde bahşiş +%10.' },
-    { id: 'acikgomlek', kat: 'Gardırop', ad: 'Açık saten gömlek', fiyat: 1400, kiyafet: true, acik: 'Düğmeler göbeğe kadar açık. Bahşiş +%16, risk artar.' },
-    { id: 'mini', kat: 'Gardırop', ad: 'Dekolteli body + mini etek + file çorap', fiyat: 1900, kiyafet: true, acik: 'Gece yarısı özel için. Bahşiş +%16, risk artar.' },
-    { id: 'gece', kat: 'Gardırop', ad: 'Straplez gece elbisesi', fiyat: 2600, kiyafet: true, acik: 'Kırmızı saten. Bahşiş +%16, risk artar.' },
-    { id: 'gecelik', kat: 'Gardırop', ad: 'Saten gecelik', fiyat: 1700, kiyafet: true, acik: 'İç giyim. Bahşiş +%24. Annen görürse her şey biter.' },
-    { id: 'dantel', kat: 'Gardırop', ad: 'Dantel iç çamaşırı + file çorap', fiyat: 2200, kiyafet: true, acik: 'İç giyim. Bahşiş +%24, risk çok artar.' },
-    { id: 'gomlek', kat: 'Gardırop', ad: 'Sadece bol gömlek', fiyat: 900, kiyafet: true, acik: '"Sabah kahvesi" karesi. Bahşiş +%16.' },
-    { id: 'havlu', kat: 'Gardırop', ad: 'Pamuklu havlu', fiyat: 400, kiyafet: true, acik: '"Duştan yeni çıktım." En cüretkâr ucuz eşya. Bahşiş +%24, risk çok artar.' },
-    { id: 'korse', kat: 'Gardırop', ad: 'Deri korse + mini etek', fiyat: 2900, kiyafet: true, acik: 'Parlak deri. Bahşiş +%24, risk çok artar.' },
-    { id: 'sik', kat: 'Gardırop', ad: 'Şık gömlek', fiyat: 2500, kiyafet: true, acik: 'Annen "nereye gidiyorsun" der.' },
-    { id: 'enerji', kat: 'Tüketim', ad: 'Enerji içeceği (3\'lü)', fiyat: 150, stok: 3, acik: 'Yayında +35 enerji.' },
-    { id: 'bulasik', kat: 'Hayat', ad: 'Annene bulaşık makinesi', fiyat: 18000, acik: 'Aile radarı −30. Ama "parayı nereden buldun?"', fx: { aile: -30, risk: 8 } },
-    { id: 'altin', kat: 'Hayat', ad: 'Gram altın', fiyat: 4000, acik: 'Birikim. Risk +3.', fx: { risk: 3 }, birikir: true }
+    { id: 'tripod', kat: 'Ekipman', ad: 'Tripod', fiyat: 750, acik: 'Telefon artık kaymaz. Kitap yığınına veda.' },
+    { id: 'ringlight', kat: 'Ekipman', ad: 'Ring light', fiyat: 2400, acik: 'Işık sorunu biter, izleyici +%10.' },
+    { id: 'powerbank', kat: 'Ekipman', ad: 'Powerbank', fiyat: 1200, acik: 'Şarj krizi kendiliğinden çözülür.' },
+    { id: 'mikrofon', kat: 'Ekipman', ad: 'Mikrofon', fiyat: 3500, acik: 'ASMR gecelerinde tam verim.' },
+    { id: 'modem', kat: 'Ekipman', ad: 'Yeni modem', fiyat: 2900, acik: 'Bağlantı sorunları yarıya iner.' },
+    { id: 'led', kat: 'Oda', ad: 'LED şerit', fiyat: 450, acik: 'İlgi daha yavaş düşer. Komşu teyze fark eder.' },
+    { id: 'kilit', kat: 'Oda', ad: 'Kapı kilidi', fiyat: 1800, acik: 'Annen kapıyı açamaz. Ama şüphelenir.' },
+    { id: 'tarz_entel', kat: 'Oda', tarz: 'entel', ad: 'Kitaplık', fiyat: 2500, acik: 'Entel tarzında bahşiş +%15.' },
+    { id: 'tarz_tatli', kat: 'Oda', tarz: 'tatli', ad: 'Dev peluş ayı', fiyat: 1400, acik: 'Tatlı tarzında bahşiş +%15.' },
+    { id: 'tarz_gizemli', kat: 'Oda', tarz: 'gizemli', ad: 'Mor lav lambası', fiyat: 900, acik: 'Gizemli tarzında bahşiş +%15.' },
+    { id: 'tarz_sporcu', kat: 'Oda', tarz: 'sporcu', ad: 'Dambıl seti', fiyat: 1600, acik: 'Sporcu tarzında bahşiş +%15.' },
+    { id: 'tarz_komik', kat: 'Oda', tarz: 'komik', ad: 'Lastik tavuk', fiyat: 250, acik: 'Komik tarzında bahşiş +%15.' },
+    { id: 'kedikulak', kat: 'Gardırop', ad: 'Kedi kulağı bandı', fiyat: 180, aksesuar: true, acik: 'Gece yarısı özelde bahşiş +%10.' },
+    { id: 'croptop', kat: 'Gardırop', ad: 'Crop top + kot şort', fiyat: 700, kiyafet: true, acik: 'İddialı. Bahşiş +%8.' },
+    { id: 'fitness', kat: 'Gardırop', ad: 'Spor sütyeni + tayt', fiyat: 850, kiyafet: true, acik: 'Fitness gecesi için. Bahşiş +%8.' },
+    { id: 'forma', kat: 'Gardırop', ad: 'Mahalle takımı forması', fiyat: 1700, kiyafet: true, acik: 'Derbi günleri için.' },
+    { id: 'mayo', kat: 'Gardırop', ad: 'Mayo şort', fiyat: 550, kiyafet: true, acik: 'Havuz başı için. Cesur: bahşiş +%16, risk artar.' },
+    { id: 'bikini', kat: 'Gardırop', ad: 'Üçgen bikini', fiyat: 650, kiyafet: true, acik: 'Boyundan bağlamalı, mercan rengi. Havuz başı ve gece yarısı özel için. Bahşiş +%16, risk artar.' },
+    { id: 'leopar', kat: 'Gardırop', ad: 'Leopar bikini', fiyat: 750, kiyafet: true, acik: '"Vahşi taraf." Havuz başı ve özel gece. Bahşiş +%16, risk artar.' },
+    { id: 'tekparca', kat: 'Gardırop', ad: 'Derin V mayo', fiyat: 950, kiyafet: true, acik: 'Göbeğe inen V yaka, yüksek bacak kesimi. Bahşiş +%16, risk artar.' },
+    { id: 'slip', kat: 'Gardırop', ad: 'Slip mayo', fiyat: 450, kiyafet: true, acik: 'Mavi, dar, kısa. Havuz başı için. Bahşiş +%16, risk artar.' },
+    { id: 'lateks', kat: 'Gardırop', ad: 'Lateks tulum', fiyat: 2800, kiyafet: true, acik: 'Kapalı ama ayna gibi parlıyor. Kostüm istekleri de karşılar. Bahşiş +%16.' },
+    { id: 'boxer', kat: 'Gardırop', ad: 'Boxer + spor sütyeni', fiyat: 500, kiyafet: true, acik: '"Yeni uyandım" iç giyimi. Bahşiş +%24, risk çok artar.' },
+    { id: 'ictakim', kat: 'Gardırop', ad: 'Saten iç çamaşırı takımı', fiyat: 600, kiyafet: true, acik: 'Bordo saten, pudra biye. Bahşiş +%24, risk çok artar.' },
+    { id: 'jartiyer', kat: 'Gardırop', ad: 'Jartiyerli dantel takım', fiyat: 1100, kiyafet: true, acik: 'Siyah dantel, jartiyer, opak çorap. En cüretkâr: bahşiş +%32, risk uçar.' },
+    { id: 'filebody', kat: 'Gardırop', ad: 'File body + çizme', fiyat: 450, kiyafet: true, acik: 'Boyundan bileğe file. En cüretkâr: bahşiş +%32, risk uçar.' },
+    { id: 'yag', kat: 'Bakım', ad: 'Vücut parıltı yağı', fiyat: 380, acik: 'Ten ışıkta parlar. Poz ve havuz isteklerinde bahşiş +%10.' },
+    { id: 'acikgomlek', kat: 'Gardırop', ad: 'Açık saten gömlek', fiyat: 900, kiyafet: true, acik: 'Düğmeler göbeğe kadar açık. Bahşiş +%16, risk artar.' },
+    { id: 'mini', kat: 'Gardırop', ad: 'Dekolteli body + mini etek + file çorap', fiyat: 1300, kiyafet: true, acik: 'Gece yarısı özel için. Bahşiş +%16, risk artar.' },
+    { id: 'gece', kat: 'Gardırop', ad: 'Straplez gece elbisesi', fiyat: 2200, kiyafet: true, acik: 'Kırmızı saten. Bahşiş +%16, risk artar.' },
+    { id: 'gecelik', kat: 'Gardırop', ad: 'Saten gecelik', fiyat: 650, kiyafet: true, acik: 'İç giyim. Bahşiş +%24. Annen görürse her şey biter.' },
+    { id: 'dantel', kat: 'Gardırop', ad: 'Dantel iç çamaşırı + file çorap', fiyat: 550, kiyafet: true, acik: 'İç giyim. Bahşiş +%24, risk çok artar.' },
+    { id: 'gomlek', kat: 'Gardırop', ad: 'Sadece bol gömlek', fiyat: 600, kiyafet: true, acik: '"Sabah kahvesi" karesi. Bahşiş +%16.' },
+    { id: 'havlu', kat: 'Gardırop', ad: 'Pamuklu havlu', fiyat: 350, kiyafet: true, acik: '"Duştan yeni çıktım." En cüretkâr ucuz eşya. Bahşiş +%24, risk çok artar.' },
+    { id: 'korse', kat: 'Gardırop', ad: 'Deri korse + mini etek', fiyat: 2400, kiyafet: true, acik: 'Parlak deri. Bahşiş +%24, risk çok artar.' },
+    { id: 'sik', kat: 'Gardırop', ad: 'Şık gömlek', fiyat: 3500, kiyafet: true, acik: 'Annen "nereye gidiyorsun" der.' },
+    { id: 'enerji', kat: 'Tüketim', ad: 'Enerji içeceği (3\'lü)', fiyat: 210, stok: 3, acik: 'Yayında +35 enerji.' },
+    { id: 'telefon', kat: 'Büyük alım', ad: 'iPhone 17 Pro', fiyat: 119999, acik: 'Kamera kalitesi uçar: izleyici +%12, kilitli içerik satışları +%20. Kartla da alınır (faizi sana).' },
+    { id: 'studyo', kat: 'Büyük alım', ad: 'Ayrı ev: kiralık 1+1 (depozito + ilk ay)', fiyat: 84000, acik: 'Kadıköy arka sokak, 28.000 TL/ay. Annen kapıyı çalamaz, aile radarı −25. Haftalık kira 7.000 TL olur.' },
+    { id: 'bulasik', kat: 'Hayat', ad: 'Annene bulaşık makinesi', fiyat: 24000, acik: 'Aile radarı −30. Ama "parayı nereden buldun?"', fx: { aile: -30, risk: 8 } },
+    { id: 'altin', kat: 'Hayat', ad: 'Gram altın', fiyat: 6400, acik: 'Birikim. Risk +3.', fx: { risk: 3 }, birikir: true }
   ],
 
   /* ---------- hikâye ---------- */
@@ -387,7 +406,7 @@ window.VERI = {
         s: [{ l: '"Ders çalışıyorum, müzikli"', fx: { aile: 5 }, c: 'Kardeşin: "Sen hiç ders çalışmadın ki." Annene söylemedi. Henüz.' },
             { l: '"Sus, al sana 200 TL"', fx: { para: -200, aile: -5, bayrak: 'kardesHarclik' }, c: 'Kardeşin parayı aldı. "Haftaya yine konuşuruz" dedi.' }] } },
     { gundem: ['anapara', 'corba'],
-      sabah: { from: 'Ev sahibi Nuri Bey', t: 'Önümüzdeki aydan itibaren kiraya %60 zam. Piyasa böyle, kusura bakma. Bu arada ev nasıl, her şey yolunda mı?' },
+      sabah: { from: 'Ev sahibi Nuri Bey', t: 'Önümüzdeki haftadan itibaren kiraya %60 zam: 32 bin değil 51.200. Yarısı senden, biliyorsun. Piyasa böyle, kusura bakma. Bu arada ev nasıl, her şey yolunda mı?' },
       ek: { from: 'Annen', t: 'Akşam teyzenler geliyor. Odanda ne yapıyorsan sessiz yap.', etki: { anneKat: 2 } },
       gece: { from: 'Apartman grubu · Komşu Saadet', t: '3 numaradan her gece ışıklar yanıp sönüyor, hayırdır?',
         s: [{ l: '"LED ışık teyze, oyun oynuyorum"', fx: { aile: 3 }, c: 'Saadet teyze: "Torunum da oynuyor, adı ne bu oyunun?"' },

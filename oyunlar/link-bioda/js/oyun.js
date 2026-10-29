@@ -52,13 +52,35 @@
     const v = { saat: '09:12', bildirim: [], okunmamis: {}, icerikler: [], dmler: [], aileM: [], aileSoru: null, xAkis: [], islemler: [], gunluk: { ppv: 0, dm: 0, tl: 0, cekim: 0, ppvSatis: 0 }, yayinBitti: false, xBugun: false, sizinti: null };
     for (const k in v) if (d[k] == null) d[k] = v[k];
     d.dmler.forEach(m => { m.yaziyor = 0; });
+    // sezon ekonomisi (eski kayıtlar: mevcut aboneler tek grup sayılır)
+    if (!d.aboneler) d.aboneler = d.abone ? [{ gun: d.gun || 1, adet: d.abone }] : [];
+    if (d.vergiBorcu == null) d.vergiBorcu = 0;
+    if (!d.sezon) d.sezon = 'eski';
     return d;
   }
   function sil() { try { localStorage.removeItem(KAYIT); } catch (e) { } }
+  // haftalık sezon: aynı hafta başlayan herkes aynı tohumla, aynı olaylarla oynar (tablo adil olsun)
+  function sezonKodu() {
+    const d = new Date(), t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
+    const y = t.getUTCFullYear(), h = Math.ceil(((t - Date.UTC(y, 0, 1)) / 864e5 + 1) / 7);
+    return y + '-H' + String(h).padStart(2, '0');
+  }
+  function ozet(m) { let h = 2166136261; for (const c of m) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h | 0; }
+  // hikâyesi yazılmamış günlerde gündem tohumdan seçilir
+  function gunVeri() {
+    const g = V.GUNLER[S.gun - 1];
+    if (g) return g;
+    const r = tohumlu(S.tohum + S.gun * 331), k = Object.keys(V.GUNDEM);
+    return { gundem: [k[Math.floor(r() * k.length)], k[Math.floor(r() * k.length)]] };
+  }
+  const hafta = () => Math.min(V.HAFTALAR.length, Math.ceil(S.gun / 7));
+  const kiraGunu = () => Math.min(28, Math.ceil(S.gun / 7) * 7);
+  const kiraTutar = () => S.env.studyo ? V.KIRA_STUDYO : V.KIRA[Math.min(V.KIRA.length - 1, kiraGunu() / 7 - 1)];
 
   function yeniDurum(k) {
     const d = {
-      surum: V.SURUM, tohum: (Math.random() * 2 ** 31) | 0, gun: 1, para: V.BASLANGIC_PARA, kur: V.KUR_BASLANGIC,
+      surum: V.SURUM, sezon: sezonKodu(), tohum: ozet('ozeldans-' + sezonKodu()), gun: 1, para: V.BASLANGIC_PARA, kur: V.KUR_BASLANGIC,
       takipci: 140, abone: 12, enerji: 100, aile: 10, risk: 5, sadakat: 50, kanit: 0, yarin: 1, altin: 0,
       env: {}, stok: { enerji: 1 }, kiyafetler: ['tisort', 'esofman', 'atlet'], aksesuarlar: [],
       karakter: k, secim: null, bugun: null, bayrak: {}, kullanilanDM: [], gunler: [], toplamNet: 0, asama: 'ana'
@@ -179,7 +201,7 @@
         <li>Yayından sonra X'te bir şey paylaş. Paylaşım ertesi günü değiştirir.</li>
         <li>Gece raporuna bak, mağazadan eşya al, uyu. Ertesi gün yeniden.</li>
       </ul></details>
-      <p class="dipnot">Tüm kişiler, hesaplar ve platformlar kurmacadır. Bu sürüm ilk ${V.SON_GUN} günü içeren oynanabilir bir dilimdir.</p>`;
+      <p class="dipnot">Tüm kişiler, hesaplar ve platformlar kurmacadır. Bir sezon ${V.SON_GUN} gün sürer. Sezon her pazartesi yenilenir; aynı hafta başlayan herkes aynı olaylarla oynar.</p>`;
     const kutu = $('#onay18');
     const guncelle = () => { panel.querySelectorAll('.btn').forEach(b => b.disabled = !kutu.checked); try { localStorage.setItem('lbd-18', kutu.checked ? '1' : '0'); } catch (e) { } };
     kutu.onchange = guncelle; guncelle();
@@ -285,7 +307,7 @@
     S.asama = 'ana';
     ekran('sabah', 'oda');
     const trend = gunTrend();
-    const gunV = V.GUNLER[S.gun - 1] || {};
+    const gunV = gunVeri();
     if (!S.secim) S.secim = { tema: 'sohbet', saat: '23', kiyafet: S.kiyafetler.includes('tisort') ? 'tisort' : S.kiyafetler[0], kedikulak: false };
     const kk = S.aksesuarlar.includes('kedikulak');
     if (Sahne.hazir) { Sahne.karakter(gorunum()); Sahne.oda(S.env); Sahne.oynat('bekle'); }
@@ -332,7 +354,8 @@
   function tabanIzleyici(trend) {
     const saat = bul(V.SAATLER, S.secim.saat);
     const tk = 1 + (yasGrubu(K().yas) === trend.yas ? 0.35 : 0) + (K().tarz === trend.tarz ? 0.25 : 0) + (S.secim.tema === trend.tema ? 0.3 : 0);
-    return (10 + S.takipci * 0.05 + S.abone * 0.5) * saat.izleyici * tk * (S.env.ringlight ? 1.1 : 1) * S.yarin;
+    // kitle büyüdükçe izleyici artışı yavaşlar (karekök): kartopu değil, emek
+    return (8 + Math.sqrt(S.takipci) * 0.7 + Math.sqrt(S.abone) * 1.8) * saat.izleyici * tk * (S.env.ringlight ? 1.1 : 1) * (S.env.telefon ? 1.12 : 1) * S.yarin;
   }
 
   /* ---------- canlı yayın ---------- */
@@ -343,7 +366,7 @@
     ekran('yayin', 'yayin');
     S.asama = 'yayin';
     const trend = gunTrend(), tema = bul(V.TEMALAR, S.secim.tema), saat = bul(V.SAATLER, S.secim.saat);
-    const gunV = V.GUNLER[S.gun - 1] || {};
+    const gunV = gunVeri();
     const temaEs = S.secim.tema === trend.tema;
     Y = {
       t: 0, izl: 1, ilgi: 60, enerji: S.enerji, bahsis: 0, jeton: 0, abone: 0, istekler: [], sonraki: S.gun === 1 ? 3.5 : 2, sohbetT: 0.4, botT: 12,
@@ -351,11 +374,11 @@
       tehlike: null, plan: [], basarili: 0, basarisiz: 0, anneGirdi: false, karanlik: false, bitti: false, mola: false, sarjBitti: false,
       taban: tabanIzleyici(trend), saat, tema, temaEs, gundem: gunV.gundem || [], ilkIstek: S.gun === 1, yonlendirme: S.gun === 1 ? 'istek' : null,
       cesurSay: 0, iade: 0, balinaT: R(35, 70), balinaKac: 0, sonCiz: 0, sessizUyari: 0,
-      hedef: { jeton: 500 + S.gun * 250, ad: sec(['Saç savurma maratonu', 'Kameraya yakın çekim', 'Gecelik gecesi 👀', 'Yatakta özel dans', '10 dakika ASMR']), tamam: false }
+      hedef: { jeton: Math.round((250 + S.gun * 40 + Math.sqrt(S.abone) * 45) / 50) * 50, ad: sec(['Saç savurma maratonu', 'Kameraya yakın çekim', 'Gecelik gecesi 👀', 'Yatakta özel dans', '10 dakika ASMR']), tamam: false }
     };
     bahsisKatsayi();
     // tehlike planı (tohumlu): her günün olayları aynı tohumla aynıdır
-    const ag = { anne: 2 * saat.anne * ((gunV.ek && gunV.ek.etki && gunV.ek.etki.anneKat) || 1), net: S.env.modem ? 0.5 : 1, sarj: 1, troll: 1.4, kedi: 1.2, matkap: 0.8, isik: S.env.ringlight ? 0.3 : 1, tripod: S.env.tripod ? 0.3 : 1 };
+    const ag = { anne: (S.env.studyo ? 0 : 2) * saat.anne * ((gunV.ek && gunV.ek.etki && gunV.ek.etki.anneKat) || 1), net: S.env.modem ? 0.5 : 1, sarj: 1, troll: 1.4, kedi: 1.2, matkap: 0.8, isik: S.env.ringlight ? 0.3 : 1, tripod: S.env.tripod ? 0.3 : 1 };
     const adet = S.gun === 1 ? 3 : 4;
     const zamanlar = Array.from({ length: adet }, (_, i) => 25 + i * ((V.YAYIN_SURE - 45) / adet) + R(0, (V.YAYIN_SURE - 45) / adet - 10));
     const secilen = [];
@@ -401,7 +424,7 @@
     let son = performance.now();
     const dongu = now => {
       if (!Y || Y.bitti) return;
-      const dt = Math.min(0.1, (now - son) / 1000); son = now;
+      const dt = Math.min(0.1, (now - son) / 1000) * (window.__lbdHiz || 1); son = now; // __lbdHiz: yalnızca otomatik testler
       if (!Y.mola) guncelle(dt);
       Y.raf = requestAnimationFrame(dongu);
     };
@@ -460,15 +483,15 @@
       Ses.kacti(); istekCiz();
     }
     // abone ve küçük bahşişler
-    const aboneP = Y.izl * 0.0016 * (Y.ilgi / 100) * (0.7 + S.sadakat / 170) * (1 + Y.ces * 0.1);
+    const aboneP = Y.izl * 0.0006 * (Y.ilgi / 100) * (0.7 + S.sadakat / 170) * (1 + Y.ces * 0.1);
     if (rnd() < aboneP * dt) {
       Y.abone++; const k = Sohbet.bahsisci(false); sohbetMesaj({ u: k.ad, renk: k.renk, rozet: 'YENİ', t: 'abone oldu! 🎉 ($' + V.ABONE_UCRET.toFixed(2).replace('.', ',') + ')', tur: 'abone' }); Ses.abone();
       if (rnd() < 0.45 && Y.istekler.length < 3) istekEkle('tesekkur', k.ad);
     }
-    if (rnd() < Y.izl * 0.0016 * dt * (Y.ilgi / 60)) { const k = Sohbet.bahsisci(false); bahsisAl(k.ad, Math.round(R(10, 60) * Y.bahsisK), Sohbet.bahsisNotu(k)); }
+    if (rnd() < Y.izl * 0.0016 * dt * (Y.ilgi / 60)) { const k = Sohbet.bahsisci(false); bahsisAl(k.ad, Math.round(R(5, 40) * Y.bahsisK), Sohbet.bahsisNotu(k)); }
     // balina
     Y.balinaT -= dt;
-    if (Y.balinaT <= 0 && !Y.tehlike) { balinaGeldi(); Y.balinaT = R(55, 95); }
+    if (Y.balinaT <= 0 && !Y.tehlike) { if (Y.izl > 12) balinaGeldi(); Y.balinaT = R(70, 120); }
     // sohbet akışı: izleyici çoğaldıkça hızlanır
     Y.sohbetT -= dt;
     if (Y.sohbetT <= 0) {
@@ -525,14 +548,16 @@
 
   /* istek türleri: menu (jeton önceden ödendi), istek (ücretsiz, yapılırsa bahşiş gelebilir), cesur (özel istek: menü fiyatının katları, ardından sansür) */
   let istekSayac = 0;
+  // ödeme gücü: küçük kitlede isteklerin çoğu bedava, kitle büyüdükçe ödeyen oranı artar
+  const odemeGucu = () => clamp(0.12 + Y.izl / 250, 0.12, 0.6);
   function istekEkle(zorla, kullanici) {
     let aks = zorla || agirlikliSec(Object.assign({ kombin: 0.35 + Y.ces * 0.1 }, Y.tema.agirlik));
     let k = kullanici ? (Sohbet.kisi(kullanici) || { ad: kullanici, renk: '#d9b8ff' }) : (rnd() < 0.55 ? Sohbet.bahsisci(false) : sec(Sohbet.KISI));
     let havuz = V.ISTEK[aks] || V.ISTEK.poz, tur = 'istek', jet = 0;
     const cesurSans = (Y.ces >= 1 || Y.tema.id === 'ozelgece') && !zorla ? 0.08 + Y.ces * 0.06 + (Y.tema.id === 'ozelgece' ? 0.1 : 0) : 0;
     const menu = bul(V.MENU, aks);
-    if (rnd() < cesurSans) { aks = 'ozel'; havuz = V.CESUR_ISTEK; tur = 'cesur'; jet = Math.round(R(2, 3.5) * 180 / 10) * 10; k = Sohbet.bahsisci(true); }
-    else if (aks === 'kombin' || (menu && !zorla && rnd() < 0.5)) { tur = 'menu'; jet = menu ? menu.jeton : 350; }
+    if (rnd() < cesurSans * (0.5 + odemeGucu())) { aks = 'ozel'; havuz = V.CESUR_ISTEK; tur = 'cesur'; jet = Math.round(R(1.2, 2.5) * 180 / 10) * 10; k = Sohbet.bahsisci(true); }
+    else if ((aks === 'kombin' && rnd() < odemeGucu() * 1.5) || (menu && !zorla && rnd() < odemeGucu())) { tur = 'menu'; jet = menu ? menu.jeton : 350; }
     if (aks === 'konus' && Y.tema.id === 'asmr') havuz = V.ISTEK.konus_asmr;
     const sure = R(12, 16) * (Y.ilkIstek ? 1.4 : 1) * (tur === 'cesur' ? 1.2 : 1);
     const ist = { id: ++istekSayac, aks, u: k.ad, renk: k.renk, t: sablon(sec(havuz)), kalan: sure, sure, tur, jet, cesur: tur === 'cesur' };
@@ -594,7 +619,8 @@
   }
   function balinaGeldi() {
     const k = Sohbet.bahsisci(true);
-    const j = Math.round(R(4, 12)) * 100;
+    // balinanın cömertliği sadık kitleyle büyür
+    const j = Math.round(R(2, 4 + Math.sqrt(S.abone) / 3)) * 50;
     jetonAl(k.ad, j, sec(['sen bunu hak ediyorsun 👑', 'bu gece benden', 'sadece bir teşekkür yeter', 'en sevdiğim yayıncı']));
     Y.istekler = Y.istekler.filter(i => i.aks !== 'tesekkur' || i.u !== k.ad).slice(0, 2);
     Y.istekler.push({ id: ++istekSayac, aks: 'tesekkur', u: k.ad, renk: k.renk, t: `${k.ad} ${sayi(j)} jeton attı, teşekkür bekliyor`, kalan: 9, sure: 9, tur: 'balina', jet: 0, balina: j });
@@ -605,7 +631,7 @@
     Y.cesurSay++;
     S.risk = clamp(S.risk + 1 + Y.ces);
     let o = sec(V.SANSUR);
-    if (o.tip === 'anne' && (S.env.kilit || Y.tehlike)) o = V.SANSUR[0];
+    if (o.tip === 'anne' && (S.env.kilit || S.env.studyo || Y.tehlike)) o = V.SANSUR[0];
     o.sohbet.slice(0, 2).forEach((t, i) => setTimeout(() => sohbetEkle(sec(V.KULLANICI), t), 300 + i * 500));
     if (o.tip === 'anne') { tehlikeBasla('anne'); return; }
     if (o.tip === 'kedi') { Sahne.kediGec(4); Ses.miyav(); }
@@ -664,7 +690,7 @@
     if (i >= 0) {
       const ist = Y.istekler.splice(i, 1)[0];
       Y.karsilanan++; Y.ilgi = clamp(Y.ilgi + 14 + (Y.temaEs ? 3 : 0) + (id === 'tesekkur' ? 4 : 0) + (ist.jet ? 4 : 0));
-      if (ist.tur === 'istek' && rnd() < 0.65) jetonAl(ist.u, Math.round(R(15, 70) * Y.bahsisK), sec(['teşekkürler 💕', 'harikaydı', 'bir daha!', '']));
+      if (ist.tur === 'istek' && rnd() < odemeGucu()) jetonAl(ist.u, Math.round(R(8, 45) * Y.bahsisK), sec(['teşekkürler 💕', 'harikaydı', 'bir daha!', '']));
       if (ist.tur === 'balina') { sohbetMesaj({ u: ist.u, renk: ist.renk, rozet: 'VIP', t: sec(['ismimi söyledi 🥹 yarın da buradayım', 'işte bu yüzden buradayım 👑', 'bir dahakine daha fazlası']) }); S.sadakat = clamp(S.sadakat + 3); }
       if (ist.cesur) sansurOlayi();
       if (rnd() < 0.18) { Y.abone++; sohbetMesaj({ u: ist.u, renk: ist.renk, rozet: 'YENİ', t: 'abone oldu! 🎉', tur: 'abone' }); Ses.abone(); }
@@ -728,7 +754,7 @@
     }
     Y.basarisiz++;
     if (tip === 'anne') {
-      Y.anneGirdi = true; S.aile = clamp(S.aile + 20 + Y.ces * 6);
+      Y.anneGirdi = true; S.aile = clamp(S.aile + 12 + Y.ces * 4);
       if (Y.ces >= 2) setTimeout(() => sohbetEkle('Kayserili_Mehmet', 'annen kıyafeti gördü mü 💀💀'), 900); Y.ilgi = clamp(Y.ilgi + 15); Y.izl *= 1.3;
       Sahne.anneGir(); Sahne.oynat('sok', 2.6); Ses.kapi();
       sohbetEkle('Kayserili_Mehmet', 'ANNE GİRDİ 💀💀💀'); sohbetEkle(sec(V.KULLANICI), 'teyze selam 👋');
@@ -774,7 +800,8 @@
       enBahsisci: enB ? enB[0] : null, sarjBitti: Y.sarjBitti, klip: 0, tweet: null, gece: null, ces: Y.ces, cesurSay: Y.cesurSay, jeton: Y.jeton, iade: Y.iade, hedef: Y.hedef.tamam ? Y.hedef.ad : null
     };
     S.enerji = Y.enerji; S.abone += Y.abone; S.risk = clamp(S.risk + Y.ces * 1.5);
-    S.takipci += Math.round(Y.enYuksek * 0.6 + Y.abone * 3);
+    if (Y.abone) S.aboneler.push({ gun: S.gun, adet: Y.abone });
+    S.takipci += Math.round(Y.enYuksek * 0.35 + Y.abone * 1.5);
     S.asama = 'sonra'; S.yayinBitti = true;
     { const bas = { '21': 21, '23': 23, '02': 2 }[Y.saat.id]; S.saat = String((bas + 4) % 24).padStart(2, '0') + ':0' + Math.floor(rnd() * 9); }
     kaydet();
@@ -788,7 +815,7 @@
     if (Sahne.hazir) { Sahne.karakter(gorunum()); Sahne.oda(S.env); }
     const B = S.bugun;
     if (B.tweet) return ana();
-    const gunV = V.GUNLER[S.gun - 1] || {};
+    const gunV = gunVeri();
     const secenek = ['link'];
     if (B.anneGirdi) secenek.push('anne'); else if (B.enBahsisci) secenek.push('tesekkur');
     const gk = (gunV.gundem || []).find(g => V.GUNDEM_TWEET[g]);
@@ -827,7 +854,7 @@
     if (e.viral && rnd() < e.viral) viral = true;
     if (e.kumar) { if (rnd() < e.kumar) ters = true; else viral = rnd() < 0.5; }
     if (tip !== 'hic') {
-      const baz = (B.enYuksek * 2 + 15) * (e.takipciKat || 1) * R(0.8, 1.2) * (viral ? 4 : 1);
+      const baz = (B.enYuksek * 1.1 + 15) * (e.takipciKat || 1) * R(0.8, 1.2) * (viral ? 4 : 1);
       fx.takipci = Math.round(ters ? -baz * 0.4 : baz);
       S.yarin = clamp(1 + (e.yarin || 0) * (viral ? 2 : 1) * (ters ? -0.5 : 1), 0.6, 2.5);
     } else S.yarin = 1;
@@ -909,22 +936,49 @@
   }
 
   /* ---------- rapor ve mağaza ---------- */
+  // haftalık abonelik: her grup katıldığı günden 7 gün sonra yeniler ya da bırakır
+  function aboneYenile() {
+    const son = S.gunler.slice(-6);
+    const yayinOran = (son.filter(g => g.yayin).length + (S.yayinBitti ? 1 : 0)) / (son.length + 1);
+    const oran = clamp(0.46 + S.sadakat / 250 + yayinOran * 0.25 - (S.risk > 60 ? 0.06 : 0), 0.3, 0.95);
+    let toplam = 0, kalan = 0;
+    S.aboneler.forEach(c => {
+      if (c.gun >= S.gun || (S.gun - c.gun) % 7 || !c.adet) return;
+      toplam += c.adet;
+      const y = Math.min(c.adet, Math.round(c.adet * oran * R(0.9, 1.1)));
+      kalan += y; c.adet = y;
+    });
+    S.aboneler = S.aboneler.filter(c => c.adet > 0);
+    S.abone = S.aboneler.reduce((a, c) => a + c.adet, 0);
+    return { toplam, kalan, gelir$: kalan * V.ABONE_UCRET };
+  }
   function rapor() {
     ekran('rapor', 'oda');
     S.asama = 'rapor';
     const B = S.bugun || { bahsis: 0, aboneGelir: 0, abone: 0, enYuksek: 0 };
     if (!S.gunHesap || S.gunHesap.gun !== S.gun) {
+      const yen = aboneYenile();
       const yayin$ = B.bahsis + B.aboneGelir, ppv$ = S.gunluk.ppv, dm$ = S.gunluk.dm;
-      const brut = yayin$ + ppv$ + dm$, kes = brut * V.PLATFORM_KESINTI, net$ = brut - kes, tlNet = net$ * S.kur;
-      const gider = V.GIDER.kira + V.GIDER.internet;
-      const sonuc = tlNet - gider + S.gunluk.tl;
-      S.gunHesap = { gun: S.gun, yayin$, ppv$, dm$, kes, tlNet, gider, kur: S.kur, ek: S.gunluk.tl, sonuc };
+      const brut = yayin$ + yen.gelir$ + ppv$ + dm$, kes = brut * V.PLATFORM_KESINTI, net$ = brut - kes, tlNet = net$ * S.kur;
+      // vergi: stopajlı hesapta hemen kesilir, kayıtdışında borç olarak birikir
+      const stopaj = S.vergiTipi === 'stopaj' ? tlNet * V.VERGI.stopaj : 0;
+      if (S.vergiTipi !== 'stopaj') S.vergiBorcu += tlNet * V.VERGI.kayitdisi;
+      const kira = S.gun % 7 === 0 && S.gun <= 28 ? kiraTutar() : 0;
+      const faiz = S.para < 0 ? -S.para * V.KART_FAIZ : 0;
+      const gider = V.GIDER.gunluk;
+      const sonuc = tlNet - stopaj - gider - kira - faiz + S.gunluk.tl;
+      S.gunHesap = { gun: S.gun, yayin$, ppv$, dm$, kes, tlNet, gider, kur: S.kur, ek: S.gunluk.tl, sonuc, yen, stopaj, kira, faiz };
       S.para += sonuc; S.toplamNet += sonuc;
-      if (tlNet) S.islemler.unshift({ gun: S.gun, ad: 'DansKasa ödemesi (' + usd(net$) + ')', tutar: Math.round(tlNet) });
-      if (S.gunluk.tl) S.islemler.unshift({ gun: S.gun, ad: 'Diğer', tutar: Math.round(S.gunluk.tl) });
-      S.islemler.unshift({ gun: S.gun, ad: 'Kira + internet', tutar: -gider });
-      S.islemler = S.islemler.slice(0, 40);
-      S.gunler.push({ gun: S.gun, net: sonuc, izleyici: B.enYuksek || 0 });
+      const is = (ad, tutar) => { if (Math.round(tutar)) S.islemler.unshift({ gun: S.gun, ad, tutar: Math.round(tutar) }); };
+      is('DansKasa ödemesi (' + usd(net$) + ')', tlNet);
+      is('Stopaj (%15)', -stopaj);
+      is('Diğer', S.gunluk.tl);
+      is('Yemek, yol, internet', -gider);
+      is('Haftalık kira · Nuri Bey', -kira);
+      is('Kart faizi', -faiz);
+      S.islemler = S.islemler.slice(0, 50);
+      S.gunler.push({ gun: S.gun, net: sonuc, izleyici: B.enYuksek || 0, yayin: !!S.yayinBitti });
+      if (S.para < -V.KART_LIMIT) S.bayrak.icra = true;
       kaydet();
     }
     const H = S.gunHesap;
@@ -938,10 +992,16 @@
         <div class="eksi"><span>DansKasa kesintisi (%${V.PLATFORM_KESINTI * 100})</span><span>−${usd(H.kes)}</span></div>
         <div><span>Kur: 1 $ = ${H.kur.toFixed(2).replace('.', ',')} TL</span><span>${tl(H.tlNet)}</span></div>
         ${H.ek ? `<div class="${H.ek < 0 ? 'eksi' : 'arti'}"><span>Diğer (şantaj, klip vb.)</span><span>${tl(H.ek)}</span></div>` : ''}
-        <div class="eksi"><span>Kira + internet</span><span>−${tl(H.gider)}</span></div>
+        ${H.yen && H.yen.toplam ? `<div><span>Abonelik yenileme (${H.yen.kalan}/${H.yen.toplam} yeniledi)</span><span>${usd(H.yen.gelir$)}</span></div>` : ''}
+        ${H.stopaj ? `<div class="eksi"><span>Stopaj (%15, içerik üreticisi hesabı)</span><span>−${tl(H.stopaj)}</span></div>` : ''}
+        <div class="eksi"><span>Yemek, yol, internet</span><span>−${tl(H.gider)}</span></div>
+        ${H.kira ? `<div class="eksi"><span><b>Haftalık kira</b> · Nuri Bey</span><span>−${tl(H.kira)}</span></div>` : ''}
+        ${H.faiz ? `<div class="eksi"><span>Kredi kartı faizi</span><span>−${tl(H.faiz)}</span></div>` : ''}
         <div class="top"><span>Bugünkü net</span><span>${tl(H.sonuc)}</span></div>
-        <div class="top"><span>Hesap</span><span>${tl(S.para)}</span></div>
+        <div class="top"><span>Hesap</span><span class="${S.para < 0 ? 'kirmizi' : ''}">${tl(S.para)}</span></div>
       </div></div>
+      ${S.para < 0 ? `<p class="ipucu uyari">💳 Kart borcundasın. Limit ${tl(V.KART_LIMIT)}; aşarsan icra gelir. Her gün %${(V.KART_FAIZ * 100).toFixed(2).replace('.', ',')} faiz işliyor.</p>` : ''}
+      ${S.gun < 28 ? `<p class="ipucu">Sıradaki kira: ${kiraGunu() === S.gun ? kiraGunu() + 7 : kiraGunu()}. gün · ${tl(V.KIRA[Math.min(3, (kiraGunu() === S.gun ? kiraGunu() + 7 : kiraGunu()) / 7 - 1)])}</p>` : ''}
       <p class="ipucu">Bugünkü net kazancın aylık asgari ücretin %${oran}'i. ${oran >= 25 ? 'Babanın emekli ikramiyesini bir haftada geçiyorsun. Bu yüzden banka seni arıyor.' : oran >= 10 ? 'Ev sahibi kirayı neden zamlamadığını sorguluyor.' : 'Henüz kimseye "iş" diyemezsin.'}</p>
       <div class="satir"><button class="btn ikincil" id="kartBtn">Paylaşım kartı</button><button class="btn" id="uyuBtn">🌙 Uyu</button></div>`;
     $('#geriBtn').style.visibility = 'hidden';
@@ -962,12 +1022,13 @@
     kap.innerHTML = kats.map(kat => `<p class="etiket kat-baslik">${kat}</p>` + V.MAGAZA.filter(m => m.kat === kat && (!m.tarz || m.tarz === K().tarz)).map(u => {
       const var_ = sahipMi(u);
       return `<div class="urun ${var_ ? 'alindi' : ''}"><b>${esc(u.ad)}${u.id === 'enerji' ? ` <small>(elde ${S.stok.enerji || 0})</small>` : ''}${u.id === 'altin' && S.altin ? ` <small>(${S.altin} gr)</small>` : ''}</b><span>${esc(u.acik)}</span>
-        <button data-al="${u.id}" ${var_ || S.para < u.fiyat ? 'disabled' : ''}>${var_ ? 'Sende' : tl(u.fiyat)}</button></div>`;
+        <button data-al="${u.id}" ${var_ || S.para + V.KART_LIMIT < u.fiyat ? 'disabled' : ''}>${var_ ? 'Sende' : (S.para < u.fiyat ? '💳 ' : '') + tl(u.fiyat)}</button></div>`;
     }).join('')).join('');
     kap.querySelectorAll('[data-al]').forEach(b => b.onclick = () => satinAl(bul(V.MAGAZA, b.dataset.al)));
   }
   function satinAl(u) {
-    if (S.para < u.fiyat || sahipMi(u)) return;
+    if (S.para + V.KART_LIMIT < u.fiyat || sahipMi(u)) return;
+    if (S.para < u.fiyat) bildir('Kartla ödendi. Faiz işlemeye başlar.');
     S.para -= u.fiyat;
     if (u.stok) S.stok.enerji = (S.stok.enerji || 0) + u.stok;
     else if (u.kiyafet) S.kiyafetler.push(u.id);
@@ -977,7 +1038,8 @@
     else S.env[u.id] = true;
     let c = '';
     if (u.fx) c = etkiUygula(u.fx);
-    if (u.id === 'bulasik') bildir('Annen çok sevindi. Sonra durdu: "Bu parayı nereden buldun?"', 3500);
+    if (u.id === 'studyo') { c = etkiUygula({ aile: -25 }); bildir('Taşındın! Kendi kapın, kendi kilidin. Annen her gün arayacak ama kapıyı çalamaz.', 3500); }
+    else if (u.id === 'bulasik') bildir('Annen çok sevindi. Sonra durdu: "Bu parayı nereden buldun?"', 3500);
     else bildir(u.ad + ' alındı.');
     Ses.kasa(); kaydet(); hudCiz();
     if (Sahne.hazir) Sahne.oda(S.env);
@@ -986,7 +1048,7 @@
 
   /* ---------- gece olayı ve gün geçişi ---------- */
   function geceOlayi() {
-    const ol = (V.GUNLER[S.gun - 1] || {}).gece;
+    const ol = (gunVeri()).gece;
     if (!ol || S.bayrak['olay' + S.gun]) return gunGec();
     panel.innerHTML = `<p class="etiket">Gece 03.12 · yeni bildirim</p>
       <div class="bildirim"><div class="kim"><b>${esc(ol.from)}</b><span>şimdi</span></div><p>${esc(ol.t)}</p></div>
@@ -1003,12 +1065,14 @@
   function gunGec() {
     if (S.aile >= 100) return oyunSonu('aile');
     if (S.risk >= 100) return oyunSonu('risk');
-    if (S.gun >= V.SON_GUN) return dilimSonu();
+    if (S.bayrak.icra) return oyunSonu('borc');
+    if (S.gun >= V.SON_GUN) return sezonSonu();
     const saat = bul(V.SAATLER, (S.secim && S.secim.saat) || '23');
     S.enerji = clamp(85 - (S.yayinBitti ? saat.yorgunluk : 0));
     S.bayrak.erkenUyku = false;
-    S.aile = clamp(S.aile - 3); S.risk = clamp(S.risk - 2);
-    S.kur = Math.round(S.kur * (1 + R(0.001, 0.007)) * 100) / 100;
+    S.aile = clamp(S.aile - 4); S.risk = clamp(S.risk - 2);
+    // kur: çoğu gün yukarı, bazen geri çekilir; 3. hafta başında şok
+    S.kur = Math.round(S.kur * (1 + R(-0.004, 0.009) + (S.gun === 15 ? 0.045 : 0)) * 100) / 100;
     S.gun++; S.bugun = null; S.xBugun = false;
     kaydet(); Ses.basari(); gunBasla();
   }
@@ -1018,35 +1082,54 @@
     ekran('rapor', 'oda');
     const m = tip === 'aile'
       ? ['Pazar kahvaltısı sorgusu', 'Aile radarı doldu. Annen menemeni bıraktı, babam gazeteyi kapattı. "Oturalım, konuşalım." Telefonun masanın ortasında.']
-      : ['Sabah 06.00', 'Kapı çalındı. Mal varlığına el konuldu: 1 ring light, 3 kedi kulağı, 2 gram altın. Avukatın yoktu.'];
+      : tip === 'borc' ? ['İcra dairesi', 'Kart limiti aşıldı, Kasabank dosyayı icraya verdi. Memur ring light\'ı paketlerken "kızım da bu işleri yapıyor" dedi. Tahsilat başladı.']
+      : ['Sabah 06.00 · Operasyon', `Kapı çalındı. Dosyada "müstehcenlik" ve "suçtan kaynaklanan malvarlığını aklama" yazıyor. MASAK hesap hareketlerini çıkarmış. El konulanlar: ${S.env.telefon ? '1 iPhone 17 Pro, ' : ''}1 ring light, ${S.altin || 0} gram altın, ${tl(Math.max(0, S.para))} banka bakiyesi. Avukatın yoktu.`];
     sil();
     panel.innerHTML = `<p class="etiket">Oyun bitti</p><h2 class="baslik">${m[0]}</h2><p class="cevap">${esc(m[1])}</p><button class="btn" id="bas">Baştan başla</button>`;
     $('#bas').onclick = giris;
   }
-  function dilimSonu() {
+  // sezon puanı: para tek başına yetmez; abone, takipçi, aile ve risk de sayılır
+  function sezonPuani() {
+    return Math.round(S.para + S.abone * 220 + S.takipci * 3 - S.aile * 90 - S.risk * 70 - (S.vergiTipi === 'stopaj' ? 0 : S.vergiBorcu));
+  }
+  function sezonUnvani() {
+    const kim = kimlik();
+    if (S.para < 0) return ['Kasabank Mağduru', 'Kart borcuyla sezonu kapattın. Ring light hâlâ taksitte.'];
+    if (S.aile >= 75) return ['Ailenin Kara Koyunu', 'Para var, ama Pazar kahvaltılarına artık çağrılmıyorsun.'];
+    if (S.risk >= 75) return ['İfşa Hesaplarının Gözdesi', 'Her paylaşımın üç ayrı sayfada arşivleniyor.'];
+    if (S.para >= 150000) return ['Stüdyo ' + (kim.unvan === 'kral' ? 'Kralı' : kim.unvan === 'kraliçe' ? 'Kraliçesi' : 'Efsanesi'), 'Yatak odasından çıktın. Kiralık 1+1, profesyonel ışık, kilitli kapı.'];
+    if (S.abone >= 250) return ['Balina Çobanı', 'Sadık bir kitlen var. Her akşam aynı isimler, aynı bahşişler.'];
+    if (S.para >= 40000) return ['Gece Vardiyası Ustası', 'Kirayı çıkardın, biraz da kenara koydun. Kimse bir şey anlamadı. Henüz.'];
+    return ['Balkon Yıldızı', 'Ünlü olmadın ama mahallede bir efsanesin. Saadet teyze hâlâ abone.'];
+  }
+  function sezonSonu() {
     ekran('rapor', 'oda');
     if (Sahne.hazir) Sahne.oynat('dans', 3);
     const enIyi = S.gunler.slice().sort((a, b) => b.net - a.net)[0] || { gun: 1, net: 0 };
-    const metin = `Özel Dans'ta ${S.gun} günde ${tl(S.toplamNet)} kazandım, ${sayi(S.takipci)} takipçiye ulaştım. Annem hâlâ bilmiyor (aile radarı %${Math.round(S.aile)}) 🔗`;
+    const puan = sezonPuani(), [unvan, unvanAcik] = sezonUnvani();
+    if (!S.sezonSonu) { S.sezonSonu = { puan, unvan }; kaydet(); }
+    const metin = `Özel Dans'ta 30 günlük sezonu "${unvan}" olarak bitirdim: ${tl(S.para)} kasa, ${sayi(S.abone)} abone, ${sayi(puan)} puan. Aile radarı %${Math.round(S.aile)} 🔗`;
     const url = /^https?:$/.test(location.protocol) && !/claude\.(ai|site)|claudeusercontent/.test(location.hostname) ? location.href.split('#')[0] : '';
     const xLink = 'https://x.com/intent/tweet?text=' + encodeURIComponent(metin) + (url ? '&url=' + encodeURIComponent(url) : '');
     panel.innerHTML = `
-      <p class="etiket">${V.SON_GUN} günlük dilimin sonu</p>
-      <h2 class="baslik">${esc(K().ad)} ilk haftasını yarıladı</h2>
+      <p class="etiket">Sezon ${esc(S.sezon || '')} · 30 gün bitti</p>
+      <h2 class="baslik">${esc(K().ad)}: <span class="unvan">${esc(unvan)}</span></h2>
+      <p class="cevap">${esc(unvanAcik)}</p>
       <div class="sayilar">
-        <div class="sayi"><small>Toplam net</small><b>${tl(S.toplamNet)}</b></div>
-        <div class="sayi"><small>Takipçi</small><b>${sayi(S.takipci)}</b></div>
+        <div class="sayi"><small>Sezon puanı</small><b>${sayi(puan)}</b></div>
+        <div class="sayi"><small>Kasa</small><b>${tl(S.para)}</b></div>
         <div class="sayi"><small>Abone</small><b>${sayi(S.abone)}</b></div>
+        <div class="sayi"><small>Takipçi</small><b>${sayi(S.takipci)}</b></div>
         <div class="sayi"><small>En iyi gün</small><b>Gün ${enIyi.gun}</b></div>
         <div class="sayi"><small>Aile radarı</small><b>%${Math.round(S.aile)}</b></div>
-        <div class="sayi"><small>Gerçek yüz</small><b>${S.kanit}/3</b></div>
       </div>
-      <p class="cevap">Devamı geliyor: ev sahibinin %60 zammı, @AileDegerleriTR dosyası, kiralık 1+1 ve kardeşinin haftalık "susma ücreti".</p>
+      <p class="dipnot">Puan = kasa + abone×220 + takipçi×3 − aile radarı×90 − risk×70 − ödenmemiş vergi. Aynı hafta başlayan herkes aynı olaylarla oynadı.</p>
       <a class="btn x" href="${xLink}" target="_blank" rel="noopener">X'te paylaş</a>
-      <div class="satir"><button class="btn ikincil" id="menu">Ana menü</button><button class="btn ikincil" id="bas">Baştan başla</button></div>`;
+      <div class="satir"><button class="btn ikincil" id="menu">Ana menü</button><button class="btn ikincil" id="bas">Yeni sezon</button></div>`;
     $('#menu').onclick = giris;
     $('#bas').onclick = () => onayla('Kayıt silinsin ve yeni karakter oluşturulsun mu?', 'Sil ve başla', () => { sil(); S = null; karakterOlustur(); });
   }
+
 
   /* ================= TELEFON ================= */
   const telefonEl = $('#telefon'), durumEl = $('#durum'), ekranIc = $('#ekranIc');
@@ -1109,7 +1192,7 @@
     S.gunluk = { ppv: 0, dm: 0, tl: 0, cekim: 0, ppvSatis: 0 };
     rnd = tohumlu(S.tohum + S.gun * 101);
     if (!S.secim) S.secim = { tema: 'sohbet', saat: '23', kiyafet: 'tisort', kedikulak: false };
-    const gunV = V.GUNLER[S.gun - 1] || {};
+    const gunV = gunVeri();
     // hikâye mesajları
     if (gunV.sabah) {
       const aile = /Annen|Kardeşin|Babam/.test(gunV.sabah.from);
@@ -1126,8 +1209,33 @@
     if (S.sizinti) { bildirimEkle('x', '@ifsa_arsivi_tr', S.sizinti, true); S.xAkis.unshift({ ben: false, kim: 'İfşa Arşivi', h: '@ifsa_arsivi_tr', t: S.sizinti, gor: 4000 + S.takipci * 20 }); S.sizinti = null; }
     // günün DM'leri
     dmGunluk();
+    sabahPara();
     kaydet();
     ana();
+  }
+  // sezon ekonomisi: hafta başı, kira hatırlatması, vergi seçimi ve denetimi
+  function sabahPara() {
+    const VG = V.VERGI;
+    if (S.gun > 1 && S.gun % 7 === 1 && S.gun <= 22) { const h = V.HAFTALAR[hafta() - 1]; bildirimEkle('dans', `${hafta()}. hafta · ${h.ad}`, h.acik, true); }
+    if (S.gun % 7 === 6 && S.gun < 28) { const t = `Yarın kira günü. ${tl(kiraTutar())}, aksatma lütfen 🙏`; dmEkle({ kim: 'Ev sahibi Nuri Bey', renk: '#f5c451', tur: 'bilgi', mesajlar: [{ t }] }); bildirimEkle('mesaj', 'Ev sahibi Nuri Bey', t, true); }
+    if (S.gun % 7 === 0 && S.gun <= 28) bildirimEkle('banka', 'Kasabank', `Bugün kira günü: ${tl(kiraTutar())} gün sonunda hesabından çekilecek.`, true);
+    if (S.gun >= VG.secimGun && !S.vergiTipi && !S.bayrak.vergiSoruldu) {
+      S.bayrak.vergiSoruldu = true; S.okunmamis.banka = 1;
+      bildirimEkle('banka', 'Kasabank', 'Hesabınıza yurt dışından düzenli para girişi var. Hesap türünüzü seçmeniz gerekiyor.', true);
+    }
+    if (S.gun === VG.denetimGun && S.vergiBorcu > 1500 && !S.tebligat) {
+      S.tebligat = { borc: Math.round(S.vergiBorcu), ceza: Math.round(S.vergiBorcu * VG.ceza), son: S.gun + VG.odemeSure };
+      S.okunmamis.banka = 1;
+      bildirimEkle('banka', 'Vergi dairesi · e-Tebligat', `Beyan edilmemiş gelir tespit edildi: ${tl(S.tebligat.borc)} vergi + ${tl(S.tebligat.ceza)} ceza. Son gün: ${S.tebligat.son}. gün.`, true);
+      S.aileM.push({ kim: 'Babam', t: 'Kapıya vergi dairesinden zarf geldi, senin adına. Akşam konuşalım.', saat: S.saat }); S.aile = clamp(S.aile + 8);
+    }
+    if (S.tebligat && !S.tebligat.bitti && S.gun > S.tebligat.son) {
+      const t = S.tebligat, top = t.borc + t.ceza;
+      t.bitti = true; S.vergiBorcu = 0; S.para -= top; S.aile = clamp(S.aile + 10);
+      S.islemler.unshift({ gun: S.gun, ad: 'Haciz · vergi dairesi', tutar: -top });
+      bildirimEkle('banka', 'Kasabank', `Hesabınıza haciz konuldu: ${tl(top)} tahsil edildi.`, true);
+      if (S.para < -V.KART_LIMIT) S.bayrak.icra = true;
+    }
   }
 
   /* ---------- ana ekran ---------- */
@@ -1142,10 +1250,11 @@
       <div class="kilit-saat"><b>${esc(S.saat)}</b><span>${GUN_ADI[(S.gun - 1) % 7]}, ${TARIH(S.gun)}</span></div>
       <div class="widgetlar">
         <button class="widget dk" data-uyg="dans"><small>DansKasa · bugün</small><b>${usd(bugunGelir)}</b><span>${sayi(S.abone)} abone · ${sayi(S.takipci)} takipçi</span><span class="w-durum">${S.yayinBitti ? '✅ yayın yapıldı' : '🔴 akşam yayını bekliyor'}</span></button>
-        <div class="widget"><small>Kasabank</small><b>${tl(S.para)}</b>
+        <div class="widget"><small>Kasabank${S.para < 0 ? ' · 💳 kart borcu' : ''}</small><b class="${S.para < 0 ? 'kirmizi' : ''}">${tl(S.para)}</b>
           <div class="w-bar"><span>Aile radarı</span><div class="bar aile"><i style="width:${S.aile}%"></i></div></div>
           <div class="w-bar"><span>Risk</span><div class="bar risk"><i style="width:${S.risk}%"></i></div></div></div>
       </div>
+      <button class="sezon-serit" data-uyg="banka"><span><b>Gün ${S.gun}/${V.SON_GUN}</b> · ${hafta()}. hafta: ${esc(V.HAFTALAR[hafta() - 1].ad)}</span>${S.gun <= 28 ? `<span>🏠 Kira ${kiraGunu() === S.gun ? '<b>bugün</b>' : (kiraGunu() - S.gun) + ' gün sonra'} · ${tl(kiraTutar())}</span>` : '<span>🏁 Sezon finali</span>'}<i style="width:${S.gun / V.SON_GUN * 100}%"></i></button>
       ${S.bildirim.length ? `<div class="bildirimler">${S.bildirim.slice(0, 3).map(b => { const u = bul(UYG, b.app) || UYG[0]; return `<button class="bld" data-uyg="${b.app}"><span class="b-ik" style="background:${u.renk}">${u.ik}</span><div><b>${esc(b.kim)}</b><span>${esc(b.metin)}</span></div><small>${esc(b.saat)}</small></button>`; }).join('')}</div>` : ''}
       <div class="uygulamalar">${UYG.map(u => `<button class="uyg" data-uyg="${u.id}"><span class="uyg-ik" style="background:${u.renk}">${u.ik}${rozet(u.id)}</span><span>${u.ad}</span></button>`).join('')}</div>
       <div class="dock"><button class="btn gece-btn" id="gunBitir">🌙 Günü bitir · Gün ${S.gun}/${V.SON_GUN}</button></div>`;
@@ -1277,7 +1386,8 @@
   function satinAlmaOrani(ic) {
     const ces = icerikCesaret(ic), set = bul(V.CEKIM_SET, ic.set);
     const deger = 4 + ces * 7 + set.bonus * 40 + (S.env.ringlight ? 3 : 0);
-    return clamp(0.06 + ces * 0.06 + set.bonus - Math.max(0, ic.fiyat - deger) * 0.012 + (S.sadakat - 50) * 0.002, 0.01, 0.7) / 100 * 100;
+    // gerçekte kilitli içerik dönüşümü abonelerin %5–15'i civarı
+    return clamp((0.03 + ces * 0.022 + set.bonus * 0.4 - Math.max(0, ic.fiyat - deger) * 0.006 + (S.sadakat - 50) * 0.0008) * (S.env.telefon ? 1.2 : 1), 0.01, 0.25);
   }
   function topluSat(ic) {
     ic.gonderildi = true;
@@ -1304,7 +1414,8 @@
     const kisiler = karistir(Sohbet.KISI.filter(k => k.tur !== 'troll' && k.tur !== 'bot'));
     const istek = karistir(V.DM_ISTEK).slice(0, 2);
     istek.forEach((q, i) => { const k = kisiler[i]; dmEkle({ kim: k.ad, renk: k.renk, tur: 'istek', istek: { ces: q.ces, set: q.set, teklif: Math.round(R(q.teklif[0], q.teklif[1])) }, mesajlar: [{ t: q.t }] }); });
-    if (S.gun >= 2 || rnd() < 0.5) { const q = sec(V.DM_OZEL), k = kisiler[3]; dmEkle({ kim: k.ad, renk: k.renk, tur: 'ozel', istek: { ces: q.ces, set: q.set, teklif: q.teklif }, mesajlar: [{ t: q.t }] }); }
+    // özel sipariş veren VIP'ler, abone kitlesi büyüdükçe çoğalır
+    if (S.gun >= 2 && rnd() < clamp(0.15 + S.abone / 200, 0.15, 0.85)) { const q = sec(V.DM_OZEL), k = kisiler[3]; dmEkle({ kim: k.ad, renk: k.renk, tur: 'ozel', istek: { ces: q.ces, set: q.set, teklif: q.teklif }, mesajlar: [{ t: q.t }] }); }
     const fk = kisiler[4]; dmEkle({ kim: fk.ad, renk: fk.renk, tur: 'flort', mesajlar: [{ t: sec(V.DM_FLORT) }] });
     if (S.gun >= 2 && rnd() < 0.7) { const q = sec(V.DM_SAPIK), k = { ad: 'user_' + Math.floor(R(1000, 9999)), renk: '#ff6161' }; dmEkle({ kim: k.ad, renk: k.renk, tur: 'sapik', alt: q.tur, mesajlar: [{ t: q.t }] }); }
     const hik = V.DM.filter(d => !S.kullanilanDM.includes(d.id));
@@ -1437,7 +1548,7 @@
     const metin = ic.altyazi + ' Kilidi açan bilir. Link bio\'da 🔗';
     const gor = (S.takipci * 4 + 300) * R(0.8, 1.4) * (1 + ces * 0.6);
     S.xAkis.unshift({ t: metin, img: ic.img, gor });
-    S.xBugun = true; S.takipci += Math.round(gor * 0.012); S.risk = clamp(S.risk + 2 + ces * 1.5); S.aile = clamp(S.aile + ces);
+    S.xBugun = true; S.takipci += Math.round(gor * 0.006); S.risk = clamp(S.risk + 2 + ces * 1.5); S.aile = clamp(S.aile + ces);
     const yanit = karistir(V.X_YANIT.cesur.concat(V.X_YANIT.genel)).slice(0, 3);
     yanit.forEach(y => S.xAkis.splice(1, 0, { kim: y.n, h: y.h, t: sablon(y.t), gor: gor * 0.05 }));
     // tanıtım, toplu satışa ek alıcı getirir
@@ -1448,13 +1559,39 @@
 
   /* ---------- Kasabank, Kargola, Ayarlar ---------- */
   function banka() {
-    ekran('banka');
+    ekran('banka'); S.okunmamis.banka = 0;
+    const VG = V.VERGI, t = S.tebligat && !S.tebligat.bitti ? S.tebligat : null;
+    const kart = S.para < 0 ? -S.para : 0;
     panel.innerHTML = uygBas('Kasabank', '#c47d10') + `
-      <div class="kart banka-kart"><small>Vadesiz hesap</small><b>${tl(S.para)}</b><span>Kur: 1 $ = ${S.kur.toFixed(2).replace('.', ',')} TL${S.altin ? ' · ' + S.altin + ' gr altın' : ''}</span></div>
+      <div class="kart banka-kart"><small>Vadesiz hesap</small><b class="${S.para < 0 ? 'kirmizi' : ''}">${tl(S.para)}</b><span>Kur: 1 $ = ${S.kur.toFixed(2).replace('.', ',')} TL${S.altin ? ' · ' + S.altin + ' gr altın' : ''}</span>
+        <div class="w-bar"><span>Kredi kartı · ${tl(kart)} / ${tl(V.KART_LIMIT)}</span><div class="bar risk"><i style="width:${Math.min(100, kart / V.KART_LIMIT * 100)}%"></i></div></div>
+        <span>Hesap tipi: ${S.vergiTipi === 'stopaj' ? 'İçerik üreticisi (%15 stopaj)' : S.vergiTipi === 'kayitdisi' ? 'Kişisel hesap (beyansız)' : 'seçilmedi'}</span></div>
+      ${!S.vergiTipi && S.gun >= VG.secimGun ? `<div class="kart secim-kart"><p class="etiket">Hesap türü seç</p><p>Yurt dışından düzenli para giriyor. Bankanın sorusu basit: bu bir iş mi?</p>
+        <div class="secenekler"><button class="secenek" data-v="stopaj"><b>İçerik üreticisi hesabı</b><span>Her ödemeden %15 stopaj kesilir. Temiz: risk −8, vergi derdi yok.</span></button>
+        <button class="secenek" data-v="kayitdisi"><b>Kişisel hesapta kalsın</b><span>Kesinti yok, hepsi senin. Ama beyan edilmeyen gelirin %20'si vergi borcu olarak birikir. 3. hafta denetim gelir.</span></button></div></div>` : ''}
+      ${S.vergiTipi === 'kayitdisi' && !t ? `<div class="kart secim-kart"><p class="etiket">Beyan edilmemiş gelir · tahmini vergi ${tl(S.vergiBorcu)}</p><p>Denetim gelmeden pişmanlıkla beyan edersen ceza kesilmez, sadece %3,7/ay gecikme faizi ödersin. Denetimde ise bir kat vergi ziyaı cezası gelir.</p>
+        <div class="secenekler">${S.vergiBorcu > 0 ? `<button class="secenek" data-v="pismanlik"><b>Pişmanlıkla beyan et · ${tl(S.vergiBorcu * (1 + V.VERGI.pismanlik))}</b><span>Temiz sayfa: risk −12, stopajlı hesaba geçersin.</span></button>` : ''}<button class="secenek" data-v="gec"><b>Sadece bundan sonrasını stopajlı yap</b><span>Birikmiş borç olduğu gibi kalır.</span></button></div></div>` : ''}
+      ${t ? `<div class="kart secim-kart uyari"><p class="etiket">e-Tebligat · son gün ${t.son}. gün</p><p>Vergi ${tl(t.borc)} + ceza ${tl(t.ceza)} = <b>${tl(t.borc + t.ceza)}</b>. Ödemezsen hesabına haciz gelir.</p>
+        <div class="secenekler"><button class="secenek" data-v="ode"><b>Öde · ${tl(t.borc + t.ceza)}</b><span>Kart limitini de kullanabilirsin.</span></button>
+        ${t.muhasebe ? '' : `<button class="secenek" data-v="muhasebe"><b>Mali müşavir tut · ${tl(V.VERGI.musavir)}</b><span>Matrahı düzeltir: borç ve ceza %40 azalır.</span></button>`}
+        ${t.itiraz ? '' : `<button class="secenek" data-v="itiraz"><b>İtiraz et</b><span>Kumar: tutarsa dosya kapanır. Tutmazsa ceza artar, risk yükselir.</span></button>`}</div></div>` : ''}
       ${S.risk > 50 ? '<p class="ipucu">⚠️ Hesabınıza yurt dışından düzenli para girişi tespit edildi. Bilgi talebi gelebilir.</p>' : ''}
       <p class="etiket">Hesap hareketleri</p>
       <div class="dokum">${S.islemler.length ? S.islemler.slice(0, 20).map(x => `<div class="${x.tutar < 0 ? 'eksi' : 'arti'}"><span>Gün ${x.gun} · ${esc(x.ad)}</span><span>${x.tutar < 0 ? '−' : '+'}${tl(Math.abs(x.tutar))}</span></div>`).join('') : '<p class="alt">Henüz hareket yok. DansKasa ödemeleri gün sonunda yatar.</p>'}</div>`;
     geriBagla();
+    panel.querySelectorAll('[data-v]').forEach(b => b.onclick = () => { Ses.tik(); vergiKarar(b.dataset.v); });
+  }
+  function vergiKarar(v) {
+    const t = S.tebligat;
+    let c = '';
+    if (v === 'stopaj' || v === 'gec') { S.vergiTipi = 'stopaj'; c = etkiUygula({ risk: -8 }); bildir('Hesabın içerik üreticisi hesabına çevrildi. Bundan sonra %15 stopaj.'); }
+    else if (v === 'kayitdisi') { S.vergiTipi = 'kayitdisi'; c = etkiUygula({ risk: 4 }); bildir('Kişisel hesapta devam. Banka not aldı.'); }
+    else if (v === 'ode') { const top = t.borc + t.ceza; if (S.para + V.KART_LIMIT < top) { bildir('Kart limitin yetmiyor.'); return; } S.para -= top; t.bitti = true; S.vergiBorcu = 0; S.islemler.unshift({ gun: S.gun, ad: 'Vergi + ceza ödemesi', tutar: -top }); c = etkiUygula({ risk: -10 }); Ses.kasa(); }
+    else if (v === 'muhasebe') { const u = V.VERGI.musavir; if (S.para + V.KART_LIMIT < u) { bildir('Kart limitin yetmiyor.'); return; } S.para -= u; t.muhasebe = true; t.borc = Math.round(t.borc * 0.6); t.ceza = Math.round(t.ceza * 0.6); S.islemler.unshift({ gun: S.gun, ad: 'Mali müşavir ücreti', tutar: -u }); bildir('Mali müşavir giderleri yazdı, matrahı düzeltti. Tutar %40 azaldı.'); }
+    else if (v === 'pismanlik') { const top = Math.round(S.vergiBorcu * (1 + V.VERGI.pismanlik)); if (S.para + V.KART_LIMIT < top) { bildir('Kart limitin yetmiyor.'); return; } S.para -= top; S.vergiBorcu = 0; S.vergiTipi = 'stopaj'; S.islemler.unshift({ gun: S.gun, ad: 'Pişmanlıkla beyan (vergi + gecikme faizi)', tutar: -top }); c = etkiUygula({ risk: -12 }); bildir('Pişmanlıkla beyan ettin: ceza yok, sadece gecikme faizi. Artık stopajlı hesaptasın.', 3500); Ses.kasa(); }
+    else if (v === 'itiraz') { t.itiraz = true; if (rnd() < 0.35) { t.bitti = true; S.vergiBorcu = 0; c = etkiUygula({ risk: 5 }); bildir('İtirazın kabul edildi! Dosya kapandı. Şimdilik.', 3500); } else { t.ceza = Math.round(t.ceza * 1.5); c = etkiUygula({ risk: 15 }); bildir('İtiraz reddedildi. Ceza %50 arttı.', 3500); } }
+    kaydet(); banka();
+    if (c) panel.insertAdjacentHTML('beforeend', c);
   }
   function kargola() {
     ekran('kargo');
