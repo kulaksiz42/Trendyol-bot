@@ -56,6 +56,26 @@
     kaydet(); return 'tamam';
   }
   // kuşatma ya da meydan muharebesi: güç, sur, tarih ivmesi
+  // 3D meydan savaşının düşman ordusu: garnizon ve tarih ivmesine göre
+  function dusmanOrdusu(hedef) {
+    const y = yerV(hedef), k = S.kaleler[hedef];
+    const ivme = S.yil >= y.fetih ? 0.6 : 1 + Math.min(1.5, (y.fetih - S.yil) * 0.05);
+    const G = Math.round(k.garnizon * ivme);
+    return { skutatos: Math.round(G * 0.42), toksotes: Math.round(G * 0.2), katafrakt: Math.round(G * 0.16), alan: Math.round(G * 0.22), ivme };
+  }
+  // 3D savaş bitti: kalanlar döner, zaferse kale ve ganimet
+  function meydanBitir(sonuc) {
+    const sefer = S.sefer; if (!sefer) return null;
+    const y = yerV(sefer.hedef), k = S.kaleler[sefer.hedef];
+    const r = { hedef: y.id, ad: y.ad, zafer: sonuc.zafer, kayip: {}, kalan: sonuc.kalan, guc: sonuc.guc || 0, savunma: sonuc.savunma || 0, ivme: sonuc.ivme || 1, savas: true, meydan: true };
+    for (const id in sefer.ordu) { r.kayip[id] = Math.max(0, sefer.ordu[id] - (sonuc.kalan[id] || 0)); S.ordu[id] += sonuc.kalan[id] || 0; }
+    if (sonuc.zafer) {
+      k.sahip = 'osm'; r.ganimet = Math.round(k.garnizon * 3 + (sefer.ordu.akinci || 0) * 3); r.tebaa = Math.round(k.garnizon * 0.25);
+      S.kaynak.akce += r.ganimet; S.nufus += r.tebaa; S.fetih++; k.garnizon = 0; S.memnun = Math.min(100, S.memnun + 12);
+    } else { S.memnun = Math.max(0, S.memnun - 10); }
+    S.sefer = null; kaydet();
+    return r;
+  }
   function savasCoz(sefer) {
     const y = yerV(sefer.hedef), k = S.kaleler[sefer.hedef];
     const sur = y.sur || 1;
@@ -140,7 +160,13 @@
     let savas = null;
     S.egitim.forEach(e => { e.kalan--; if (e.kalan <= 0) S.ordu[e.tip] += e.adet; });
     S.egitim = S.egitim.filter(e => e.kalan > 0);
-    if (S.sefer) { S.sefer.kalan--; if (S.sefer.kalan <= 0) { savas = savasCoz(S.sefer); S.sefer = null; } }
+    if (S.sefer && !S.sefer.bekliyor) {
+      S.sefer.kalan--;
+      if (S.sefer.kalan <= 0) {
+        if (yerV(S.sefer.hedef).savas) { S.sefer.bekliyor = true; savas = { meydan: true, hedef: S.sefer.hedef }; }
+        else { savas = savasCoz(S.sefer); S.sefer = null; }
+      }
+    }
     // akçe biterse asker kaçar
     if (S.kaynak.akce + rapor.akce < 0 && ask) { for (const id in S.ordu) S.ordu[id] = Math.floor(S.ordu[id] * 0.85); S.gunluk.unshift({ t: tarihYazi(), m: 'Akçe bitti: bazı askerler terhis oldu.' }); }
     // tarih ivmesi bildirimi
@@ -187,5 +213,5 @@
   function yukle() { try { const d = JSON.parse(localStorage.getItem(KAYIT) || 'null'); if (d && d.surum === 1) { S = d; orduAlanlari(S); } return d && d.surum === 1 ? d : null; } catch (e) { return null; } }
   function sil() { try { localStorage.removeItem(KAYIT); } catch (e) { } }
 
-  window.Sim = { asker, egitimBaslat, seferBaslat, seferSuresi, birlikV, yerV, yeni, yukle, kaydet, sil, durum: () => S, ayGec, binaEkle, binaYik, say, konut, acikMi, alinabilir, binaV, tarihYazi, isciDagit };
+  window.Sim = { dusmanOrdusu, meydanBitir, asker, egitimBaslat, seferBaslat, seferSuresi, birlikV, yerV, yeni, yukle, kaydet, sil, durum: () => S, ayGec, binaEkle, binaYik, say, konut, acikMi, alinabilir, binaV, tarihYazi, isciDagit };
 })();

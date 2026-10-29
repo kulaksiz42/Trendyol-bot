@@ -50,6 +50,7 @@
     Sim.isciDagit();
     Dunya.nufusGuncelle(S.nufus, S.binalar, Sim.binaV);
     hiz(S.hiz || 1); binaCubugu(); ciz();
+    if (S.sefer && S.sefer.bekliyor) setTimeout(() => meydanSavasi(S.sefer.hedef), 600);
     if (!S.binalar.some(b => !['cadir', 'agil'].includes(b.tip))) ipucu('Alttan bir bina seç, haritada yerine dokun, ✓ ile kur.');
   }
 
@@ -72,7 +73,8 @@
     Dunya.askerGoster(S.ordu.yaya + S.ordu.okcu + S.ordu.akinci, S.binalar.find(b => b.tip === 'meydan'));
     binaCubugu(); ciz();
     if (window.Harita.acik()) Harita.guncelle();
-    if (savas) savasRaporu(savas); else tarihKontrol();
+    if (savas && savas.meydan) meydanSavasi(savas.hedef);
+    else if (savas) savasRaporu(savas); else tarihKontrol();
   }
 
   /* ---------- ordu ---------- */
@@ -99,11 +101,29 @@
     modal = true;
     Harita.ac({ kapat: () => { modal = false; ciz(); }, sefer: hedef => { Dunya.askerGoster(S.ordu.yaya + S.ordu.okcu + S.ordu.akinci, S.binalar.find(b => b.tip === 'meydan')); bildirim(`Ordu ${esc(Sim.yerV(hedef).ad)} yolunda.`); ciz(); } });
   }
+  // tarihî meydan savaşı: 3D savaş ekranı
+  function meydanSavasi(hedef) {
+    modal = true;
+    const y = Sim.yerV(hedef), d = Sim.dusmanOrdusu(hedef);
+    Dunya.duraklat(true);
+    Savas.baslat({
+      ad: y.id === 'koyunhisar' ? 'Koyunhisar (Bapheus) Savaşı' : y.ad + ' meydan savaşı',
+      alt: `${V.AYLAR[S.ay]} ${S.yil} · Bizans komutanı: Georgios Muzalon`,
+      ordu: S.sefer.ordu, dusman: d,
+      giris: 'Bir alay seç, emir ver. Düşmana dokunarak hedef göster. Akıncılarla kanattan dolanmak çok etkilidir.'
+    }, sonuc => {
+      Dunya.duraklat(false);
+      const r = Sim.meydanBitir(Object.assign(sonuc, { ivme: d.ivme }));
+      if (r) savasRaporu(r); else { modal = false; }
+    });
+  }
   function savasRaporu(r) {
     modal = true;
     const el = document.createElement('div'); el.className = 'ferman';
     const kayip = Object.entries(r.kayip).filter(([, n]) => n).map(([id, n]) => Sim.birlikV(id).ikon + ' ' + n).join(' · ') || 'yok';
-    const anlat = r.zafer
+    const anlat = r.meydan
+      ? (r.zafer ? 'Bizans safları dağıldı. Kaynaklara göre Alan paralı askerleri savaşa girmeden Bizans\'ın geri çekilmesini korudu. Halil İnalcık\'a göre beylik bu zaferle devlet niteliği kazandı.' : 'Bizans safları dayandı. Ordu geri çekildi; tarih bir sonraki seferi bekliyor.')
+      : r.zafer
       ? (r.savas ? `Bizans ordusu ovada saf tuttu. Akıncılar kanatlardan dolandı, okçular merkezi dağıttı. Bizans kumandanı geri çekildi.` : `Kuşatma sürdü; ${r.ivme < 1 ? 'kalenin erzakı tükenmişti ve' : ''} surlar sonunda teslim oldu. Halk vergiyi artık Osmanlı'ya ödeyecek.`)
       : (r.savas ? 'Bizans saflarını yaramadık. Ordu dağınık halde geri döndü.' : 'Surlar fazla güçlüydü. Kuşatma kaldırıldı, ordu kayıplarla döndü.');
     el.innerHTML = `<div class="kag"><p class="yil">${V.AYLAR[S.ay].toUpperCase()} ${S.yil}</p><h2>${r.zafer ? 'Zafer: ' : 'Hezimet: '}${esc(r.ad)}</h2><p>${anlat}</p>

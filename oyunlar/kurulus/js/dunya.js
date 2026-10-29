@@ -583,7 +583,10 @@
     [askerler, askerBas, askerMizrak].forEach(x => { x.instanceMatrix.needsUpdate = true; });
   }
 
-  window.Dunya = { askerGoster,
+  // savaş ekranı açıkken şehir çizimini durdur (pil ve GPU)
+  function duraklat(d) { renderer.setAnimationLoop(d ? null : kare); if (!d) saat.getDelta(); }
+
+  window.Dunya = { duraklat, askerGoster,
     kur, mevsim, binaEkle, binaGuncelle, binaKaldir, cevre, uygun, yerlestirmeBasla, yerlestirmeBitir, yerlestirDondur,
     yerlestirme: () => yerlestir, nufusGuncelle, odakla, ekranKonum, baslangicYeri, karo: () => karo, dunyadan,
     hiz: h => { hizCarpan = h; }, kamera: () => kamera, kontrol: () => kontrol

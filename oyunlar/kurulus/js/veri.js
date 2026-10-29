@@ -57,7 +57,7 @@ window.VERI = {
       { id: 'inegol', ad: 'İnegöl', eski: 'Angelokoma', e: 40.08, b: 29.51, lx: -16, ly: 2, sahip: 'biz', garnizon: 26, sur: 1.3, fetih: 1299, not: "Turgut Alp İnegöl'ü aldı (1298–99, kaynaklarda tarih tartışmalı)." },
       { id: 'yenisehir', ad: 'Yenişehir', e: 40.26, b: 29.65, lx: -26, ly: -30, sahip: 'biz', garnizon: 22, sur: 1.1, fetih: 1301, not: "1301'de beyliğin merkezi oldu." },
       { id: 'lefke', ad: 'Lefke', e: 40.36, b: 30.01, sahip: 'biz', garnizon: 20, sur: 1.2, fetih: 1313, not: "Sakarya kıyısındaki kale. Fetih yılı yaklaşık." },
-      { id: 'koyunhisar', ad: 'Koyunhisar', e: 40.6, b: 29.55, sahip: 'biz', garnizon: 70, sur: 1.0, fetih: 1302, savas: true, not: "Bapheus Savaşı (27 Temmuz 1302 ya da 1299). Yeri bilinmiyor; İzmit ile İznik arası bir ova." },
+      { id: 'koyunhisar', ad: 'Koyunhisar', e: 40.6, b: 29.55, sahip: 'biz', garnizon: 34, sur: 1.0, fetih: 1302, savas: true, not: "Bapheus Savaşı (27 Temmuz 1302 ya da 1299). Yeri bilinmiyor; İzmit ile İznik arası bir ova." },
       { id: 'gemlik', ad: 'Gemlik', eski: 'Kios', e: 40.43, b: 29.15, sahip: 'biz', garnizon: 34, sur: 1.4, fetih: 1302, not: "Koyunhisar zaferinden sonra alındı." },
       { id: 'iznik', ad: 'İznik', eski: 'Nikaia', e: 40.43, b: 29.72, sahip: 'biz', garnizon: 150, sur: 2.6, fetih: 1331, not: "Uzun kuşatmadan sonra 1331'de Orhan Bey'e teslim oldu." },
       { id: 'mudanya', ad: 'Mudanya', e: 40.38, b: 28.88, sahip: 'biz', garnizon: 40, sur: 1.4, fetih: 1321, not: "1321'de Orhan Bey aldı." },
