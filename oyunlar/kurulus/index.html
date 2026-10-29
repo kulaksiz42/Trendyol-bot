@@ -99,6 +99,26 @@ button{font:inherit;color:inherit;cursor:pointer}
 .bildirim b{color:var(--altin2)}
 @keyframes bl{0%{opacity:0;transform:translate(-50%,-8px)}10%,85%{opacity:1;transform:translate(-50%,0)}100%{opacity:0}}
 .ipucu{position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:9;border-radius:12px;padding:8px 14px;font-size:13px;text-align:center;max-width:90%}
+.yan{position:fixed;right:8px;top:calc(96px + env(safe-area-inset-top));z-index:9;display:grid;gap:6px}
+.yan button{width:56px;height:52px;border-radius:14px;display:grid;place-items:center;font-size:20px;line-height:1;padding:4px 0}
+.yan button span{font-size:10.5px;font-weight:700;color:var(--altin2)}
+.birlik{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(217,180,90,.15)}
+.birlik b{display:block;font-size:15px}.birlik small{display:block;color:var(--soluk);font-size:12px}
+.birlik.kapali{opacity:.5}
+.birlik .adet{display:flex;gap:6px}.birlik .adet button{min-width:44px;height:40px;border-radius:10px;border:1px solid rgba(217,180,90,.4);background:rgba(217,180,90,.12);font-weight:800}
+.harita{position:fixed;inset:0;z-index:35;background:#2b2016;display:flex;flex-direction:column}
+.h-ust{display:flex;justify-content:space-between;align-items:center;padding:calc(10px + env(safe-area-inset-top)) 14px 8px;color:var(--altin2);font:700 20px var(--f-baslik)}
+.h-lejant{display:flex;gap:10px;flex-wrap:wrap;font:600 11px var(--f-govde);color:var(--krem);margin-top:2px}.h-lejant i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px}
+.h-ust button{width:40px;height:40px;border-radius:12px;border:1px solid rgba(217,180,90,.4);background:transparent;font-size:18px}
+.h-tuval{flex:1;min-height:0;display:flex;justify-content:center;align-items:center;padding:0 6px}
+.h-tuval canvas{border-radius:8px;box-shadow:0 0 0 2px #8a6a2a,0 10px 30px rgba(0,0,0,.5)}
+.h-bilgi{background:linear-gradient(#efdfb6,#e2cc96);color:#2b2016;padding:12px 14px calc(12px + env(safe-area-inset-bottom));max-height:40vh;overflow:auto;border-top:2px solid #8a6a2a}
+.h-bilgi h3{font:700 24px var(--f-baslik);margin:0}.h-bilgi h3 small{font-size:15px;color:#6b5530}
+.h-not{font-size:13px;margin:4px 0 8px}
+.h-birlik{display:flex;justify-content:space-between;align-items:center;padding:4px 0}
+.h-birlik button{width:42px;height:34px;border-radius:8px;border:1px solid #8a6a2a;background:rgba(255,255,255,.4);font-weight:800;color:#2b2016}
+.h-birlik b{display:inline-block;min-width:34px;text-align:center}
+.h-bilgi .btn{background:var(--bordo);color:#fbf3dc}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
 </head>
@@ -108,12 +128,14 @@ button{font:inherit;color:inherit;cursor:pointer}
 <div class="gorev panel" id="gorev" hidden></div>
 <div class="alt" id="alt" hidden><div class="binalar" id="binalar"></div></div>
 <div class="yerles panel" id="yerles" hidden></div>
+<div class="yan" id="yan" hidden><button class="panel" id="btnOrdu">⚔️<span>Ordu</span></button><button class="panel" id="btnHarita">🗺️<span>Harita</span></button></div>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
 <script src="js/veri.js"></script>
 <script src="js/tarih.js"></script>
 <script src="js/sim.js"></script>
 <script src="js/dunya.js"></script>
+<script src="js/harita.js"></script>
 <script src="js/arayuz.js"></script>
 </body>
 </html>

@@ -2,7 +2,7 @@
 'use strict';
 (function () {
   const V = window.VERI, $ = s => document.querySelector(s);
-  const IKON = { cadir: '⛺', ev: '🏠', tarla: '🌾', agil: '🐑', oduncu: '🪓', tasocagi: '⛏️', pazar: '🏪', mescit: '🕌', han: '🐫' };
+  const IKON = { cadir: '⛺', ev: '🏠', tarla: '🌾', agil: '🐑', oduncu: '🪓', tasocagi: '⛏️', pazar: '🏪', mescit: '🕌', han: '🐫', meydan: '🚩', ahir: '🐎' };
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const tam = x => Math.floor(x).toLocaleString('tr-TR');
   let S = null, modal = false, secili = null, sonAylik = {};
@@ -39,7 +39,10 @@
   }
   function dunyayiKur() { S.binalar.forEach(b => Dunya.binaEkle(b, Sim.binaV(b.tip))); }
   function basla() {
-    ['#ust', '#gorev', '#alt'].forEach(s => { $(s).hidden = false; });
+    ['#ust', '#gorev', '#alt', '#yan'].forEach(s => { $(s).hidden = false; });
+    $('#btnOrdu').onclick = orduPaneli;
+    $('#btnHarita').onclick = haritaAc;
+    Dunya.askerGoster(S.ordu.yaya + S.ordu.okcu + S.ordu.akinci, S.binalar.find(b => b.tip === 'meydan'));
     const [ci, cj] = S.merkez || Dunya.baslangicYeri(), [x, z] = Dunya.dunyadan(ci, cj);
     Dunya.odakla(x, z);
     const k = Dunya.kamera(); k.position.set(x - 20, 40, z + 38);
@@ -58,7 +61,7 @@
   }
   function ayGecti() {
     const onceki = Object.assign({}, S.kaynak);
-    const { rapor, bitenGorev } = Sim.ayGec(b => Dunya.cevre(b, Sim.binaV(b.tip)));
+    const { rapor, bitenGorev, savas } = Sim.ayGec(b => Dunya.cevre(b, Sim.binaV(b.tip)));
     sonAylik = rapor;
     S.binalar.forEach(b => Dunya.binaGuncelle(b));
     Dunya.mevsim(S.ay);
@@ -66,8 +69,49 @@
     uretimGoster();
     if (bitenGorev) bildirim(`Görev tamam: <b>${esc(bitenGorev.ad)}</b> · ${fxYazi(bitenGorev.odul)}`);
     if (S.gunluk.length && S.gunluk[0].t === Sim.tarihYazi()) bildirim(esc(S.gunluk[0].m));
+    Dunya.askerGoster(S.ordu.yaya + S.ordu.okcu + S.ordu.akinci, S.binalar.find(b => b.tip === 'meydan'));
     binaCubugu(); ciz();
-    tarihKontrol();
+    if (window.Harita.acik()) Harita.guncelle();
+    if (savas) savasRaporu(savas); else tarihKontrol();
+  }
+
+  /* ---------- ordu ---------- */
+  function orduPaneli() {
+    const o = S.ordu, top = o.yaya + o.okcu + o.akinci, limit = Math.floor(S.nufus * 0.35), ask = Sim.asker();
+    const egt = S.egitim.map(e => `${Sim.birlikV(e.tip).ikon} ${e.adet}`).join(' ');
+    sayfa(`<h2>⚔️ Ordu</h2><p class="alt-baslik">Askerler nüfustan çıkar ve çalışmaz. Her asker ayda ${String(V.BAKIM.yiyecek).replace('.', ',')} 🌾 ve ${String(V.BAKIM.akce).replace('.', ',')} 🪙 yer. Sınır: nüfusun %35'i (${limit}).</p>
+      <div class="dokum"><div><span>Hazır</span><span>🗡️ ${o.yaya} · 🏹 ${o.okcu} · 🐎 ${o.akinci}</span></div>
+      ${S.egitim.length ? `<div><span>Eğitimde (1 ay)</span><span>${egt}</span></div>` : ''}
+      ${S.sefer ? `<div><span>Seferde</span><span>${esc(Sim.yerV(S.sefer.hedef).ad)} · ${S.sefer.kalan} ay</span></div>` : ''}
+      <div><span>Toplam asker / sınır</span><span>${ask} / ${limit}</span></div></div>
+      ${V.BIRLIKLER.map(v => { const acik = Sim.say(v.gerek) > 0; return `<div class="birlik ${acik ? '' : 'kapali'}"><div><b>${v.ikon} ${esc(v.ad)}</b><small>${esc(v.acik)} · saldırı ${v.saldiri}, kuşatma ×${String(v.kusatma).replace('.', ',')}</small><small>${Object.entries(v.maliyet).map(([k, m]) => V.KAYNAK[k].ikon + m).join(' ')} / asker${acik ? '' : ' · 🔒 ' + esc(Sim.binaV(v.gerek).ad)}</small></div>
+        <div class="adet">${[1, 5].map(n => `<button data-yetis="${v.id}" data-n="${n}" ${acik ? '' : 'disabled'}>+${n}</button>`).join('')}</div></div>`; }).join('')}
+      <button class="btn ikincil" id="hBtn">🗺️ Sefer haritası</button>`, p => {
+      p.querySelectorAll('[data-yetis]').forEach(b => b.onclick = () => {
+        const r = Sim.egitimBaslat(b.dataset.yetis, +b.dataset.n);
+        if (r === 'nufus') bildirim('Asker sınırına ulaştın: nüfus artmalı.'); else if (r === 'kaynak') bildirim('Kaynak yetmiyor.'); else if (r === 'bina') bildirim('Önce gereken binayı kur.');
+        p.remove(); ciz(); orduPaneli();
+      });
+      p.querySelector('#hBtn').onclick = () => { p.remove(); haritaAc(); };
+    });
+  }
+  function haritaAc() {
+    modal = true;
+    Harita.ac({ kapat: () => { modal = false; ciz(); }, sefer: hedef => { Dunya.askerGoster(S.ordu.yaya + S.ordu.okcu + S.ordu.akinci, S.binalar.find(b => b.tip === 'meydan')); bildirim(`Ordu ${esc(Sim.yerV(hedef).ad)} yolunda.`); ciz(); } });
+  }
+  function savasRaporu(r) {
+    modal = true;
+    const el = document.createElement('div'); el.className = 'ferman';
+    const kayip = Object.entries(r.kayip).filter(([, n]) => n).map(([id, n]) => Sim.birlikV(id).ikon + ' ' + n).join(' · ') || 'yok';
+    const anlat = r.zafer
+      ? (r.savas ? `Bizans ordusu ovada saf tuttu. Akıncılar kanatlardan dolandı, okçular merkezi dağıttı. Bizans kumandanı geri çekildi.` : `Kuşatma sürdü; ${r.ivme < 1 ? 'kalenin erzakı tükenmişti ve' : ''} surlar sonunda teslim oldu. Halk vergiyi artık Osmanlı'ya ödeyecek.`)
+      : (r.savas ? 'Bizans saflarını yaramadık. Ordu dağınık halde geri döndü.' : 'Surlar fazla güçlüydü. Kuşatma kaldırıldı, ordu kayıplarla döndü.');
+    el.innerHTML = `<div class="kag"><p class="yil">${V.AYLAR[S.ay].toUpperCase()} ${S.yil}</p><h2>${r.zafer ? 'Zafer: ' : 'Hezimet: '}${esc(r.ad)}</h2><p>${anlat}</p>
+      <div class="fx"><span>Ordu gücü ${r.guc}</span><span>Savunma ${r.savunma}</span><span>Kayıp: ${kayip}</span>${r.zafer ? `<span>🪙+${r.ganimet}</span><span>👥+${r.tebaa}</span>` : ''}</div>
+      ${r.ivme < 1 ? '<p class="kaynak">Tarihte bu kale bu yıllarda Osmanlı\'ya geçti; savunması zayıflamıştı.</p>' : r.ivme > 1.2 ? '<p class="kaynak">Tarihin önüne geçtin: bu kale gerçekte daha sonra alındı, savunması çok güçlüydü.</p>' : ''}
+      <button class="btn" id="tm">Devam</button></div>`;
+    document.body.appendChild(el);
+    el.querySelector('#tm').onclick = () => { el.remove(); modal = false; Dunya.askerGoster(S.ordu.yaya + S.ordu.okcu + S.ordu.akinci, S.binalar.find(b => b.tip === 'meydan')); ciz(); tarihKontrol(); };
   }
   function hiz(h) {
     S.hiz = h; Dunya.hiz(h);
@@ -154,9 +198,12 @@
       p.querySelector('#yik').onclick = () => { Sim.binaYik(b.id); Dunya.binaKaldir(b, v); Dunya.nufusGuncelle(S.nufus, S.binalar, Sim.binaV); Sim.kaydet(); p.remove(); ciz(); binaCubugu(); };
     });
   }
+  // alt sayfa: açıkken zaman durur (ferman panelin üstüne binmesin)
   function sayfa(html, bagla) {
     const p = document.createElement('div'); p.className = 'perde';
     p.innerHTML = `<div class="sayfa panel">${html}</div>`;
+    modal = true;
+    const kaldir = p.remove.bind(p); p.remove = () => { kaldir(); modal = !!document.querySelector('.ferman, .harita, .perde'); };
     p.onclick = e => { if (e.target === p) p.remove(); };
     document.body.appendChild(p); if (bagla) bagla(p);
   }
@@ -176,6 +223,9 @@
   }
   function ferman(e) {
     modal = true; S.okunan.push(e.baslik); Sim.kaydet();
+    if (e.savas && S.kaleler.koyunhisar.sahip !== 'osm') {
+      e = Object.assign({}, e, { fx: {}, metin: e.metin + ' Tarih seni bekliyor: haritadan Koyunhisar\'a sefer düzenle. Bizans ordusu ovada.' });
+    }
     const el = document.createElement('div'); el.className = 'ferman';
     const kapat = () => { el.remove(); modal = false; Dunya.nufusGuncelle(S.nufus, S.binalar, Sim.binaV); ciz(); binaCubugu(); Sim.kaydet(); if (e.son) bolumSonu(); else tarihKontrol(); };
     const govde = sonuc => `<p class="yil">${V.AYLAR[e.ay].toUpperCase()} ${e.yil}</p><h2>${esc(e.baslik)}</h2><p>${esc(e.metin)}</p><p class="kaynak">Kaynak: ${esc(e.kaynak)}</p>${sonuc || ''}`;

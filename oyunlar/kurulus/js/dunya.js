@@ -303,6 +303,25 @@
       kutu(g, 0.6, 1.0, 0.08, 0x5a3a24, 0, 0, 1.31);
       for (const x of [-0.8, 0.8]) kutu(g, 0.3, 0.55, 0.06, 0x3a4a5a, x, 0.75, 1.31);
     },
+    meydan(g) {
+      kutu(g, 3.6, 0.05, 3.6, 0xb59a6a, 0, 0, 0);
+      silindir(g, 0.05, 0.06, 3.2, 0x6b4a2f, -1.5, 0, -1.5, 6);
+      const f = new T.Mesh(new T.PlaneGeometry(1.1, 0.7), new T.MeshLambertMaterial({ color: 0xa3222f, side: T.DoubleSide })); f.position.set(-0.95, 2.8, -1.5); g.add(f); g.userData.sancak = f;
+      kutu(g, 1.4, 0.08, 0.1, 0x7a5a38, 1.0, 0.9, -1.6); for (let k = 0; k < 5; k++) { const m = silindir(g, 0.02, 0.02, 1.4, 0x9a8a70, 0.5 + k * 0.25, 0, -1.55, 4); m.rotation.x = 0.15; }
+      const h = silindir(g, 0.45, 0.45, 0.08, 0xe8dcc0, 1.4, 0.7, 1.4, 12); h.rotation.x = Math.PI / 2;
+      const h2 = silindir(g, 0.28, 0.28, 0.09, 0xa3222f, 1.4, 0.7, 1.4, 12); h2.rotation.x = Math.PI / 2;
+      silindir(g, 0.04, 0.04, 0.75, 0x6b4a2f, 1.4, 0, 1.36, 4);
+      g.userData.anim = t => { if (g.userData.sancak) g.userData.sancak.rotation.y = Math.sin(t * 2.2) * 0.25; };
+    },
+    ahir(g) {
+      kutu(g, 3.2, 1.0, 1.2, 0x8a6440, 0, 0, -1.1); const c = kutu(g, 3.4, 0.08, 1.5, 0x5a4a30, 0, 1.05, -1.1); c.rotation.x = 0.12;
+      cit(g, 3.6, 3.4);
+      for (let k = 0; k < 4; k++) {
+        const a = new T.Group(); kutu(a, 0.75, 0.38, 0.26, [0x6b3f22, 0x2a1d15, 0x8a5a32, 0xc8b8a0][k], 0, 0.42); kutu(a, 0.2, 0.42, 0.18, [0x6b3f22, 0x2a1d15, 0x8a5a32, 0xc8b8a0][k], 0.38, 0.62);
+        for (const [x, z] of [[-0.28, -0.09], [-0.28, 0.09], [0.28, -0.09], [0.28, 0.09]]) kutu(a, 0.06, 0.42, 0.06, 0x2a1d15, x, 0, z);
+        a.position.set(-1.1 + k * 0.75, 0, 0.6 + (k % 2) * 0.5); a.rotation.y = rnd() * 6; g.add(a);
+      }
+    },
     han(g) {
       const tas = 0xc9b48e;
       kutu(g, 3.6, 1.5, 0.5, tas, 0, 0, -1.55); kutu(g, 3.6, 1.5, 0.5, tas, 0, 0, 1.55); kutu(g, 0.5, 1.5, 3.1, tas, -1.55, 0, 0); kutu(g, 0.5, 1.5, 3.1, tas, 1.55, 0, 0);
@@ -538,7 +557,33 @@
     return en || [N / 2, N / 2];
   }
 
-  window.Dunya = {
+  /* ---------- askerler: alay meydanında saf ---------- */
+  let askerler = null, askerBas = null, askerMizrak = null;
+  function askerGoster(n, meydan) {
+    if (!askerler) {
+      const MAX = 60;
+      const govde = new T.CylinderGeometry(0.17, 0.23, 0.66, 6); govde.translate(0, 0.33, 0);
+      const bas = new T.SphereGeometry(0.16, 6, 5); bas.translate(0, 0.82, 0);
+      const miz = new T.BoxGeometry(0.04, 1.6, 0.04); miz.translate(0.22, 0.8, 0.05);
+      askerler = new T.InstancedMesh(govde, new T.MeshLambertMaterial({ color: 0x8b1a2b, flatShading: true }), MAX);
+      askerBas = new T.InstancedMesh(bas, new T.MeshLambertMaterial({ color: 0xf2ece0 }), MAX);   // beyaz sarık
+      askerMizrak = new T.InstancedMesh(miz, new T.MeshLambertMaterial({ color: 0x7a5a38 }), MAX);
+      [askerler, askerBas, askerMizrak].forEach(m => { m.castShadow = true; m.frustumCulled = false; sahne.add(m); });
+    }
+    const g = meydan && binaNesne.get(meydan.id);
+    const say = g && meydan.insa >= 1 ? Math.min(60, n) : 0;
+    const m = new T.Matrix4(), q = new T.Quaternion();
+    for (let k = 0; k < say; k++) {
+      const sira = Math.floor(k / 8), sut = k % 8;
+      const v = new T.Vector3(-1.4 + sut * 0.42, 0, -0.6 + sira * 0.5).applyAxisAngle(new T.Vector3(0, 1, 0), g.rotation.y).add(g.position);
+      m.compose(v, q.setFromAxisAngle(new T.Vector3(0, 1, 0), g.rotation.y + Math.PI), new T.Vector3(1, 1, 1));
+      askerler.setMatrixAt(k, m); askerBas.setMatrixAt(k, m); askerMizrak.setMatrixAt(k, m);
+    }
+    askerler.count = askerBas.count = askerMizrak.count = say;
+    [askerler, askerBas, askerMizrak].forEach(x => { x.instanceMatrix.needsUpdate = true; });
+  }
+
+  window.Dunya = { askerGoster,
     kur, mevsim, binaEkle, binaGuncelle, binaKaldir, cevre, uygun, yerlestirmeBasla, yerlestirmeBitir, yerlestirDondur,
     yerlestirme: () => yerlestir, nufusGuncelle, odakla, ekranKonum, baslangicYeri, karo: () => karo, dunyadan,
     hiz: h => { hizCarpan = h; }, kamera: () => kamera, kontrol: () => kontrol
