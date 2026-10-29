@@ -76,9 +76,40 @@ window.VERI = {
       { id: 'izmit', ad: 'İzmit', eski: 'Nikomedia', e: 40.77, b: 29.93, sahip: 'biz', garnizon: 160, sur: 2.5, fetih: 1337, not: "Bithynia'daki son Bizans kalesi, 1337'de alındı." },
       { id: 'kostantiniye', ad: 'Konstantinopolis', e: 41.01, b: 28.98, sahip: 'biz', garnizon: 2000, sur: 5, fetih: 1453, kapali: true, not: "Bizans'ın başkenti. Fethi 1453'te." },
       { id: 'kutahya', ad: 'Kütahya ↓', e: 39.66, b: 29.98, sahip: 'ger', kapali: true, not: "Germiyanoğulları'nın merkezi. Bu dönemin en güçlü beyliklerinden." },
-      { id: 'balikesir', ad: '← Karesi', e: 39.95, b: 28.5, sahip: 'kar', kapali: true, not: "Karesioğulları beyliğinin merkezi." }
+      { id: 'balikesir', ad: '← Karesi', e: 39.95, b: 28.5, sahip: 'kar', garnizon: 40, sur: 1.2, fetih: 1345, donanma: true, not: "Karesioğulları (Balıkesir). İlhak tarihi tartışmalı: 1335, 1336, 1345 ya da 1348/49. Alınırsa Karesi donanmasıyla Rumeli'ye geçiş açılır." },
+      { id: 'pelekanon', ad: 'Pelekanon', e: 40.93, b: 29.15, sahip: 'biz', garnizon: 45, sur: 1.0, fetih: 1329, savas: true, dusman: 'biz', komutan: 'III. Andronikos ve Kantakuzenos', not: "10–11 Haziran 1329 (gün tartışmalı). Orhan Bey yaklaşık 8.000 kişiyle yaklaşık 4.000 kişilik Bizans ordusunu yendi; imparator yaralandı." },
+      // Rumeli (bolge: rumeli). Geçiş için Karesi donanması gerekir.
+      { id: 'cimpe', ad: 'Çimpe', bolge: 'rumeli', e: 40.5, b: 26.73, sahip: 'biz', garnizon: 18, sur: 1.1, fetih: 1352, ly: 4, lx: 22, not: "c. 1352'de VI. Kantakuzenos tarafından Osmanlılara verildi; geleneksel anlatıya göre Süleyman Paşa 1356'da 39 akıncıyla aldı (tartışmalı). Rumeli'deki ilk dayanak." },
+      { id: 'gelibolu', ad: 'Gelibolu', eski: 'Kallipolis', bolge: 'rumeli', e: 40.41, b: 26.67, sahip: 'biz', garnizon: 50, sur: 2.0, fetih: 1354, lx: -26, not: "1–2 Mart 1354 gecesi depremde surları yıkıldı; Süleyman Paşa bir ay içinde şehri aldı. Avrupa'daki ilk Osmanlı kalesi." },
+      { id: 'dimetoka', ad: 'Dimetoka', eski: 'Didymoteichon', bolge: 'rumeli', e: 41.35, b: 26.5, sahip: 'biz', garnizon: 40, sur: 1.6, fetih: 1361, not: "1360 ya da 1361'de alındı. I. Murad'ın sarayı bir süre burada ve Bursa'daydı." },
+      { id: 'edirne', ad: 'Edirne', eski: 'Adrianopolis', bolge: 'rumeli', lx: 40, ly: -14, e: 41.68, b: 26.56, sahip: 'biz', garnizon: 90, sur: 2.2, fetih: 1369, not: "Lala Şahin Paşa aldı. Tarih tartışmalı: 1361–62, 1367, 1369 ya da 1371 önerilir; modern akademisyenlerin çoğu 1369'u kabul eder. Murad 1376/77 kışında Edirne'ye girdi." },
+      { id: 'sirpsindigi', ad: 'Sırpsındığı', bolge: 'rumeli', lx: -46, ly: -30, e: 41.85, b: 26.4, sahip: 'biz', garnizon: 55, sur: 1.0, fetih: 1364, savas: true, dusman: 'sirp', komutan: 'Sırp, Bulgar ve Macar kuvvetleri', not: "1364: Hacı İlbey'in meşalelerle sayıca kalabalık görünen gece baskını. Avrupa kaynaklarında bu savaşın kaydı yoktur (tartışmalı)." },
+      { id: 'filibe', ad: 'Filibe', eski: 'Philippopolis', bolge: 'rumeli', e: 42.15, b: 24.75, sahip: 'biz', garnizon: 60, sur: 1.8, fetih: 1363, not: "1363'te alındı." },
+      { id: 'sofya', ad: 'Sofya', bolge: 'rumeli', e: 42.7, b: 23.33, sahip: 'biz', garnizon: 70, sur: 1.8, fetih: 1382, not: "1380–82 arası iki kuşatmayla alındı (bazı kaynaklar 1385 der). Savunmayı Yanuka yönetti." },
+      { id: 'kosova', ad: 'Kosova', bolge: 'rumeli', e: 42.72, b: 21.09, sahip: 'biz', garnizon: 150, sur: 1.0, fetih: 1389, savas: true, dusman: 'sirp', komutan: 'Knez Lazar', not: "15 Haziran 1389. I. Murad ve Knez Lazar savaşta öldü; sonuç kaynaklara göre belirsiz. Osmanlı 27–40 bin, karşı taraf 12–25 bin (tartışmalı)." },
+      { id: 'nigbolu', ad: 'Niğbolu', eski: 'Nikopolis', bolge: 'rumeli', e: 43.71, b: 24.9, sahip: 'biz', garnizon: 170, sur: 1.0, fetih: 1396, savas: true, dusman: 'hacli', komutan: 'Macar Kralı Sigismund', not: "25 Eylül 1396. Yıldırım Bayezid haçlı ordusunu yendi; Nevers Kontu esir düştü, Sigismund kayıkla kaçtı." }
     ],
-    yollar: [['sogut', 'bilecik'], ['bilecik', 'yarhisar'], ['yarhisar', 'inegol'], ['yarhisar', 'yenisehir'], ['sogut', 'karacahisar'], ['bilecik', 'lefke'], ['yenisehir', 'iznik'], ['lefke', 'iznik'], ['iznik', 'koyunhisar'], ['koyunhisar', 'izmit'], ['iznik', 'gemlik'], ['gemlik', 'mudanya'], ['inegol', 'bursa'], ['yenisehir', 'bursa'], ['mudanya', 'bursa'], ['karacahisar', 'kutahya'], ['bursa', 'balikesir'], ['izmit', 'kostantiniye']],
+    bolgeler: {
+      anadolu: { ad: 'Anadolu', enlemMin: 39.6, enlemMax: 41.12, boylamMin: 28.45, boylamMax: 30.75 },
+      rumeli: { ad: 'Rumeli', enlemMin: 40.0, enlemMax: 44.2, boylamMin: 20.6, boylamMax: 29.6 }
+    },
+    // Rumeli denizleri (yaklaşık kıyılar)
+    rumeli: {
+      denizler: [
+        [[41.0, 28.98], [41.07, 28.25], [40.98, 27.95], [40.97, 27.5], [40.75, 27.3], [40.6, 27.1], [40.42, 26.67], [40.25, 26.48], [40.05, 26.2], [40.15, 26.42], [40.35, 26.68], [40.42, 27.0], [40.35, 27.4], [40.35, 27.97], [40.38, 28.5], [40.38, 28.88], [40.45, 29.2], [40.6, 29.05], [40.69, 29.6], [40.76, 29.6], [40.87, 29.2], [40.98, 29.03]],
+        [[40.05, 26.2], [40.4, 26.25], [40.6, 26.5], [40.65, 26.3], [40.72, 26.05], [40.85, 25.87], [40.95, 25.3], [40.94, 24.4], [40.8, 23.9], [40.64, 22.94], [40.3, 22.6], [40.0, 22.5], [39.5, 22.5], [39.5, 26.6], [39.95, 26.1]],
+        [[41.2, 29.1], [41.25, 28.6], [41.6, 28.1], [42.0, 27.95], [42.5, 27.6], [43.0, 27.95], [43.4, 28.15], [43.8, 28.6], [44.5, 28.7], [44.5, 30.0], [41.2, 30.0]]
+      ],
+      nehirler: [
+        [[42.15, 24.75], [42.05, 25.4], [41.8, 26.1], [41.68, 26.56], [41.4, 26.45], [41.1, 26.3], [40.75, 26.05]],
+        [[44.3, 20.6], [44.0, 22.4], [43.99, 22.88], [43.75, 23.8], [43.71, 24.9], [43.85, 25.97], [44.11, 27.26], [44.25, 28.0], [44.5, 28.3]]
+      ],
+      nehirAd: [[42.0, 25.6, 'Meriç'], [43.85, 23.5, 'Tuna']],
+      daglar: [[42.6, 25.0, 'Balkan dağları'], [41.6, 24.2, 'Rodoplar'], [42.4, 22.4, '']],
+      denizAd: [[40.45, 25.0, 'Ege'], [42.8, 28.6, 'Karadeniz'], [40.72, 28.3, 'Marmara']]
+    },
+    yollar: [['sogut', 'bilecik'], ['bilecik', 'yarhisar'], ['yarhisar', 'inegol'], ['yarhisar', 'yenisehir'], ['sogut', 'karacahisar'], ['bilecik', 'lefke'], ['yenisehir', 'iznik'], ['lefke', 'iznik'], ['iznik', 'koyunhisar'], ['koyunhisar', 'izmit'], ['iznik', 'gemlik'], ['gemlik', 'mudanya'], ['inegol', 'bursa'], ['yenisehir', 'bursa'], ['mudanya', 'bursa'], ['karacahisar', 'kutahya'], ['bursa', 'balikesir'], ['izmit', 'kostantiniye'], ['bursa', 'balikesir'], ['izmit', 'pelekanon'],
+      ['cimpe', 'gelibolu'], ['gelibolu', 'dimetoka'], ['dimetoka', 'edirne'], ['edirne', 'sirpsindigi'], ['edirne', 'filibe'], ['filibe', 'sofya'], ['sofya', 'kosova'], ['sofya', 'nigbolu'], ['edirne', 'kostantiniye']],
     // Marmara kıyı şeridi (yaklaşık), İznik ve Sapanca gölleri, Sakarya nehri
     marmara: [[41.25, 27.75], [41.25, 28.0], [41.07, 28.25], [41.02, 28.58], [41.0, 28.98], [40.98, 29.03], [40.87, 29.2], [40.82, 29.3], [40.78, 29.42], [40.77, 29.6], [40.76, 29.93], [40.72, 29.8], [40.69, 29.6], [40.66, 29.3], [40.6, 29.05], [40.52, 28.8], [40.45, 29.0], [40.43, 29.15], [40.4, 29.0], [40.38, 28.88], [40.4, 28.6], [40.37, 28.2], [40.35, 27.97], [40.45, 27.86], [40.4, 27.75]],
     gol: [{ e: 40.44, b: 29.53, re: 0.06, rb: 0.17 }, { e: 40.71, b: 30.26, re: 0.02, rb: 0.08 }],

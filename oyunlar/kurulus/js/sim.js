@@ -60,14 +60,19 @@
     kaydet(); return 'tamam';
   }
   function mesafe(a, b) { return Math.hypot(a.e - b.e, (a.b - b.b) * 0.76); }
+  // Rumeli'ye geçiş: Karesi donanması ya da Rumeli'de bir dayanak kale
+  function gecisVar() { return S.kaleler.balikesir.sahip === 'osm' || V.HARITA.yerler.some(y => y.bolge === 'rumeli' && S.kaleler[y.id].sahip === 'osm'); }
   function seferSuresi(hedef, ordu) {
-    const d = mesafe(yerV('sogut'), yerV(hedef));
+    const bas = yerV(S.sehir === 'bursa' ? 'bursa' : 'sogut'), y = yerV(hedef);
     const hizli = ordu.akinci && !ordu.yaya && !ordu.okcu;
-    return Math.max(1, Math.round(d / (hizli ? 0.5 : 0.25)));
+    const d = mesafe(bas, y);
+    // ordu ayda ~120 km (≈1,2 derece), akıncılar iki katı; boğaz geçişi +1 ay
+    return Math.max(1, Math.round(d / (hizli ? 2.4 : 1.2))) + (y.bolge === 'rumeli' ? 1 : 0);
   }
   function seferBaslat(hedef, ordu) {
     const top = Object.values(ordu).reduce((a, b) => a + b, 0);
     if (!top) return 'bos'; if (S.sefer) return 'var';
+    if (yerV(hedef).bolge === 'rumeli' && !gecisVar()) return 'gecis';
     for (const k in ordu) { if (ordu[k] > S.ordu[k]) return 'yetersiz'; }
     for (const k in ordu) S.ordu[k] -= ordu[k];
     const sure = seferSuresi(hedef, ordu);
@@ -79,8 +84,10 @@
   function dusmanOrdusu(hedef) {
     const y = yerV(hedef), k = S.kaleler[hedef];
     const ivme = S.yil >= y.fetih ? 0.6 : 1 + Math.min(1.5, (y.fetih - S.yil) * 0.05);
-    const G = Math.round(k.garnizon * ivme);
-    return { skutatos: Math.round(G * 0.42), toksotes: Math.round(G * 0.2), katafrakt: Math.round(G * 0.16), alan: Math.round(G * 0.22), ivme };
+    const G = Math.round(k.garnizon * ivme), r = f => Math.round(G * f);
+    if (y.dusman === 'sirp') return { birlik: { sirp_piyade: r(0.42), sirp_okcu: r(0.18), sirp_sovalye: r(0.4) }, ivme, ad: 'Sırp ordusu' };
+    if (y.dusman === 'hacli') return { birlik: { hacli_piyade: r(0.3), arbaletci: r(0.25), sovalye: r(0.45) }, ivme, ad: 'Haçlı ordusu' };
+    return { birlik: { skutatos: r(0.42), toksotes: r(0.2), katafrakt: r(0.16), alan: r(0.22) }, ivme, ad: 'Bizans' };
   }
   // 3D savaş bitti: kalanlar döner, zaferse kale ve ganimet
   function meydanBitir(sonuc) {
@@ -97,7 +104,7 @@
   }
   function savasCoz(sefer) {
     const y = yerV(sefer.hedef), k = S.kaleler[sefer.hedef];
-    const sur = y.sur || 1;
+    const sur = k.sur != null ? k.sur : (y.sur || 1);
     let guc = 0;
     for (const [id, n] of Object.entries(sefer.ordu)) { const b = birlikV(id); guc += n * b.saldiri * (sur > 1.05 ? Math.pow(b.kusatma, 0.9) : (id === 'akinci' ? 1.25 : 1)); }
     guc *= 0.85 + S.memnun / 400;
@@ -247,5 +254,5 @@
   function yukle() { try { const d = JSON.parse(localStorage.getItem(KAYIT) || 'null'); if (d && d.surum === 1) { S = d; orduAlanlari(S); } return d && d.surum === 1 ? d : null; } catch (e) { return null; } }
   function sil() { try { localStorage.removeItem(KAYIT); } catch (e) { } }
 
-  window.Sim = { baskentTasi, kulliyeSay, dusmanOrdusu, meydanBitir, asker, egitimBaslat, seferBaslat, seferSuresi, birlikV, yerV, yeni, yukle, kaydet, sil, durum: () => S, ayGec, binaEkle, binaYik, say, konut, acikMi, alinabilir, binaV, tarihYazi, isciDagit };
+  window.Sim = { gecisVar, baskentTasi, kulliyeSay, dusmanOrdusu, meydanBitir, asker, egitimBaslat, seferBaslat, seferSuresi, birlikV, yerV, yeni, yukle, kaydet, sil, durum: () => S, ayGec, binaEkle, binaYik, say, konut, acikMi, alinabilir, binaV, tarihYazi, isciDagit };
 })();

@@ -37,10 +37,11 @@ button{font:inherit;color:inherit;cursor:pointer}
 .tarih{font:700 19px var(--f-baslik);color:var(--altin2);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tarih small{font:600 12px var(--f-govde);color:var(--soluk);margin-left:6px}
 .hiz{display:flex;gap:3px;flex:none}
-.hiz button{width:34px;height:28px;border-radius:8px;border:1px solid rgba(217,180,90,.3);background:rgba(255,255,255,.04);font-size:12px;font-weight:800;letter-spacing:-1px}
+.hiz button{width:32px;height:28px;border-radius:8px;border:1px solid rgba(217,180,90,.3);background:rgba(255,255,255,.04);font-size:12px;font-weight:800;letter-spacing:-1px}
 .hiz button[aria-pressed="true"]{background:var(--altin);color:var(--lac);border-color:var(--altin)}
 .gorev{position:fixed;left:8px;top:calc(96px + env(safe-area-inset-top));z-index:9;border-radius:12px;padding:6px 10px;max-width:72%;font-size:12.5px}
 .gorev b{color:var(--altin2);font-weight:700;margin-right:4px}
+.gorev{cursor:pointer}.gorev .git{color:var(--altin);font-weight:800;margin-left:4px}
 
 /* alt bina çubuğu */
 .alt{position:fixed;left:0;right:0;bottom:0;z-index:10;padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
@@ -109,9 +110,11 @@ button{font:inherit;color:inherit;cursor:pointer}
 .birlik .adet{display:flex;gap:6px}.birlik .adet button{min-width:44px;height:40px;border-radius:10px;border:1px solid rgba(217,180,90,.4);background:rgba(217,180,90,.12);font-weight:800}
 .harita{position:fixed;inset:0;z-index:35;background:#2b2016;display:flex;flex-direction:column}
 .h-ust{display:flex;justify-content:space-between;align-items:center;padding:calc(10px + env(safe-area-inset-top)) 14px 8px;color:var(--altin2);font:700 20px var(--f-baslik)}
+.h-bolge{display:flex;gap:6px;margin-bottom:4px}.h-bolge button{height:28px;padding:0 12px;border-radius:8px;border:1px solid rgba(217,180,90,.45);background:transparent;color:var(--krem);font:700 13px var(--f-govde)}.h-bolge button[aria-pressed="true"]{background:var(--altin);color:var(--lac)}
 .h-lejant{display:flex;gap:10px;flex-wrap:wrap;font:600 11px var(--f-govde);color:var(--krem);margin-top:2px}.h-lejant i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px}
-.h-ust button{width:40px;height:40px;border-radius:12px;border:1px solid rgba(217,180,90,.4);background:transparent;font-size:18px}
+.h-ust #hKapat{flex:none;width:40px;height:40px;border-radius:12px;border:1px solid rgba(217,180,90,.4);background:transparent;font-size:18px}
 .h-tuval{flex:1;min-height:0;display:flex;justify-content:center;align-items:center;padding:0 6px}
+.h-tuval.kaydir{justify-content:flex-start;overflow-x:auto;-webkit-overflow-scrolling:touch}.h-tuval.kaydir canvas{flex:none}
 .h-tuval canvas{border-radius:8px;box-shadow:0 0 0 2px #8a6a2a,0 10px 30px rgba(0,0,0,.5)}
 .h-bilgi{background:linear-gradient(#efdfb6,#e2cc96);color:#2b2016;padding:12px 14px calc(12px + env(safe-area-inset-bottom));max-height:40vh;overflow:auto;border-top:2px solid #8a6a2a}
 .h-bilgi h3{font:700 24px var(--f-baslik);margin:0}.h-bilgi h3 small{font-size:15px;color:#6b5530}
@@ -151,6 +154,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
 <script src="js/veri.js"></script>
+<script src="js/ses.js"></script>
 <script src="js/tarih.js"></script>
 <script src="js/sim.js"></script>
 <script src="js/dunya.js"></script>

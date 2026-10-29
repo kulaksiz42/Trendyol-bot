@@ -5,16 +5,19 @@
   const RENK = { osm: '#a3222f', biz: '#6b3fa0', ger: '#2f6b5a', kar: '#b5762a' };
   const SAHIP_AD = { osm: 'Osmanlı', biz: 'Bizans', ger: 'Germiyanoğulları', kar: 'Karesioğulları' };
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  let el = null, tuval, ctx, Wd, Hd, secili = null, cb = {};
+  let el = null, tuval, ctx, Wd, Hd, secili = null, cb = {}, bolge = 'anadolu', SN = H.bolgeler.anadolu;
+  const bolgede = y => (y.bolge || 'anadolu') === bolge || (y.id === 'kostantiniye');
 
   function ac(geriCagri) {
     cb = geriCagri || {};
     el = document.createElement('div'); el.className = 'harita';
-    el.innerHTML = `<div class="h-ust"><div><b>Sefer haritası · ${V.AYLAR[Sim.durum().ay]} ${Sim.durum().yil}</b><div class="h-lejant">${Object.entries(SAHIP_AD).map(([k, ad]) => `<span><i style="background:${RENK[k]}"></i>${ad}</span>`).join('')}</div></div><button id="hKapat" aria-label="Kapat">✕</button></div>
+    bolge = Sim.durum().sefer && Sim.yerV(Sim.durum().sefer.hedef).bolge === 'rumeli' ? 'rumeli' : bolge; SN = H.bolgeler[bolge];
+    el.innerHTML = `<div class="h-ust"><div><div class="h-bolge">${Object.entries(H.bolgeler).map(([id, b]) => `<button data-bolge="${id}" aria-pressed="${id === bolge}">${b.ad}</button>`).join('')}</div><b>Sefer haritası · ${V.AYLAR[Sim.durum().ay]} ${Sim.durum().yil}</b><div class="h-lejant">${Object.entries(SAHIP_AD).map(([k, ad]) => `<span><i style="background:${RENK[k]}"></i>${ad}</span>`).join('')}</div></div><button id="hKapat" aria-label="Kapat">✕</button></div>
       <div class="h-tuval"><canvas id="hTuval"></canvas></div><div class="h-bilgi" id="hBilgi"></div>`;
     document.body.appendChild(el);
     tuval = el.querySelector('#hTuval'); ctx = tuval.getContext('2d');
     el.querySelector('#hKapat').onclick = kapat;
+    el.querySelectorAll('[data-bolge]').forEach(b => b.onclick = () => { bolge = b.dataset.bolge; SN = H.bolgeler[bolge]; el.querySelectorAll('[data-bolge]').forEach(x => x.setAttribute('aria-pressed', x === b)); secili = null; boyut(); bilgi(null); });
     boyut(); window.addEventListener('resize', boyut);
     tuval.addEventListener('click', tik);
     bilgi(Sim.durum().sefer ? Sim.durum().sefer.hedef : null);
@@ -22,12 +25,20 @@
   function kapat() { if (el) el.remove(); el = null; window.removeEventListener('resize', boyut); if (cb.kapat) cb.kapat(); }
   function boyut() {
     const k = el.querySelector('.h-tuval'), w = k.clientWidth, h = k.clientHeight, d = Math.min(2, devicePixelRatio || 1);
-    const oran = (H.sinir.boylamMax - H.sinir.boylamMin) * 0.76 / (H.sinir.enlemMax - H.sinir.enlemMin);
+    const oran = (SN.boylamMax - SN.boylamMin) * 0.76 / (SN.enlemMax - SN.enlemMin);
     Wd = Math.min(w, h * oran); Hd = Wd / oran;
+    // geniş bölge dar ekrana sığmıyorsa: haritayı büyüt, parmakla yana kaydırılsın
+    const kaydir = Wd < w * 0.98 ? false : Hd < h * 0.6;
+    if (kaydir) { Hd = Math.min(h - 8, w * 2.2 / oran); Wd = Hd * oran; }
+    k.classList.toggle('kaydir', kaydir);
     tuval.width = Wd * d; tuval.height = Hd * d; tuval.style.width = Wd + 'px'; tuval.style.height = Hd + 'px';
     ctx.setTransform(d, 0, 0, d, 0, 0); ciz();
+    if (kaydir) {
+      const S = Sim.durum(), odak = Sim.yerV(S.sefer ? S.sefer.hedef : bolge === 'rumeli' ? 'edirne' : 'bursa');
+      k.scrollLeft = px(odak.e, odak.b)[0] - w / 2;
+    }
   }
-  const px = (e, b) => [(b - H.sinir.boylamMin) / (H.sinir.boylamMax - H.sinir.boylamMin) * Wd, (H.sinir.enlemMax - e) / (H.sinir.enlemMax - H.sinir.enlemMin) * Hd];
+  const px = (e, b) => [(b - SN.boylamMin) / (SN.boylamMax - SN.boylamMin) * Wd, (SN.enlemMax - e) / (SN.enlemMax - SN.enlemMin) * Hd];
 
   function ciz() {
     const S = Sim.durum();
@@ -35,6 +46,7 @@
     const g = ctx.createRadialGradient(Wd / 2, Hd / 2, 10, Wd / 2, Hd / 2, Math.max(Wd, Hd) * 0.7);
     g.addColorStop(0, '#f3e6c4'); g.addColorStop(1, '#d9c28c');
     ctx.fillStyle = g; ctx.fillRect(0, 0, Wd, Hd);
+    if (bolge === 'rumeli') { rumeliCiz(); yerlerCiz(S); return; }
     // deniz: kıyı şeridinin kuzeyi
     ctx.beginPath(); H.marmara.forEach(([e, b], i) => { const [x, y] = px(e, b); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
     ctx.lineTo(0, px(40.38, 28.45)[1]); ctx.lineTo(0, 0); ctx.closePath();
@@ -46,20 +58,32 @@
     ctx.fillStyle = 'rgba(40,70,80,.55)'; ctx.font = 'italic 600 13px Cormorant Garamond, Georgia, serif';
     ctx.fillText('Marmara', ...px(40.7, 28.6)); ctx.fillText('Karadeniz', ...px(41.08, 30.3));
     // göller
-    H.gol.forEach(l => { const [x, y] = px(l.e, l.b); const rx = l.rb / (H.sinir.boylamMax - H.sinir.boylamMin) * Wd, ry = l.re / (H.sinir.enlemMax - H.sinir.enlemMin) * Hd; ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, 7); ctx.fillStyle = '#9fc2c9'; ctx.fill(); ctx.stroke(); });
+    H.gol.forEach(l => { const [x, y] = px(l.e, l.b); const rx = l.rb / (SN.boylamMax - SN.boylamMin) * Wd, ry = l.re / (SN.enlemMax - SN.enlemMin) * Hd; ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, 7); ctx.fillStyle = '#9fc2c9'; ctx.fill(); ctx.stroke(); });
     // nehir
     ctx.beginPath(); H.nehir.forEach(([e, b], i) => { const [x, y] = px(e, b); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
     ctx.strokeStyle = '#6a9aa3'; ctx.lineWidth = 2.2; ctx.stroke();
     ctx.fillStyle = 'rgba(40,70,80,.55)'; ctx.font = 'italic 600 11px Cormorant Garamond, Georgia, serif'; ctx.fillText('Sakarya', ...px(40.62, 30.42));
     // dağlar
     H.daglar.forEach(([e, b, ad]) => { const [x, y] = px(e, b); ctx.fillStyle = '#b39a6a'; for (const d of [-9, 0, 9]) { ctx.beginPath(); ctx.moveTo(x + d - 8, y + 6); ctx.lineTo(x + d, y - 8 - (d ? 0 : 4)); ctx.lineTo(x + d + 8, y + 6); ctx.fill(); } if (ad) { ctx.fillStyle = '#6b5530'; ctx.font = 'italic 11px Cormorant Garamond, Georgia, serif'; ctx.fillText(ad, x - 14, y + 18); } });
+    yerlerCiz(S);
+  }
+  function rumeliCiz() {
+    const R = H.rumeli, cokgen = (l, fill) => { ctx.beginPath(); l.forEach(([e, b], i) => { const [x, y] = px(e, b); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); ctx.strokeStyle = '#6a8f96'; ctx.lineWidth = 1.3; ctx.stroke(); };
+    R.denizler.forEach(d => cokgen(d, '#9fc2c9'));
+    R.nehirler.forEach(n => { ctx.beginPath(); n.forEach(([e, b], i) => { const [x, y] = px(e, b); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.strokeStyle = '#6a9aa3'; ctx.lineWidth = 2.2; ctx.stroke(); });
+    ctx.fillStyle = 'rgba(40,70,80,.6)'; ctx.font = 'italic 600 13px Cormorant Garamond, Georgia, serif';
+    R.denizAd.forEach(([e, b, ad]) => ctx.fillText(ad, ...px(e, b)));
+    ctx.font = 'italic 600 11px Cormorant Garamond, Georgia, serif'; R.nehirAd.forEach(([e, b, ad]) => ctx.fillText(ad, ...px(e, b)));
+    R.daglar.forEach(([e, b, ad]) => { const [x, y] = px(e, b); ctx.fillStyle = '#b39a6a'; for (const d of [-9, 0, 9]) { ctx.beginPath(); ctx.moveTo(x + d - 8, y + 6); ctx.lineTo(x + d, y - 8 - (d ? 0 : 4)); ctx.lineTo(x + d + 8, y + 6); ctx.fill(); } if (ad) { ctx.fillStyle = '#6b5530'; ctx.font = 'italic 11px Cormorant Garamond, Georgia, serif'; ctx.fillText(ad, x - 22, y + 18); } });
+  }
+  function yerlerCiz(S) {
     // yollar
     ctx.setLineDash([4, 4]); ctx.strokeStyle = 'rgba(107,85,48,.7)'; ctx.lineWidth = 1.3;
-    H.yollar.forEach(([a, b]) => { const A = Sim.yerV(a), B = Sim.yerV(b); ctx.beginPath(); ctx.moveTo(...px(A.e, A.b)); ctx.lineTo(...px(B.e, B.b)); ctx.stroke(); });
+    H.yollar.forEach(([a, b]) => { const A = Sim.yerV(a), B = Sim.yerV(b); if (!bolgede(A) || !bolgede(B)) return; ctx.beginPath(); ctx.moveTo(...px(A.e, A.b)); ctx.lineTo(...px(B.e, B.b)); ctx.stroke(); });
     ctx.setLineDash([]);
     // sefer yolu ve ordu
-    if (S.sefer) {
-      const A = Sim.yerV('sogut'), B = Sim.yerV(S.sefer.hedef), u = 1 - S.sefer.kalan / S.sefer.sure;
+    if (S.sefer && bolgede(Sim.yerV(S.sefer.hedef))) {
+      const B = Sim.yerV(S.sefer.hedef), A = B.bolge === 'rumeli' ? Sim.yerV('cimpe') : Sim.yerV(S.sehir === 'bursa' ? 'bursa' : 'sogut'), u = 1 - S.sefer.kalan / S.sefer.sure;
       const [x1, y1] = px(A.e, A.b), [x2, y2] = px(B.e, B.b);
       ctx.strokeStyle = '#a3222f'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
       const x = x1 + (x2 - x1) * Math.max(0.12, u), y = y1 + (y2 - y1) * Math.max(0.12, u);
@@ -67,6 +91,7 @@
     }
     // yerler
     H.yerler.forEach(y => {
+      if (!bolgede(y)) return;
       const [x, yy] = px(y.e, y.b), k = S.kaleler[y.id], renk = RENK[k.sahip] || '#555';
       const r = y.baskent ? 9 : y.garnizon > 100 || y.kapali ? 8 : 6.5;
       if (secili === y.id) { ctx.beginPath(); ctx.arc(x, yy, r + 6, 0, 7); ctx.strokeStyle = '#2b2016'; ctx.lineWidth = 2; ctx.stroke(); }
@@ -86,13 +111,13 @@
   function tik(e) {
     const r = tuval.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
     let en = null, d = 28;
-    H.yerler.forEach(y => { const [x, yy] = px(y.e, y.b), m = Math.hypot(x - mx, yy - my); if (m < d) { d = m; en = y.id; } });
+    H.yerler.forEach(y => { if (!bolgede(y)) return; const [x, yy] = px(y.e, y.b), m = Math.hypot(x - mx, yy - my); if (m < d) { d = m; en = y.id; } });
     if (en) bilgi(en);
   }
   function tahmin(y) {
     const S = Sim.durum(), k = S.kaleler[y.id];
     const ivme = (S.yil >= y.fetih ? 0.6 : 1 + Math.min(1.5, (y.fetih - S.yil) * 0.05)) * (y.abluka && S.yil >= y.abluka ? 0.75 : 1);
-    return Math.round(k.garnizon * 4 * (y.sur || 1) * ivme);
+    return Math.round(k.garnizon * 4 * (k.sur != null ? k.sur : (y.sur || 1)) * ivme);
   }
   function orduGucu(o, y) {
     let g = 0; for (const [id, n] of Object.entries(o)) { const b = Sim.birlikV(id); g += n * b.saldiri * ((y.sur || 1) > 1.05 ? Math.pow(b.kusatma, 0.9) : (id === 'akinci' ? 1.25 : 1)); }
@@ -101,6 +126,7 @@
   function bilgi(id) {
     secili = id; ciz();
     const S = Sim.durum(), b = el.querySelector('#hBilgi');
+    if (!id && bolge === 'rumeli' && !Sim.gecisVar()) { b.innerHTML = '<p class="h-not">Rumeli\'ye geçmek için gemi gerekli. Anadolu\'da Karesi beyliğini al (Bursa\'nın batısı): donanması boğazı geçirir.</p>'; return; }
     if (!id) { b.innerHTML = `<p class="h-not">Bir kaleye dokun. ${S.sefer ? '' : 'Ordun Söğüt\'te bekliyor.'}</p>`; return; }
     const y = Sim.yerV(id), k = S.kaleler[id];
     let govde = `<h3>${esc(y.ad)}${y.eski ? ` <small>(${esc(y.eski)})</small>` : ''}</h3><p class="h-not"><b style="color:${RENK[k.sahip]}">${SAHIP_AD[k.sahip]}</b>${y.fetih ? ` · Gerçek tarih: ${esc(y.not)}` : ' · ' + esc(y.not || '')}</p>`;
@@ -118,7 +144,7 @@
       b.innerHTML = govde;
       if (!S.sefer && top) {
         ciz2();
-        b.querySelector('#hGit').onclick = () => { const r = Sim.seferBaslat(id, sec); if (r === 'tamam') { if (cb.sefer) cb.sefer(id); bilgi(id); } };
+        b.querySelector('#hGit').onclick = () => { const r = Sim.seferBaslat(id, sec); if (r === 'tamam') { if (cb.sefer) cb.sefer(id); bilgi(id); } else if (r === 'gecis' && cb.bildir) cb.bildir('Boğazı geçmek için gemi gerekli: önce Karesi beyliğini al.'); };
       }
       return;
     } else if (k.sahip === 'osm' && id !== 'sogut') govde += '<p class="h-not">Senin toprağın: her ay 3 akçe ve 4 yiyecek (tımar).</p>';

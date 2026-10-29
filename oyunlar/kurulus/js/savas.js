@@ -11,8 +11,16 @@
     skutatos:  { ad: 'Skutatos (kalkanlı piyade)', ikon: '🛡️', hiz: 2.1, vur: 0.05, sav: 5, menzil: 0, renk: 0x4a3a8a, bas: 0x9a9aa8, mizrak: true },
     toksotes:  { ad: 'Toksotes (okçu)', ikon: '🏹', hiz: 2.4, vur: 0.025, sav: 2, menzil: 24, ok: 0.026, renk: 0x5a4a9a, bas: 0x9a9aa8 },
     katafrakt: { ad: 'Katafrakt (ağır süvari)', ikon: '🐴', hiz: 4.8, vur: 0.1, hucum: 1.8, sav: 6, menzil: 0, renk: 0x3a3a5a, bas: 0xb8b8c8, atli: true },
-    alan:      { ad: 'Alan paralı askerleri', ikon: '🐴', hiz: 5.5, vur: 0.07, sav: 3, menzil: 0, renk: 0x6a5a3a, bas: 0x8a7a5a, atli: true, bekler: true }
+    alan:      { ad: 'Alan paralı askerleri', ikon: '🐴', hiz: 5.5, vur: 0.07, sav: 3, menzil: 0, renk: 0x6a5a3a, bas: 0x8a7a5a, atli: true, bekler: true },
+    sirp_piyade:  { ad: 'Sırp piyadesi', ikon: '🛡️', hiz: 2.2, vur: 0.05, sav: 4, menzil: 0, renk: 0x7a2a2a, bas: 0xa8a8b0, mizrak: true },
+    sirp_okcu:    { ad: 'Sırp okçuları', ikon: '🏹', hiz: 2.4, vur: 0.025, sav: 2, menzil: 24, ok: 0.026, renk: 0x6a3a2a, bas: 0xa8a8b0 },
+    sirp_sovalye: { ad: 'Sırp ağır süvarisi', ikon: '🐴', hiz: 4.6, vur: 0.11, hucum: 2.0, sav: 6, menzil: 0, renk: 0x5a1a1a, bas: 0xc8c8d0, atli: true },
+    hacli_piyade: { ad: 'Haçlı piyadesi', ikon: '🛡️', hiz: 2.1, vur: 0.055, sav: 5, menzil: 0, renk: 0x2a3a6a, bas: 0xc0c0c8, mizrak: true },
+    arbaletci:    { ad: 'Arbaletçiler', ikon: '🏹', hiz: 2.2, vur: 0.025, sav: 3, menzil: 22, ok: 0.034, renk: 0x3a4a7a, bas: 0xc0c0c8 },
+    sovalye:      { ad: 'Haçlı şövalyeleri', ikon: '🐴', hiz: 4.2, vur: 0.13, hucum: 2.4, sav: 7, menzil: 0, renk: 0xe8e8f0, bas: 0xd0d0d8, atli: true }
   };
+  // düşman birliklerinin dizilişi (x, z)
+  const DUZEN = { skutatos: [0, -18], toksotes: [0, -29], katafrakt: [20, -20], alan: [-26, -34], sirp_piyade: [0, -18], sirp_okcu: [0, -29], sirp_sovalye: [-20, -22], hacli_piyade: [0, -16], arbaletci: [0, -27], sovalye: [0, -38] };
   let el, renderer, sahne, kamera, kontrol, saat, alaylar = [], secili = null, bitti = false, hiz = 1, sure = 0, cb, bilgi, oklar = [], okMesh;
   const _m = new T.Matrix4(), _q = new T.Quaternion(), _v = new T.Vector3(), _s = new T.Vector3(1, 1, 1);
 
@@ -32,13 +40,9 @@
     if (b.akinci >= 4) { alayEkle(0, 'akinci', Math.ceil(b.akinci / 2), -22, 22, 'Sol kanat akıncı'); alayEkle(0, 'akinci', Math.floor(b.akinci / 2), 22, 22, 'Sağ kanat akıncı'); }
     else if (b.akinci) alayEkle(0, 'akinci', b.akinci, -20, 22, 'Akıncılar');
     // Bizans
-    const d = o.dusman;
-    if (d.skutatos) alayEkle(1, 'skutatos', d.skutatos, 0, -18, 'Skutatoslar');
-    if (d.toksotes) alayEkle(1, 'toksotes', d.toksotes, 0, -29, 'Toksotesler');
-    if (d.katafrakt) alayEkle(1, 'katafrakt', d.katafrakt, 20, -20, 'Katafraktlar');
-    if (d.alan) alayEkle(1, 'alan', d.alan, -26, -34, 'Alan paralıları');
+    for (const [tur, n] of Object.entries(o.dusman)) if (n > 0 && TUR[tur]) alayEkle(1, tur, n, DUZEN[tur][0], DUZEN[tur][1], TUR[tur].ad);
     // varsayılan emirler: okçular ateş eder, diğerleri tutar
-    alaylar.forEach(a => { a.emir = a.tur === 'okcu' || a.tur === 'toksotes' ? 'ates' : 'tut'; });
+    alaylar.forEach(a => { a.emir = a.v.menzil ? 'ates' : 'tut'; });
     secili = alaylar.find(a => a.taraf === 0) || null;
     arayuzCiz(); requestAnimationFrame(boyut);
     el.querySelector('#svHiz').onclick = () => { hiz = hiz === 1 ? 2 : hiz === 2 ? 3 : 1; el.querySelector('#svHiz').textContent = hiz + '×'; };
@@ -132,7 +136,7 @@
       if (a.taraf === 1 && !a.bozuk) {
         if (a.v.bekler) { const ort = ortMoral(1); a.emir = ort < 45 ? 'geri' : (a.temas > 0 ? 'saldir' : 'tut'); }
         else if (a.v.menzil) a.emir = 'ates';
-        else a.emir = sure > (a.tur === 'skutatos' ? 3 : 6) ? 'saldir' : 'tut';
+        else a.emir = sure > (a.v.atli ? 6 : 3) ? 'saldir' : 'tut';
       }
       // kaçış
       if (a.bozuk) { yuru(a, a.x + (a.taraf ? 0 : 0), a.taraf ? -140 : 140, a.v.hiz * 1.3, dt); continue; }
@@ -176,13 +180,14 @@
     const hucum = a.v.hucum && a.temas < 2.5 ? a.v.hucum : 1;
     const hasar = a.n * a.v.vur * kanat * hucum * (0.6 + a.moral / 250) * 3 / (3 + h.v.sav) * dt;
     kayip(h, hasar, kanat > 1 ? 1.8 : 1);
+    if (window.Ses && Math.random() < dt * 3) Ses.kilic();
   }
   function okAt(a, h, dt) {
     const hasar = a.n * a.v.ok * (0.6 + a.moral / 250) * 3 / (3 + h.v.sav * 0.5) * dt;
     kayip(h, hasar, 0.7);
     // görsel oklar
     a.okT = (a.okT || 0) - dt;
-    if (a.okT <= 0) { a.okT = 0.45; for (let k = 0; k < Math.min(10, Math.ceil(a.n / 4)); k++) oklar.push({ x0: a.x + (Math.random() - 0.5) * 6, z0: a.z + (Math.random() - 0.5) * 4, x1: h.x + (Math.random() - 0.5) * 7, z1: h.z + (Math.random() - 0.5) * 5, t: -Math.random() * 0.3, sure: 1.1 }); }
+    if (a.okT <= 0) { a.okT = 0.45; if (window.Ses && a.taraf === 0) Ses.ok(); for (let k = 0; k < Math.min(10, Math.ceil(a.n / 4)); k++) oklar.push({ x0: a.x + (Math.random() - 0.5) * 6, z0: a.z + (Math.random() - 0.5) * 4, x1: h.x + (Math.random() - 0.5) * 7, z1: h.z + (Math.random() - 0.5) * 5, t: -Math.random() * 0.3, sure: 1.1 }); }
   }
   function kayip(h, hasar, moralCarpan) {
     h.yara = (h.yara || 0) + hasar;
@@ -240,7 +245,7 @@
     if (performance.now() - sonDurum < 250) return; sonDurum = performance.now();
     const b = Math.round(guc(0)), o = Math.round(guc(1));
     el.querySelector('#svBiz').textContent = 'Biz ' + alaylar.filter(a => a.taraf === 0).reduce((t, a) => t + a.n, 0);
-    el.querySelector('#svOnlar').textContent = alaylar.filter(a => a.taraf === 1).reduce((t, a) => t + a.n, 0) + ' Bizans';
+    el.querySelector('#svOnlar').textContent = alaylar.filter(a => a.taraf === 1).reduce((t, a) => t + a.n, 0) + ' ' + (bilgi.dusmanAd || 'düşman');
     el.querySelector('#svOran').style.width = (b / Math.max(1, b + o) * 100) + '%';
     el.querySelectorAll('[data-alay]').forEach(x => { const a = alaylar[+x.dataset.alay]; x.querySelector('small').textContent = a.bozuk ? 'bozuldu' : `${a.n} · moral ${Math.max(0, Math.round(a.moral))}`; x.classList.toggle('bozuk', a.bozuk || a.n <= 0); });
   }
@@ -260,6 +265,7 @@
   function bitir(zafer) {
     bitti = true;
     yazi(zafer ? 'ZAFER!' : 'HEZİMET', 3);
+    if (window.Ses) zafer ? Ses.mehter() : Ses.yenilgi();
     const kalan = {};
     alaylar.filter(a => a.taraf === 0).forEach(a => { const tur = a.tur; kalan[tur] = (kalan[tur] || 0) + a.n; });
     setTimeout(() => {

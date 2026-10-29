@@ -94,7 +94,7 @@
     tip = t || 'sogut';
     dunyaNesne.forEach(o => { sahne.remove(o); if (o.geometry) o.geometry.dispose(); }); dunyaNesne = [];
     binaNesne.forEach(g => sahne.remove(g)); binaNesne.clear();
-    agacVeri = []; buhar = [];
+    agacVeri = []; buhar = []; patika = new Float32Array(N * N);
     karolar(); araziKur(); suKur(); daglar(); agaclar(); kayalar();
     if (tip === 'bursa') { uludag(); hisar(); kaplicalar(); } else kale();
     sahne.fog.far = tip === 'bursa' ? 230 : 170;
@@ -171,9 +171,31 @@
     cayir: [new T.Color('#6ea33f'), new T.Color('#74a843')], orman: [new T.Color('#4f8534'), new T.Color('#54893a')],
     kaya: [new T.Color('#9c9586'), new T.Color('#8a8475')], su: [new T.Color('#b7a676'), new T.Color('#c2b383')],
     sur: [new T.Color('#b8ab90'), new T.Color('#ad9f84')],
-    kar: new T.Color('#f2f5f7'), kuru: new T.Color('#b5a35a')
+    kar: new T.Color('#f2f5f7'), kuru: new T.Color('#b5a35a'), patika: new T.Color('#a8885a')
   };
   let araziTaban;
+  let patika = new Float32Array(N * N);
+  // patikalar: her bina en yakın konuta ve şehrin merkezine yürünür; çok yürünen karo toprak yola döner
+  function patikaGuncelle(binalar) {
+    const hedef = new Float32Array(N * N);
+    const merkez = binalar.length ? binalar.reduce((a, b) => [a[0] + b.x / binalar.length, a[1] + b.z / binalar.length], [0, 0]) : null;
+    const isaretle = (x0, z0, x1, z1) => {
+      const adim = Math.max(Math.abs(x1 - x0), Math.abs(z1 - z0)) * 2 + 1;
+      for (let s = 0; s <= adim; s++) {
+        const i = Math.round(x0 + (x1 - x0) * s / adim), j = Math.round(z0 + (z1 - z0) * s / adim);
+        if (i < 0 || j < 0 || i >= N || j >= N || karo[i][j].tip === 'su') continue;
+        hedef[i * N + j] = 1;
+        for (const [a, b] of [[1, 0], [0, 1]]) if (i + a < N && j + b < N) hedef[(i + a) * N + j + b] = Math.max(hedef[(i + a) * N + j + b], 0.35);
+      }
+    };
+    const evler = binalar.filter(b => b.konut);
+    binalar.forEach(b => {
+      if (merkez) isaretle(b.x, b.z, Math.round(merkez[0]), Math.round(merkez[1]));
+      let en = null, d = 1e9; evler.forEach(e => { if (e === b) return; const m = Math.abs(e.x - b.x) + Math.abs(e.z - b.z); if (m < d) { d = m; en = e; } });
+      if (en && d < 14) isaretle(b.x, b.z, en.x, en.z);
+    });
+    for (let k = 0; k < patika.length; k++) patika[k] += (hedef[k] - patika[k]) * (hedef[k] > patika[k] ? 0.22 : 0.05);
+  }
   function araziKur() {
     let g = new T.PlaneGeometry(W + 40, W + 40, (N + 20), (N + 20));
     g.rotateX(-Math.PI / 2);
@@ -188,7 +210,8 @@
       let tip = karo[i] && karo[i][j] ? karo[i][j].tip : (y > 6 ? 'kaya' : 'orman');
       if (y < SU_Y + 0.25) tip = 'su';
       const c = RENK[tip][(f / 3) % 2].clone().offsetHSL(0, 0, (fbm(x * 0.3, z * 0.3) - 0.5) * 0.06);
-      araziTaban.push({ c, tip, y });
+      const ic = i >= 0 && j >= 0 && i < N && j < N;
+      araziTaban.push({ c, tip, y, k: ic ? i * N + j : -1 });
       for (let k = 0; k < 3; k++) c.toArray(renk, (f + k) * 3);
     }
     g.setAttribute('color', new T.BufferAttribute(renk, 3));
@@ -205,7 +228,9 @@
     araziTaban.forEach((t, f) => {
       c.copy(t.c);
       if (t.tip === 'cayir' || t.tip === 'orman') c.lerp(RENK.kuru, kuru);
-      if (t.tip !== 'su' || t.y > SU_Y) c.lerp(RENK.kar, kar * (t.tip === 'kaya' ? 0.8 : 1) * (0.85 + (f % 3) * 0.05));
+      const w = t.k >= 0 ? patika[t.k] : 0;
+      if (w > 0.03 && t.tip !== 'su') c.lerp(RENK.patika, Math.min(0.85, w));
+      if (t.tip !== 'su' || t.y > SU_Y) c.lerp(RENK.kar, kar * (t.tip === 'kaya' ? 0.8 : 1) * (0.85 + (f % 3) * 0.05) * (w > 0.3 ? 0.75 : 1));
       for (let k = 0; k < 3; k++) c.toArray(araziRenk.array, (f * 3 + k) * 3);
     });
     araziRenk.needsUpdate = true;
@@ -729,7 +754,7 @@
   // bir binanın yanında kaplıca ya da ova var mı (hamam ve dutluk bonusu)
   function yakinda(b, boy, ozellik) { for (let i = b.x - 2; i < b.x + boy + 2; i++) for (let j = b.z - 2; j < b.z + boy + 2; j++) if (karo[i] && karo[i][j] && karo[i][j][ozellik]) return true; return false; }
 
-  window.Dunya = { haritaKur, harita: () => tip, yakinda, duraklat, askerGoster,
+  window.Dunya = { patikaGuncelle, haritaKur, harita: () => tip, yakinda, duraklat, askerGoster,
     kur, mevsim, binaEkle, binaGuncelle, binaKaldir, cevre, uygun, yerlestirmeBasla, yerlestirmeBitir, yerlestirDondur,
     yerlestirme: () => yerlestir, nufusGuncelle, odakla, ekranKonum, baslangicYeri, karo: () => karo, dunyadan,
     hiz: h => { hizCarpan = h; }, kamera: () => kamera, kontrol: () => kontrol
