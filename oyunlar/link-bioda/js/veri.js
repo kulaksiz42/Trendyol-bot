@@ -39,6 +39,14 @@ window.VERI = {
   GOZLUK: [
     { id: 'yok', ad: 'Yok' }, { id: 'yuvarlak', ad: 'Yuvarlak' }, { id: 'kalin', ad: 'Kalın çerçeve' }, { id: 'gunes', ad: 'Güneş gözlüğü' }
   ],
+  MAKYAJ: [
+    { id: 'yok', ad: 'Yok' }, { id: 'dogal', ad: 'Doğal' }, { id: 'pembe', ad: 'Pembe parlak' },
+    { id: 'smokey', ad: 'Smokey göz' }, { id: 'glam', ad: 'Kırmızı ruj' }
+  ],
+  GOZ_RENK: [
+    { id: 'kahve', ad: 'Kahve', renk: '#5a3420' }, { id: 'ela', ad: 'Ela', renk: '#8a6a2a' }, { id: 'yesil', ad: 'Yeşil', renk: '#3f8a4f' },
+    { id: 'mavi', ad: 'Mavi', renk: '#3f7cc4' }, { id: 'gri', ad: 'Gri', renk: '#8593a3' }, { id: 'siyah', ad: 'Siyah', renk: '#1a1210' }
+  ],
   AKSESUAR: [
     { id: 'yok', ad: 'Yok' }, { id: 'kolye', ad: 'Kolye' }, { id: 'kupe', ad: 'Küpe' }, { id: 'bere', ad: 'Bere' }
   ],
@@ -73,7 +81,7 @@ window.VERI = {
     { id: 'fitness', ad: 'Fitness gecesi', acik: 'Esneme, mekik, "formda kal" sohbeti. Spor kıyafeti ister.', gerek: 'fitness', agirlik: { dans: 2, poz: 2.5, konus: 1.5, ozel: 1, opucuk: 0.6, tesekkur: 1 } },
     { id: 'asmr', ad: 'ASMR gecesi', acik: 'Fısılda. Mikrofon varsa tam verim.', gerek: 'mikrofon', agirlik: { konus: 4, opucuk: 2, tesekkur: 1, poz: 1, ozel: 1, dans: 0.4 } }
   ],
-  /* cesaret: 0 gündelik, 1 iddialı, 2 cesur, 3 iç giyim. Bahşişi artırır, riski de. */
+  /* cesaret: 0 gündelik, 1 iddialı, 2 cesur, 3 iç giyim, 4 en cüretkâr. Bahşişi artırır, riski de. */
   KIYAFETLER: [
     { id: 'tisort', ad: 'Tişört + kot', cesaret: 0, etiket: [] },
     { id: 'esofman', ad: 'Eşofman', cesaret: 0, etiket: [] },
@@ -86,7 +94,15 @@ window.VERI = {
     { id: 'mini', ad: 'Dekolteli body + mini etek + file çorap', cesaret: 2, etiket: ['cesur'] },
     { id: 'gece', ad: 'Straplez gece elbisesi', cesaret: 2, etiket: ['cesur'] },
     { id: 'mayo', ad: 'Mayo şort', cesaret: 2, etiket: ['havuz'] },
-    { id: 'bikini', ad: 'Bikini', cesaret: 2, etiket: ['havuz', 'cesur'] },
+    { id: 'bikini', ad: 'Üçgen bikini', cesaret: 2, etiket: ['havuz', 'cesur'] },
+    { id: 'leopar', ad: 'Leopar bikini', cesaret: 2, etiket: ['havuz', 'cesur'] },
+    { id: 'tekparca', ad: 'Derin V mayo', cesaret: 2, etiket: ['havuz', 'cesur'] },
+    { id: 'slip', ad: 'Slip mayo', cesaret: 2, etiket: ['havuz', 'cesur'] },
+    { id: 'lateks', ad: 'Lateks tulum', cesaret: 2, etiket: ['cesur', 'kostum'] },
+    { id: 'boxer', ad: 'Boxer + spor sütyeni', cesaret: 3, etiket: ['cesur'] },
+    { id: 'ictakim', ad: 'Saten iç çamaşırı takımı', cesaret: 3, etiket: ['cesur'] },
+    { id: 'jartiyer', ad: 'Jartiyerli dantel takım + çorap', cesaret: 4, etiket: ['cesur'] },
+    { id: 'filebody', ad: 'File body + çizme', cesaret: 4, etiket: ['cesur'] },
     { id: 'gecelik', ad: 'Saten gecelik', cesaret: 3, etiket: ['cesur'] },
     { id: 'dantel', ad: 'Dantel iç çamaşırı + file çorap', cesaret: 3, etiket: ['cesur'] },
     { id: 'havlu', ad: 'Sadece havlu (duştan yeni çıktım)', cesaret: 3, etiket: ['cesur', 'havuz'] },
@@ -116,20 +132,38 @@ window.VERI = {
     { t: 'Eşim uyuyor, sessiz bir şey at 🤫', ces: 2, teklif: [10, 22] },
     { t: 'Bikinili? Yaz bitti ama ben bitmedim ☀️', ces: 2, teklif: [9, 20] },
     { t: 'Yatakta çekilmiş bir şey var mı? Saten çarşaflı olan 🔥', ces: 2, set: 'yatak', teklif: [12, 30] },
-    { t: 'Sadece gömlekle bir sabah karesi… kahve benden ☕', ces: 2, teklif: [10, 24] }
+    { t: 'Sadece gömlekle bir sabah karesi… kahve benden ☕', ces: 2, teklif: [10, 24] },
+    { t: 'Leopar bikinili olanı gördüm tanıtımda. Kilidini açayım, sen de bana daha yakından bir tane çek 🐆', ces: 2, teklif: [12, 26] },
+    { t: 'Jartiyer. Tek kelime. Fiyatı sen söyle.', ces: 4, teklif: [35, 70] },
+    { t: 'File body ile ayna karşısında bir kare… dün gece rüyamdaydı aynen o 😵', ces: 4, set: 'ayna', teklif: [30, 60] },
+    { t: 'Saten takımla yatakta, telefonu tutarken bir selfie? Uyumadan önce bakacağım 🌙', ces: 3, set: 'yatak', teklif: [18, 38] },
+    { t: 'Yayında askın düştü, bir saniye. Ondan bir kare kaldı mı 😳', ces: 3, teklif: [15, 32] },
+    { t: 'Neon altında iç çamaşırıyla. Pembe ışık. Başka bir şey istemiyorum.', ces: 3, set: 'neon', teklif: [20, 42] },
+    { t: 'Abone oldum, VIP de oldum, şimdi sıra sende 😏 cesur bir şey', ces: 3, teklif: [16, 34] },
+    { t: 'Mayolu bir tane… havuz yok biliyorum, küvet de olur 🛁', ces: 2, teklif: [9, 18] }
   ],
   DM_OZEL: [
     { t: 'Adımı kâğıda yazıp tut, öyle bir fotoğraf. Sadece benim. $40 veririm.', ces: 1, teklif: 40 },
     { t: 'Doğum günüm 🎂 Sadece bana özel, mum ışığında bir kare? $60', ces: 2, set: 'mum', teklif: 60 },
     { t: 'Kırmızı elbiseyle, yatak başında. Kimseye gösterme. $80', ces: 2, set: 'yatak', teklif: 80 },
-    { t: 'Dantelli, neon altında, adımı söyleyen bir kare. $120. Ciddiyim.', ces: 3, set: 'neon', teklif: 120 }
+    { t: 'Dantelli, neon altında, adımı söyleyen bir kare. $120. Ciddiyim.', ces: 3, set: 'neon', teklif: 120 },
+    { t: 'Jartiyerli takım, mum ışığı, kameraya omzunun üstünden bak. Sadece ben. $180.', ces: 4, set: 'mum', teklif: 180 },
+    { t: 'Ayna karşısında file body. Telefonun ekranında benim adım yazsın. $150, peşin.', ces: 4, set: 'ayna', teklif: 150 },
+    { t: 'Evliyim, karım bilmeyecek. Saten takımla yatakta, iyi geceler de. $95', ces: 3, set: 'yatak', teklif: 95 }
   ],
   DM_FLORT: ['Bu gece rüyamdaydın. Kötü bir şey yoktu (vardı) 😇', 'Gülüşün beni bitiriyor', 'Bir kahveye ne dersin? Sadece kahve. Kahve.',
-    'Uyuyamıyorum, senin yüzünden 🌙', 'O kombin hâlâ aklımda 🔥', 'Bugün sesini duymadan uyuyamam', 'Bana bir sesli mesaj at, bahşişi ben bilirim'],
+    'Uyuyamıyorum, senin yüzünden 🌙', 'O kombin hâlâ aklımda 🔥', 'Bugün sesini duymadan uyuyamam', 'Bana bir sesli mesaj at, bahşişi ben bilirim',
+    'Dün gece o ruj… sabaha kadar düşündüm 💋', 'Yayında bana baktığını hissettim. Baktın mı? Söyle baktın', 'Telefonun kilit ekranı sensin, sorun olur mu 🙈',
+    'Şu an yataktayım ve aklımda sadece o dans var', 'İtiraf: bütün yayınları kaydediyorum. Kötü bir şey için değil (iyi bir şey için de değil)',
+    'Bir gece sadece benim için yayın açsan ne istersin? Fiyat değil, gerçekten', 'Sesini duymak istiyorum, fısıltıyla. Tek kelime yeter.'],
   DM_SAPIK: [
     { t: 'Önce bedava at, beğenirsem öderim 😏', tur: 'bedava' },
     { t: 'Gerçek adın ne? Hangi semttesin? Tanışalım.', tur: 'ifsa' },
-    { t: 'Ekran görüntülerin bende. $200 atmazsan ailene gönderirim.', tur: 'santaj' }
+    { t: 'Ekran görüntülerin bende. $200 atmazsan ailene gönderirim.', tur: 'santaj' },
+    { t: 'Abone olmayacağım ama bir tane at, sonra belki 😏 herkes atıyor', tur: 'bedava' },
+    { t: 'Sen benim komşumsun bence. Balkondaki çamaşırlar aynı. Kaçıncı kattasın?', tur: 'ifsa' },
+    { t: 'Kuzenin benim arkadaşım. Seni tanıyorlar mı merak ediyorum 🙂 $150 konuşur muyuz', tur: 'santaj' },
+    { t: 'Fotoğrafı yapay zekâyla açtım, ister misin görmek? Bedava bir tane daha at da karşılaştırayım', tur: 'bedava' }
   ],
   AILE: {
     dusuk: [['Annem', 'Günaydın 🌸 kahvaltı hazır, soğumadan gel'], ['Teyzem', '(İletildi) Bu mesajı 10 kişiye gönderin yoksa…'], ['Babam', 'Doğalgaz faturası geldi 💸 kimse kombiye dokunmasın'], ['Kardeşim', '😏']],
@@ -321,7 +355,16 @@ window.VERI = {
     { id: 'fitness', kat: 'Gardırop', ad: 'Spor sütyeni + tayt', fiyat: 1100, kiyafet: true, acik: 'Fitness gecesi için. Bahşiş +%8.' },
     { id: 'forma', kat: 'Gardırop', ad: 'Mahalle takımı forması', fiyat: 1200, kiyafet: true, acik: 'Derbi günleri için.' },
     { id: 'mayo', kat: 'Gardırop', ad: 'Mayo şort', fiyat: 700, kiyafet: true, acik: 'Havuz başı için. Cesur: bahşiş +%16, risk artar.' },
-    { id: 'bikini', kat: 'Gardırop', ad: 'Bikini', fiyat: 1300, kiyafet: true, acik: 'Havuz başı ve gece yarısı özel için. Bahşiş +%16, risk artar.' },
+    { id: 'bikini', kat: 'Gardırop', ad: 'Üçgen bikini', fiyat: 1300, kiyafet: true, acik: 'Boyundan bağlamalı, mercan rengi. Havuz başı ve gece yarısı özel için. Bahşiş +%16, risk artar.' },
+    { id: 'leopar', kat: 'Gardırop', ad: 'Leopar bikini', fiyat: 1600, kiyafet: true, acik: '"Vahşi taraf." Havuz başı ve özel gece. Bahşiş +%16, risk artar.' },
+    { id: 'tekparca', kat: 'Gardırop', ad: 'Derin V mayo', fiyat: 1800, kiyafet: true, acik: 'Göbeğe inen V yaka, yüksek bacak kesimi. Bahşiş +%16, risk artar.' },
+    { id: 'slip', kat: 'Gardırop', ad: 'Slip mayo', fiyat: 800, kiyafet: true, acik: 'Mavi, dar, kısa. Havuz başı için. Bahşiş +%16, risk artar.' },
+    { id: 'lateks', kat: 'Gardırop', ad: 'Lateks tulum', fiyat: 3400, kiyafet: true, acik: 'Kapalı ama ayna gibi parlıyor. Kostüm istekleri de karşılar. Bahşiş +%16.' },
+    { id: 'boxer', kat: 'Gardırop', ad: 'Boxer + spor sütyeni', fiyat: 1000, kiyafet: true, acik: '"Yeni uyandım" iç giyimi. Bahşiş +%24, risk çok artar.' },
+    { id: 'ictakim', kat: 'Gardırop', ad: 'Saten iç çamaşırı takımı', fiyat: 2400, kiyafet: true, acik: 'Bordo saten, pudra biye. Bahşiş +%24, risk çok artar.' },
+    { id: 'jartiyer', kat: 'Gardırop', ad: 'Jartiyerli dantel takım', fiyat: 4200, kiyafet: true, acik: 'Siyah dantel, jartiyer, opak çorap. En cüretkâr: bahşiş +%32, risk uçar.' },
+    { id: 'filebody', kat: 'Gardırop', ad: 'File body + çizme', fiyat: 3800, kiyafet: true, acik: 'Boyundan bileğe file. En cüretkâr: bahşiş +%32, risk uçar.' },
+    { id: 'yag', kat: 'Bakım', ad: 'Vücut parıltı yağı', fiyat: 1100, acik: 'Ten ışıkta parlar. Poz ve havuz isteklerinde bahşiş +%10.' },
     { id: 'acikgomlek', kat: 'Gardırop', ad: 'Açık saten gömlek', fiyat: 1400, kiyafet: true, acik: 'Düğmeler göbeğe kadar açık. Bahşiş +%16, risk artar.' },
     { id: 'mini', kat: 'Gardırop', ad: 'Dekolteli body + mini etek + file çorap', fiyat: 1900, kiyafet: true, acik: 'Gece yarısı özel için. Bahşiş +%16, risk artar.' },
     { id: 'gece', kat: 'Gardırop', ad: 'Straplez gece elbisesi', fiyat: 2600, kiyafet: true, acik: 'Kırmızı saten. Bahşiş +%16, risk artar.' },

@@ -24,20 +24,44 @@
     mini:       { ust: '#16141a', ust2: '#16141a', alt: '#16141a', ayakR: '#16141a', ustUst: 'yaka', ustAlt: 'bel', kol: 'yok', alt_: 'mini', ayak: 'bot', corap: 1, dekolte: 0.17, parlak: 0.45 },
     gece:       { ust: '#b0122d', ust2: '#b0122d', alt: '#b0122d', ayakR: '#16141a', ustUst: 'bra', ustAlt: 'kalca', kol: 'yok', alt_: 'yok', ayak: 'ayakkabi', desen: 6 },
     fitness:    { ust: '#2b2b35', ust2: '#46d39a', alt: '#2b2b35', ayakR: '#f0f0f0', ustUst: 'bra', ustAlt: 'gogusAlt', kol: 'yok', alt_: 'uzun', ayak: 'ayakkabi' },
-    bikini:     { ust: '#ff7a59', ust2: '#ff7a59', alt: '#ff7a59', ayakR: '#000', ustUst: 'bra', ustAlt: 'gogusAlt', kol: 'yok', alt_: 'kucuk', ayak: 'yok' },
-    dantel:     { ust: '#120a10', ust2: '#7a0f2a', alt: '#120a10', ayakR: '#120a10', ustUst: 'bra', ustAlt: 'gogusAlt', kol: 'yok', alt_: 'kucuk', ayak: 'yok', corap: 1, desen: 5 },
+    // ic: mankenin kendi iç çamaşırı kesimi giysi olarak boyanır (üçgen kap, askı, jartiyer eklenebilir)
+    bikini:     { ust: '#ff5a4e', ust2: '#ffffff', alt: '#ff5a4e', ayakR: '#000', ustUst: 'yok', ustAlt: 'yok', kol: 'yok', alt_: 'yok', ayak: 'yok', ic: 1, ucgen: 1, parlak: 0.5 },
+    leopar:     { ust: '#c99a5b', ust2: '#2a1a10', alt: '#c99a5b', ayakR: '#000', ustUst: 'yok', ustAlt: 'yok', kol: 'yok', alt_: 'yok', ayak: 'yok', ic: 1, ucgen: 1, desen: 8, parlak: 0.6 },
+    tekparca:   { ust: '#101014', ust2: '#c9a14a', alt: '#101014', ayakR: '#000', ustUst: 'yaka', ustAlt: 'kasik', kol: 'yok', alt_: 'yok', ayak: 'yok', ic: 1, dekolte: 0.3, parlak: 0.35 },
+    dantel:     { ust: '#120a10', ust2: '#7a0f2a', alt: '#120a10', ayakR: '#120a10', ustUst: 'yok', ustAlt: 'yok', kol: 'yok', alt_: 'yok', ayak: 'yok', ic: 1, ucgen: 1, corap: 1, desen: 5 },
+    ictakim:    { ust: '#9e0f2c', ust2: '#e8c4cc', alt: '#9e0f2c', ayakR: '#000', ustUst: 'yok', ustAlt: 'yok', kol: 'yok', alt_: 'yok', ayak: 'yok', ic: 1, ucgen: 1, desen: 6 },
+    jartiyer:   { ust: '#0b0a0d', ust2: '#5a0f22', alt: '#0b0a0d', ayakR: '#0b0a0d', ustUst: 'yok', ustAlt: 'yok', kol: 'yok', alt_: 'yok', ayak: 'yok', ic: 1, ucgen: 1, desen: 5, corap: 2, jartiyer: 1 },
+    filebody:   { ust: '#0b0a0d', ust2: '#0b0a0d', alt: '#0b0a0d', ayakR: '#0b0a0d', ustUst: 'yok', ustAlt: 'yok', kol: 'yok', alt_: 'yok', ayak: 'bot', ic: 1, corap: 1, file: 1, parlak: 0.3 },
+    lateks:     { ust: '#08080a', ust2: '#08080a', alt: '#08080a', ayakR: '#08080a', ustUst: 'yaka', ustAlt: 'bel', kol: 'uzun', alt_: 'uzun', ayak: 'bot', dekolte: 0.2, parlak: 0.06, desen: 6 },
+    boxer:      { ust: '#22252c', ust2: '#e8e8e8', alt: '#22252c', ayakR: '#000', ustUst: 'yok', ustAlt: 'yok', kol: 'yok', alt_: 'yok', ayak: 'yok', ic: 1, ustsuzB: 1 },
+    slip:       { ust: '#1f4fd1', ust2: '#ffffff', alt: '#1f4fd1', ayakR: '#000', ustUst: 'yok', ustAlt: 'yok', kol: 'yok', alt_: 'yok', ayak: 'yok', ic: 1, ustsuzB: 1, parlak: 0.45 },
     gecelik:    { ust: '#c9a0dc', ust2: '#c9a0dc', alt: '#c9a0dc', ayakR: '#000', ustUst: 'bra', ustAlt: 'kalca', kol: 'yok', alt_: 'yok', ayak: 'yok', desen: 6, dekolte: 0.06 },
     acikgomlek: { ust: '#f4f1ea', ust2: '#f4f1ea', alt: '#1d1d24', ayakR: '#151515', ustUst: 'yaka', ustAlt: 'bel', kol: 'uzun', alt_: 'uzun', ayak: 'ayakkabi', dekolte: 0.34, desen: 6 },
     havlu:      { ust: '#f4f1ec', ust2: '#f4f1ec', alt: '#f4f1ec', ayakR: '#000', ustUst: 'bra', ustAlt: 'kalca', kol: 'yok', alt_: 'yok', ayak: 'yok', desen: 7, duz: 0.3 },
     gomlek:     { ust: '#eef1f6', ust2: '#eef1f6', alt: '#eef1f6', ayakR: '#000', ustUst: 'yaka', ustAlt: 'kalca', kol: 'uzun', alt_: 'yok', ayak: 'yok', dekolte: 0.15, duz: 0.6 },
     korse:      { ust: '#0d0b0f', ust2: '#5a0f22', alt: '#0d0b0f', ayakR: '#0d0b0f', ustUst: 'bra', ustAlt: 'bel', kol: 'yok', alt_: 'mini', ayak: 'bot', corap: 1, desen: 6, parlak: 0.18 },
-    mayo:       { ust: '#000', ust2: '#000', alt: '#1aa3a3', ayakR: '#000', ustUst: 'yok', ustAlt: 'yok', kol: 'yok', alt_: 'sort', ayak: 'yok' }
+    mayo:       { ust: '#1aa3a3', ust2: '#1aa3a3', alt: '#1aa3a3', ayakR: '#000', ustUst: 'yok', ustAlt: 'yok', kol: 'yok', alt_: 'sort', ayak: 'yok', ic: 1, ustsuzB: 1 }
   };
   const SAC_DOSYA = { kisa: 'SimpleParted', uzun: 'Long', topuz: 'Buns', kazinmis: 'Buzzed', kisakesim: 'BuzzedFemale' };
   const KLIP = {
     bekle: 'Idle_Loop', konus: 'Idle_Talking_Loop', dans: 'Dance_Loop', sarki: 'Idle_Talking_Loop', selam: 'Idle_Loop',
     poz: 'Idle_Loop', ozel: 'Idle_Loop', opucuk: 'Idle_Loop', tesekkur: 'Idle_Loop', ic: 'Idle_Loop', panik: 'Jump_Loop', sok: 'Hit_Head', gul: 'Idle_Talking_Loop', sergile: 'Idle_Loop'
   };
+
+  // yüz dokusundaki noktalar (piksel/1024): göz merkezleri, göz yarıçapı, dudak, yanak
+  const YUZ = {
+    a: { g1: [135, 182], g2: [242, 182], gr: [26, 15], d: [187, 268], dr: [31, 14], y1: [108, 236], y2: [266, 236], yr: [30, 22] },
+    b: { g1: [138, 182], g2: [242, 182], gr: [26, 14], d: [190, 272], dr: [31, 11], y1: [110, 236], y2: [270, 236], yr: [30, 22] }
+  };
+  // ruj, far, eyeliner, allık: [renk, yoğunluk]; parlak: dudak parlatıcısı
+  const MAKYAJ = {
+    yok:    { ruj: ['#b45a5a', 0], far: ['#6a4a40', 0], liner: 0, allik: 0, parlak: 0 },
+    dogal:  { ruj: ['#c0606a', 0.35], far: ['#8a5a4a', 0.22], liner: 0.4, allik: 0.16, parlak: 0.3 },
+    pembe:  { ruj: ['#e2578f', 0.7], far: ['#c86a9c', 0.45], liner: 0.55, allik: 0.26, parlak: 0.8 },
+    smokey: { ruj: ['#9a5a56', 0.4], far: ['#231a1f', 0.8], liner: 1, allik: 0.12, parlak: 0.2, kanat: 1 },
+    glam:   { ruj: ['#a00f26', 0.9], far: ['#5a2236', 0.55], liner: 1, allik: 0.22, parlak: 0.9, kanat: 1 }
+  };
+  const GOZ = { kahve: null, ela: '#8a6a2a', yesil: '#3f8a4f', mavi: '#3f7cc4', gri: '#8593a3', siyah: '#1a1210' };
 
   const dogrusal = hex => new T.Color(hex).convertSRGBToLinear();
   // dokudaki ortalama ten (sRGB ~#d99c78); hedef tenin bu renge oranı çarpan olarak kullanılır
@@ -67,11 +91,13 @@
   }
 
   /* ---------- malzemeler ---------- */
-  function govdeMalzemesi(asil, lm, kiy, ten) {
+  function govdeMalzemesi(asil, lm, kiy, ten, c) {
     const m = asil.clone();
     const k = KIYAFET[kiy] || KIYAFET.tisort;
     const tenK = dogrusal(ten);
-    const Yk = { yaka: lm.yakaY, bra: lm.yakaY - 0.075, gogusAlt: lm.yakaY - 0.285, gobek: lm.belY + 0.11, bel: lm.belY, kalca: lm.uylukOrtaY + 0.07, yok: -9 };
+    const Yk = { yaka: lm.yakaY, bra: lm.yakaY - 0.075, gogusAlt: lm.yakaY - 0.285, gobek: lm.belY + 0.11, bel: lm.belY, kasik: lm.belY - 0.07, kalca: lm.uylukOrtaY + 0.07, yok: -9 };
+    const mk = MAKYAJ[c.makyaj] || MAKYAJ.yok, yz = YUZ[c.siluet === 'b' ? 'b' : 'a'];
+    const uv = (p, r) => new T.Vector4(p[0] / 1024, p[1] / 1024, r[0] / 1024, r[1] / 1024);
     const altAlt = { uzun: lm.ayakY, sort: lm.uylukOrtaY, mini: lm.uylukOrtaY + 0.08, kucuk: lm.kasikY, yok: 9 }[k.alt_ || 'uzun'];
     const ayakUst = { ayakkabi: lm.ayakY, bot: lm.botY, yok: -9 }[k.ayak || 'ayakkabi'];
     const u = {
@@ -82,7 +108,15 @@
       uCorap: { value: k.corap || 0 }, uCorapUst: { value: lm.uylukOrtaY + 0.1 }, uPuruz: { value: k.parlak != null ? k.parlak : (k.desen === 6 ? 0.28 : 0.88) }, uDuz: { value: k.duz || 0 }, uKemer: { value: ['uzun', 'sort'].includes(k.alt_ || 'uzun') ? 1 : 0 },
       uUst: { value: dogrusal(k.ust) }, uUst2: { value: dogrusal(k.ust2) }, uAlt: { value: dogrusal(k.alt) }, uAyak: { value: dogrusal(k.ayakR) },
       uBindInv: { value: lm.bind.clone().invert() }, uZRef: { value: lm.zRef }, uY0: { value: lm.y0 }, uY1: { value: lm.y1 }, uXKenar: { value: lm.xKenar },
-      uDesen: { value: k.desen || 0 }, uTen: { value: new T.Vector3(tenK.r / DOKU_TEN.r, tenK.g / DOKU_TEN.g, tenK.b / DOKU_TEN.b) }
+      uDesen: { value: k.desen || 0 }, uTen: { value: new T.Vector3(tenK.r / DOKU_TEN.r, tenK.g / DOKU_TEN.g, tenK.b / DOKU_TEN.b) },
+      uTenRenk: { value: new T.Vector3(tenK.r, tenK.g, tenK.b) },
+      uIc: { value: k.ic ? 1 : 0 }, uIcUst: { value: k.ustsuzB && c.siluet === 'b' ? 0 : 1 }, uUcgen: { value: k.ucgen ? 1 : 0 },
+      uGogus: { value: lm.gogus }, uJartiyer: { value: k.jartiyer ? 1 : 0 }, uUylukX: { value: lm.uylukX }, uFile: { value: k.file ? 1 : 0 },
+      uG1: { value: uv(yz.g1, yz.gr) }, uG2: { value: uv(yz.g2, yz.gr) }, uDudak: { value: uv(yz.d, yz.dr) },
+      uYa1: { value: uv(yz.y1, yz.yr) }, uYa2: { value: uv(yz.y2, yz.yr) },
+      uRuj: { value: dogrusal(mk.ruj[0]) }, uRujA: { value: mk.ruj[1] }, uFar: { value: dogrusal(mk.far[0]) }, uFarA: { value: mk.far[1] },
+      uLiner: { value: mk.liner }, uKanat: { value: mk.kanat || 0 }, uAllik: { value: mk.allik }, uRujParlak: { value: mk.parlak },
+      uParilti: { value: c.parilti != null ? c.parilti : 0.25 }
     };
     m.onBeforeCompile = sh => {
       Object.assign(sh.uniforms, u);
@@ -107,12 +141,34 @@ vec4 duzlestir(vec3 p, out float rw) {
         .replace('#include <beginnormal_vertex>', '#include <beginnormal_vertex>\nfloat rw;\nvec4 dz = duzlestir(position, rw);\nvBind = (uBind * vec4(position, 1.0)).xyz;\nobjectNormal = normalize(mix(objectNormal, normalize(mat3(uBindInv) * normalize(vec3(dz.x * 1.6, 0.0, max(dz.z, 0.0) + 0.05))), max(rw * 0.8, dz.w)));')
         .replace('#include <begin_vertex>', '#include <begin_vertex>\ntransformed = (uBindInv * vec4(dz.xyz, 1.0)).xyz;');
       sh.fragmentShader = `uniform float uBelY, uYakaY, uOmuzX, uKoltukY, uKolBit, uDesen, uKemer, uUstUst, uUstAlt, uDekolte, uAltUst, uAltAlt, uAyakUst, uCorap, uCorapUst, uPuruz;
-uniform vec3 uUst, uUst2, uAlt, uAyak, uTen;
+uniform vec3 uUst, uUst2, uAlt, uAyak, uTen, uTenRenk, uGogus, uRuj, uFar;
+uniform float uIc, uIcUst, uUcgen, uJartiyer, uUylukX, uFile, uRujA, uFarA, uLiner, uKanat, uAllik, uRujParlak, uParilti;
+uniform vec4 uG1, uG2, uDudak, uYa1, uYa2;
 varying vec3 vBind;
+vec3 leopar(vec2 p, vec3 a, vec3 b) {
+  vec2 g = p * 70.0, c = floor(g), f = fract(g);
+  vec2 o = vec2(fract(sin(dot(c, vec2(127.1, 311.7))) * 43758.5), fract(sin(dot(c, vec2(269.5, 183.3))) * 43758.5));
+  float d = length(f - (0.3 + 0.4 * o));
+  float halka = smoothstep(0.17, 0.21, d) * (1.0 - smoothstep(0.29, 0.33, d));
+  return mix(mix(a, a * 0.62, 1.0 - smoothstep(0.15, 0.19, d)), b, halka * 0.95);
+}
+// göz makyajı: far kapağın üstünde, eyeliner kirpik çizgisinde, istenirse dışa kanat
+vec3 gozMakyaj(vec3 renk, vec2 uv, vec4 G, float sh, float cilt) {
+  vec2 d = (uv - G.xy) / G.zw;
+  float e = length(d), xo = d.x * sign(G.x - 0.1836);
+  float far = (1.0 - smoothstep(0.5, 1.0, length((d - vec2(0.0, -0.7)) / vec2(1.5, 1.05)))) * (1.0 - smoothstep(-0.1, 0.25, d.y));
+  float cizgi = smoothstep(0.68, 0.82, e) * (1.0 - smoothstep(0.95, 1.12, e)) * mix(0.35, 1.0, 1.0 - smoothstep(-0.1, 0.3, d.y));
+  float kanat = uKanat * step(0.8, xo) * step(xo, 1.75) * step(abs(d.y + (xo - 0.8) * 0.6 + 0.12), 0.03 + 0.14 * (1.75 - xo));
+  renk = mix(renk, uFar * sh, far * uFarA * cilt);
+  return mix(renk, vec3(0.012, 0.008, 0.01), clamp(max(cizgi, kanat) * uLiner, 0.0, 1.0) * cilt);
+}
 ` + sh.fragmentShader
         .replace('#include <map_fragment>', `#include <map_fragment>
-  float kumasMaske = 0.0;
+  float kumasMaske = 0.0, rujParlak = 0.0;
   {
+    vec3 tex0 = diffuseColor.rgb;
+    // mankenin dokusundaki koyu iç çamaşırı kesimi
+    float koyu = 1.0 - smoothstep(0.05, 0.11, tex0.r);
     vec3 kb = vBind; float ax = abs(kb.x), y = kb.y; float on = step(0.0, kb.z);
     vec3 tenR = diffuseColor.rgb * uTen;
     float kol = step(uOmuzX - 0.02, ax) * step(uKoltukY, y);
@@ -131,7 +187,10 @@ varying vec3 vBind;
       ustR = mix(ustR, uUst2, kravat * ust);
     }
     if (uDesen > 2.5 && uDesen < 3.5) ustR = mix(ustR, uUst2, step(ax, 0.004) * on);
+    vec2 lp = kb.xy + vec2(kb.z * 0.8, 0.0);
+    if (uDesen > 7.5) ustR = leopar(lp, uUst, uUst2);
     vec3 altR = mix(uAlt, uAlt * 0.45, alt * step(uAltUst - 0.025, y) * uKemer);
+    if (uDesen > 7.5) altR = leopar(lp, uAlt, uUst2);
     vec3 kumas = ustR * max(ust, kolK) + altR * alt * (1.0 - ust) + uAyak * ayak;
     // dikiş: kumaş kenarlarında koyu çizgi (vücut boyası değil giysi görünsün)
     float kenarU = ust * (1.0 - smoothstep(0.0, 0.009, min(y - uUstAlt, uUstUst - y)));
@@ -148,20 +207,83 @@ varying vec3 vBind;
       kumas = mix(kumas, mix(tenR, uUst2, 0.25), d * 0.55);
     }
     vec3 renk = mix(tenR, kumas, kumasMaske);
+    if (uIc > 0.5) {
+      float ustB = step(uBelY + 0.06, y);
+      float ek = 0.0;
+      if (uUcgen > 0.5) {
+        // üçgen kap: göğüs ucunun çevresinde, tepesinden boyuna ince askı, sırtta bağ
+        float gx = ax - uGogus.x + 0.004, gy = y - uGogus.y;
+        float t = clamp((0.085 - gy) / 0.14, 0.0, 1.0);
+        ek = on * step(-0.055, gy) * step(gy, 0.085) * step(abs(gx), t * 0.082);
+        vec2 a = vec2(uGogus.x - 0.004, uGogus.y + 0.085), ba = vec2(0.048, uYakaY + 0.012) - a, pa = vec2(ax, y) - a;
+        float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+        ek = max(ek, step(length(pa - ba * h), 0.0045) * step(-0.03, kb.z));
+        ek = max(ek, (1.0 - on) * govde * step(abs(y - (uGogus.y - 0.03)), 0.008));
+      }
+      if (uJartiyer > 0.5) {
+        ek = max(ek, govde * step(abs(y - (uBelY - 0.015)), 0.016));
+        ek = max(ek, govde * step(abs(ax - uUylukX), 0.0045) * step(uCorapUst - 0.01, y) * step(y, uBelY - 0.015));
+      }
+      float icK = max(koyu * mix(1.0, uIcUst, ustB), ek) * (1.0 - kumasMaske);
+      vec3 icR = mix(uAlt, uUst, ustB);
+      if (uDesen > 7.5) icR = leopar(lp, icR, uUst2);
+      if (uDesen > 4.5 && uDesen < 5.5) {
+        float d = smoothstep(0.55, 0.75, sin(kb.x * 300.0) * sin(kb.y * 300.0) + 0.35 * sin((kb.x + kb.y) * 160.0));
+        icR = mix(icR, mix(tenR, uUst2, 0.3), d * 0.42 * koyu);
+      }
+      // biye: kesimin kenarında ince şerit
+      icR = mix(icR, uUst2, clamp(koyu * (1.0 - koyu) * 3.2, 0.0, 1.0) * 0.7);
+      renk = mix(renk, uTenRenk, koyu * (1.0 - uIcUst) * ustB * (1.0 - kumasMaske));
+      renk = mix(renk, icR, icK);
+      kumasMaske = max(kumasMaske, icK);
+    }
     // çorap: file desen ya da opak, kumaşın dışında kalan bacaklarda
     float bacak = govde * (1.0 - kumasMaske) * step(y, uCorapUst) * step(0.5, uCorap);
+    // file body: boyundan bileklere kadar ağ
+    bacak = max(bacak, uFile * (1.0 - kumasMaske) * step(y, uYakaY - 0.03));
     if (uCorap > 0.5 && uCorap < 1.5) {
       float a1 = abs(fract((kb.x + kb.y) * 60.0) - 0.5), a2 = abs(fract((kb.x - kb.y) * 60.0) - 0.5);
       float ag = 1.0 - smoothstep(0.06, 0.12, min(a1, a2));
       renk = mix(renk, vec3(0.02), bacak * ag * 0.9);
-    } else if (uCorap > 1.5) renk = mix(renk, vec3(0.03), bacak * 0.75);
+    } else if (uCorap > 1.5) renk = mix(renk, vec3(0.03), bacak * mix(0.75, 0.95, uJartiyer * step(uCorapUst - 0.025, y)));
+    // makyaj (yüz dokusu koordinatlarında)
+    #ifdef USE_UV
+    {
+      float cilt = 1.0 - kumasMaske;
+      float sh = clamp(dot(tex0, vec3(0.3, 0.59, 0.11)) / 0.2, 0.45, 1.3);
+      float dud = 1.0 - smoothstep(0.62, 1.0, length((vUv - uDudak.xy) / uDudak.zw));
+      renk = mix(renk, uRuj * sh, dud * uRujA * cilt);
+      rujParlak = dud * uRujParlak * step(0.01, uRujA);
+      float al = max(1.0 - smoothstep(0.15, 1.0, length((vUv - uYa1.xy) / uYa1.zw)), 1.0 - smoothstep(0.15, 1.0, length((vUv - uYa2.xy) / uYa2.zw)));
+      renk = mix(renk, renk * vec3(1.12, 0.74, 0.78), al * uAllik * cilt);
+      renk = gozMakyaj(renk, vUv, uG1, sh, cilt);
+      renk = gozMakyaj(renk, vUv, uG2, sh, cilt);
+    }
+    #endif
     diffuseColor.rgb = renk;
   }`)
-        .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\n  roughnessFactor = mix(roughnessFactor, uPuruz, kumasMaske);')
+        .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\n  roughnessFactor = mix(roughnessFactor * (1.0 - 0.45 * uParilti), uPuruz, kumasMaske);\n  roughnessFactor = mix(roughnessFactor, 0.16, rujParlak);')
+        .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n  totalEmissiveRadiance += diffuseColor.rgb * vec3(0.05, 0.016, 0.01) * (1.0 - kumasMaske);')
         .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\n  normal = normalize(mix(normal, geometryNormal, kumasMaske * 0.9));');
     };
     if (window.__lbdEnv) { m.envMap = window.__lbdEnv; m.envMapIntensity = 0.4; }
-    m.customProgramCacheKey = () => 'lbd-govde3';
+    m.customProgramCacheKey = () => 'lbd-govde4';
+    return m;
+  }
+  function gozMalzemesi(asil, renk) {
+    const m = asil.clone();
+    const u = { uGoz: { value: dogrusal(renk) } };
+    m.onBeforeCompile = sh => {
+      Object.assign(sh.uniforms, u);
+      sh.fragmentShader = 'uniform vec3 uGoz;\n' + sh.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>
+  #ifdef USE_UV
+  { float r = length(vUv - 0.5);
+    float iris = (1.0 - smoothstep(0.095, 0.108, r)) * smoothstep(0.036, 0.05, r);
+    float l = dot(diffuseColor.rgb, vec3(0.3, 0.59, 0.11));
+    diffuseColor.rgb = mix(diffuseColor.rgb, uGoz * (0.35 + l * 5.0), iris * 0.9); }
+  #endif`);
+    };
+    m.customProgramCacheKey = () => 'lbd-goz';
     return m;
   }
   function sacMalzemesi(asil, renk, opaklik = 1) {
@@ -212,6 +334,16 @@ varying vec3 vBind;
       uylukOrtaY: (nokta('thigh_l').y + nokta('calf_l').y) / 2,
       botY: (nokta('calf_l').y + nokta('foot_l').y) / 2 + 0.06
     };
+    lm.uylukX = Math.abs(nokta('thigh_l').x) + 0.005;
+    {
+      // göğüs ucu (bağlama uzayında en öndeki nokta; üçgen bikini kapları buna göre)
+      const pz = beden.geometry.attributes.position, v = new T.Vector3(), en = new T.Vector3(0.09, lm.yakaY - 0.17, 0);
+      for (let i = 0; i < pz.count; i++) {
+        v.fromBufferAttribute(pz, i).applyMatrix4(beden.matrixWorld);
+        if (v.y > lm.belY + 0.12 && v.y < lm.yakaY - 0.06 && v.x > 0.03 && v.x < 0.16 && v.z > en.z) en.set(v.x, v.y, v.z);
+      }
+      lm.gogus = en;
+    }
     // geniş omuzlu bedenin hazır boxer'ı küçük altın dışında kalmasın
     if (c.siluet === 'b') lm.kasikY = Math.min(lm.kasikY, lm.uylukOrtaY + 0.03);
     // önden düzleştirme için referans derinlik: göğüs bandında orta hat, kasık bandında yanlar
@@ -239,7 +371,8 @@ varying vec3 vBind;
       lm.zRef = ref.map((r, b) => (ref[Math.max(0, b - 1)] + r + ref[Math.min(N - 1, b + 1)]) / 3);
       lm.y0 = y0; lm.y1 = y1; lm.xKenar = lm.omuzX - 0.04;
     }
-    beden.material = govdeMalzemesi(beden.material, lm, c.kiyafet, c.ten);
+    beden.material = govdeMalzemesi(beden.material, lm, c.kiyafet, c.ten, c);
+    if (gozler && GOZ[c.goz]) gozler.material = gozMalzemesi(gozler.material, GOZ[c.goz]);
     const yasK = c.yas >= 45 ? Math.min(1, (c.yas - 42) / 22) : 0;
     const sacRenk = '#' + new T.Color(c.sacRenk).lerp(new T.Color('#c9c6c0'), yasK).getHexString();
     if (kaslar) kaslar.material = sacMalzemesi(kaslar.material, sacRenk);
@@ -371,5 +504,5 @@ varying vec3 vBind;
     }
   }
 
-  window.Model = { yukle, kur, oynat, guncelle, hazir: () => !!V, KIYAFET };
+  window.Model = { yukle, kur, oynat, guncelle, hazir: () => !!V, KIYAFET, MAKYAJ, GOZ };
 })();

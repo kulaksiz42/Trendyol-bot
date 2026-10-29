@@ -51,6 +51,7 @@
   function telefonAlanlari(d) {
     const v = { saat: '09:12', bildirim: [], okunmamis: {}, icerikler: [], dmler: [], aileM: [], aileSoru: null, xAkis: [], islemler: [], gunluk: { ppv: 0, dm: 0, tl: 0, cekim: 0, ppvSatis: 0 }, yayinBitti: false, xBugun: false, sizinti: null };
     for (const k in v) if (d[k] == null) d[k] = v[k];
+    d.dmler.forEach(m => { m.yaziyor = 0; });
     return d;
   }
   function sil() { try { localStorage.removeItem(KAYIT); } catch (e) { } }
@@ -85,6 +86,7 @@
   function gorunum() {
     const k = Object.assign({}, K());
     if (S.secim) { k.kiyafet = S.secim.kiyafet; k.kedikulak = !!S.secim.kedikulak; }
+    k.parilti = S.env && S.env.yag ? 0.9 : 0.25;
     return k;
   }
 
@@ -120,7 +122,30 @@
     $('#sesBtn').onclick = () => { Ses.degistir(); hudCiz(); };
   }
 
+  // ekran geçişleri: uygulama dokunulan simgeden büyüyerek açılır, ana ekrana dönüşte küçülür
+  let sonEkran = null, sonDokunus = null, istenenGecis = null;
+  document.addEventListener('pointerdown', e => { sonDokunus = { x: e.clientX, y: e.clientY }; }, true);
+  function gecis(eski, yeni) {
+    const yon = istenenGecis; istenenGecis = null;
+    const kok = ekranIc && ekranIc.firstElementChild;
+    if (!kok || !kok.animate || !eski || (eski === yeni && !yon)) return;
+    try { if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; } catch (e) { }
+    const tel = (telefonEl || document.body).getBoundingClientRect();
+    const kolay = 'cubic-bezier(.2,.85,.25,1)';
+    if (eski === 'ana' && yeni !== 'ana' && sonDokunus) {
+      const o = `${sonDokunus.x - tel.left}px ${sonDokunus.y - tel.top}px`;
+      kok.animate([{ transform: 'scale(.18)', opacity: 0, borderRadius: '40px', transformOrigin: o }, { transform: 'scale(1)', opacity: 1, borderRadius: '0px', transformOrigin: o }], { duration: 340, easing: kolay });
+    } else if (yeni === 'ana') {
+      kok.animate([{ transform: 'scale(1.06)', opacity: 0, filter: 'blur(6px)' }, { transform: 'none', opacity: 1, filter: 'none' }], { duration: 300, easing: kolay });
+    } else if (yon === 'geri') {
+      kok.animate([{ transform: 'translateX(-30%)', opacity: 0.2 }, { transform: 'none', opacity: 1 }], { duration: 260, easing: kolay });
+    } else {
+      kok.animate([{ transform: 'translateX(34%)', opacity: 0.2 }, { transform: 'none', opacity: 1 }], { duration: 260, easing: kolay });
+    }
+  }
   function ekran(ad, kamera) {
+    const eski = sonEkran; sonEkran = ad;
+    requestAnimationFrame(() => gecis(eski, ad));
     document.body.dataset.ekran = ad;
     ust.innerHTML = '';
     perde.hidden = true;
@@ -137,12 +162,12 @@
   function giris() {
     S = yukle();
     ekran('giris', 'oda');
-    const demo = S ? S.karakter : { boy: 168, kilo: 60, siluet: 'a', ten: V.TEN[2], sac: 'uzun', sacRenk: V.SAC_RENK[4], sakal: 'yok', gozluk: 'yok', aksesuar: 'kupe', kiyafet: 'mini', yas: 26 };
+    const demo = S ? S.karakter : { boy: 168, kilo: 60, siluet: 'a', ten: V.TEN[2], sac: 'uzun', sacRenk: V.SAC_RENK[4], sakal: 'yok', gozluk: 'yok', aksesuar: 'kupe', kiyafet: 'mini', yas: 26, makyaj: 'glam', goz: 'yesil' };
     if (Sahne.hazir) { Sahne.karakter(S ? gorunum() : demo); Sahne.oda(S ? S.env : { led: true }); Sahne.oynat('ozel', 4); }
     let onay = false; try { onay = localStorage.getItem('lbd-18') === '1'; } catch (e) { }
     panel.innerHTML = `
       <p class="etiket">Gece yayıncılığı simülatörü · 18+</p>
-      <h1 class="logo">Özel<br><span>Dans</span></h1>
+      <h1 class="logo"><span class="logo-im">${LOGO_DK}</span>Özel<br><span>Dans</span></h1>
       <p class="logo-alt">Geçim derdi seni DansKasa'ya itti. Işıkları kıs, kombini seç, özel istekleri karşıla. Ama tam o an hep bir şey olur: kedi, Wi-Fi ya da annen. Link bio'da 🔗</p>
       <label class="onay" for="onay18"><input type="checkbox" id="onay18" ${onay ? 'checked' : ''}><span>18 yaşından büyüğüm. Bu oyun yetişkin temalı, imalı ve kurmaca bir hicivdir; çıplaklık ve açık cinsel içerik yoktur.</span></label>
       ${S ? `<button class="btn" id="devamBtn">Devam et · Gün ${S.gun}, ${tl(S.para)}</button>` : ''}
@@ -175,7 +200,7 @@
     ekran('karakter', 'kabin');
     const k = {
       ad: '', kullanici: '', kimlik: 'kadin', yonelim: 'hetero', yas: 24, boy: 168, kilo: 62, siluet: 'a',
-      ten: V.TEN[1], sac: 'uzun', sacRenk: V.SAC_RENK[1], sakal: 'yok', gozluk: 'yok', aksesuar: 'yok',
+      ten: V.TEN[1], sac: 'uzun', sacRenk: V.SAC_RENK[1], sakal: 'yok', gozluk: 'yok', aksesuar: 'yok', makyaj: 'dogal', goz: 'kahve',
       tarz: 'tatli', gecmis: 'ogrenci', kiyafet: 'tisort'
     };
     let sekme = 'kimlik', bekleyen = 0;
@@ -200,6 +225,8 @@
         <div class="grup"><span class="etiket">Ten</span>${renkler('ten', V.TEN)}</div>
         <div class="grup"><span class="etiket">Saç</span>${cipler('sac', V.SAC)}</div>
         <div class="grup"><span class="etiket">Saç rengi</span>${renkler('sacRenk', V.SAC_RENK)}</div>
+        <div class="grup"><span class="etiket">Makyaj</span>${cipler('makyaj', V.MAKYAJ)}</div>
+        <div class="grup"><span class="etiket">Göz rengi</span><div class="cipler" role="group">${V.GOZ_RENK.map(g => `<button class="cip" data-alan="goz" data-deger="${g.id}" aria-pressed="${k.goz === g.id}"><i class="gnokta" style="background:${g.renk}"></i>${esc(g.ad)}</button>`).join('')}</div></div>
         <div class="grup"><span class="etiket">Sakal / bıyık</span>${cipler('sakal', V.SAKAL)}</div>
         <div class="grup"><span class="etiket">Gözlük</span>${cipler('gozluk', V.GOZLUK)}</div>
         <div class="grup"><span class="etiket">Aksesuar</span>${cipler('aksesuar', V.AKSESUAR)}</div>`;
@@ -241,8 +268,8 @@
   }
   function varsayilanGorunum(k) {
     // kimlik seçimi sadece başlangıç görünümünü önerir; her şey sonradan değiştirilebilir
-    const m = { kadin: ['uzun', 'yok', 'a'], erkek: ['kisa', 'kirli', 'b'], transkadin: ['uzun', 'yok', 'a'], transerkek: ['kisa', 'tam', 'b'], nonbinary: ['kisakesim', 'yok', 'a'] }[k.kimlik];
-    if (m) { k.sac = m[0]; k.sakal = m[1]; k.siluet = m[2]; }
+    const m = { kadin: ['uzun', 'yok', 'a', 'dogal'], erkek: ['kisa', 'kirli', 'b', 'yok'], transkadin: ['uzun', 'yok', 'a', 'pembe'], transerkek: ['kisa', 'tam', 'b', 'yok'], nonbinary: ['kisakesim', 'yok', 'a', 'smokey'] }[k.kimlik];
+    if (m) { k.sac = m[0]; k.sakal = m[1]; k.siluet = m[2]; k.makyaj = m[3]; }
   }
   function rastgeleKarakter(k) {
     const r = Math.random, s = a => a[Math.floor(r() * a.length)];
@@ -250,6 +277,7 @@
     k.boy = 152 + Math.floor(r() * 42); k.kilo = 48 + Math.floor(r() * 60); k.siluet = s(V.SILUET).id;
     k.ten = s(V.TEN); k.sac = s(V.SAC).id; k.sacRenk = s(V.SAC_RENK); k.sakal = s(V.SAKAL).id; k.gozluk = s(V.GOZLUK).id;
     k.aksesuar = s(V.AKSESUAR).id; k.tarz = s(V.TARZ).id; k.gecmis = s(V.GECMIS).id;
+    k.makyaj = s(V.MAKYAJ).id; k.goz = s(V.GOZ_RENK).id;
   }
 
   /* ---------- sabah ---------- */
@@ -386,7 +414,7 @@
     if (tema.gerek && tema.gerek !== 'mikrofon' && !kostumVar(tema.gerek)) temaK = 0.6;
     if (tema.id === 'ozelgece' && S.secim.kedikulak) temaK *= 1.1;
     Y.ces = cesaret(); Y.temaK = temaK;
-    Y.bahsisK = Y.saat.bahsis * (S.env['tarz_' + K().tarz] ? 1.15 : 1) * (1 + Y.ces * 0.08) * temaK;
+    Y.bahsisK = Y.saat.bahsis * (S.env['tarz_' + K().tarz] ? 1.15 : 1) * (1 + Y.ces * 0.08) * temaK * (S.env.yag ? (tema.id === 'havuz' ? 1.1 : 1.04) : 1);
   }
   function menuGoster() {
     if (!Y || Y.bitti) return;
@@ -446,7 +474,7 @@
     if (Y.sohbetT <= 0) {
       Y.sohbetT = Math.max(0.45, 2.2 - Y.izl * 0.035) * R(0.6, 1.4);
       if (Y.gundem.length && rnd() < 0.12) { const sat = sec(V.GUNDEM[sec(Y.gundem)]); const m = sat.match(/^(\w+): (.*)$/); sohbetEkle(m ? m[1] : sec(V.KULLANICI), m ? m[2] : sablon(sat)); }
-      else { const m = Sohbet.ortam({ t: Y.t, sessiz, ces: Y.ces, gun: S.gun, hedefOran: Y.jeton / Y.hedef.jeton }); if (m) sohbetMesaj(m); }
+      else { const m = Sohbet.ortam({ t: Y.t, sessiz, ces: Y.ces, gun: S.gun, hedefOran: Y.jeton / Y.hedef.jeton, makyaj: K().makyaj && K().makyaj !== 'yok' }); if (m) sohbetMesaj(m); }
     }
     if (sessiz > 9 && Y.t - Y.sessizUyari > 9) { Y.sessizUyari = Y.t; Sohbet.tepki('sessizlik', 2).forEach((m, i) => setTimeout(() => sohbetMesaj(m), i * 400)); }
     // bot duyuruları
@@ -605,12 +633,23 @@
     if (!Y || Y.bitti || Y.mola || Y.mesgul > 0) return;
     const sirali = S.kiyafetler.slice().sort((a, b) => kiyafetBilgi(a).cesaret - kiyafetBilgi(b).cesaret);
     if (sirali.length < 2) { bildir('Başka kıyafetin yok. Mağazadan alabilirsin.'); return; }
+    // dolap: yayın beklerken sahip olunan kıyafetlerden biri seçilir
+    Y.mola = true;
+    perde.innerHTML = `<div class="kart dolap"><p class="etiket">Dolap · sohbet bekliyor</p>
+      <div class="dolap-izgara">${sirali.map(id => { const kb = kiyafetBilgi(id); return `<button class="dolap-oge ${id === S.secim.kiyafet ? 'giyili' : ''}" data-giy="${id}" ${id === S.secim.kiyafet ? 'disabled' : ''}><b>${esc(kb.ad)}</b><span>${'🔥'.repeat(kb.cesaret) || 'gündelik'}</span></button>`; }).join('')}</div>
+      <p class="dipnot">Daha cesur kıyafet = daha çok bahşiş ve abone, ama risk ve annenin kapıyı açma ihtimali artar.</p>
+      <button class="btn ikincil" id="dolapKapat">Vazgeç</button></div>`;
+    perde.hidden = false;
+    $('#dolapKapat').onclick = () => { perde.hidden = true; Y.mola = false; };
+    perde.querySelectorAll('[data-giy]').forEach(b => b.onclick = () => { perde.hidden = true; Y.mola = false; giyin(b.dataset.giy); });
+  }
+  function giyin(yeni) {
+    if (!Y || Y.bitti) return;
     Y.mesgul = 2; Y.aksSure = 2; Y.aktifAks = 'kombin'; Y.enerji = clamp(Y.enerji - 3);
     perdeYazi('KOMBİN DEĞİŞİYOR…', true);
     setTimeout(() => {
       if (!Y || Y.bitti) return;
-      const i = sirali.indexOf(S.secim.kiyafet);
-      S.secim.kiyafet = sirali[(i + 1) % sirali.length];
+      S.secim.kiyafet = yeni;
       bahsisKatsayi();
       if (Sahne.hazir) { Sahne.karakter(gorunum()); Sahne.oynat('poz', 1.2); }
       Sohbet.tepki('kiyafetDegisti', 2).forEach((m, k) => setTimeout(() => sohbetMesaj(m), k * 400));
@@ -1011,15 +1050,28 @@
 
   /* ================= TELEFON ================= */
   const telefonEl = $('#telefon'), durumEl = $('#durum'), ekranIc = $('#ekranIc');
+  // uygulama simgeleri: kendi çizimimiz (beyaz glif, renkli zemin)
+  const svg = (ic, vb = '0 0 24 24') => `<svg class="ik" viewBox="${vb}" aria-hidden="true">${ic}</svg>`;
+  const LOGO_DK = svg('<path fill="#fff" d="M12 21.3l-1.4-1.3C5.4 15.4 2 12.3 2 8.5 2 5.4 4.4 3 7.5 3c1.7 0 3.4.8 4.5 2.1C13.1 3.8 14.8 3 16.5 3 19.6 3 22 5.4 22 8.5c0 3.8-3.4 6.9-8.6 11.5z"/><circle cx="12" cy="10" r="2.3" fill="#b02a7a"/><path d="M11 11.5h2l.8 4.2h-3.6z" fill="#b02a7a"/>');
+  const IKON = {
+    dans: LOGO_DK,
+    mesaj: svg('<path fill="#fff" d="M12 3.5c5 0 9 3.4 9 7.7s-4 7.7-9 7.7c-1 0-2-.1-2.9-.4L4.5 20.3l1.2-3.6C4 15.3 3 13.3 3 11.2 3 6.9 7 3.5 12 3.5z"/>'),
+    x: '<b class="ik-x">𝕏</b>',
+    aile: svg('<path fill="#fff" d="M12 3.2 2.8 10.4h2.6V20h5v-5h3.2v5h5v-9.6h2.6z"/><path fill="#128c4a" d="M12 16.6l-.6-.5c-1.8-1.6-3-2.6-3-3.9 0-1 .8-1.8 1.8-1.8.6 0 1.3.3 1.8.8.5-.5 1.2-.8 1.8-.8 1 0 1.8.8 1.8 1.8 0 1.3-1.2 2.3-3 3.9z" transform="translate(0 -2)"/>'),
+    banka: svg('<rect x="2.5" y="5.5" width="19" height="13" rx="2.5" fill="#fff"/><rect x="2.5" y="8.5" width="19" height="2.6" fill="#c47d10"/><rect x="5" y="13.5" width="5" height="2" rx="1" fill="#c47d10"/>'),
+    kargo: svg('<path fill="#fff" d="M12 2.5l8.5 4.3v10.4L12 21.5l-8.5-4.3V6.8z"/><path fill="none" stroke="#e0491b" stroke-width="1.6" d="M3.8 7 12 11.2 20.2 7M12 11.2V21M7.8 4.7l8.3 4.3"/>'),
+    kamera: svg('<path fill="#fff" d="M8.5 5h7l1.4 2H20a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 20 19H4a1.5 1.5 0 0 1-1.5-1.5v-9A1.5 1.5 0 0 1 4 7h3.1z"/><circle cx="12" cy="12.8" r="3.6" fill="#2a2a33"/><circle cx="12" cy="12.8" r="2.2" fill="#6b6b78"/><circle cx="18.2" cy="9.4" r=".9" fill="#ff4f8b"/>'),
+    ayar: svg('<g fill="#fff">' + [0, 1, 2, 3, 4, 5, 6, 7].map(i => `<rect x="10.5" y="1.8" width="3" height="5" rx="1" transform="rotate(${i * 45} 12 12)"/>`).join('') + '<circle cx="12" cy="12" r="7"/></g><circle cx="12" cy="12" r="2.8" fill="#4b4b55"/>')
+  };
   const UYG = [
-    { id: 'dans', ad: 'DansKasa', ik: '💃', renk: 'linear-gradient(135deg,#ff4f8b,#7a2bff)' },
-    { id: 'mesaj', ad: 'Mesajlar', ik: '💬', renk: 'linear-gradient(135deg,#3ad1ff,#2a6bff)' },
-    { id: 'x', ad: 'X', ik: '𝕏', renk: '#0b0b0b' },
-    { id: 'aile', ad: 'Aile 🏠', ik: '👨‍👩‍👧', renk: 'linear-gradient(135deg,#2bd96b,#128c4a)' },
-    { id: 'banka', ad: 'Kasabank', ik: '🏦', renk: 'linear-gradient(135deg,#f5c451,#c47d10)' },
-    { id: 'kargo', ad: 'Kargola', ik: '📦', renk: 'linear-gradient(135deg,#ff8a3d,#e0491b)' },
-    { id: 'kamera', ad: 'Kamera', ik: '📸', renk: 'linear-gradient(135deg,#5b5b66,#2a2a33)' },
-    { id: 'ayar', ad: 'Ayarlar', ik: '⚙️', renk: 'linear-gradient(135deg,#8a8a95,#4b4b55)' }
+    { id: 'dans', ad: 'DansKasa', ik: IKON.dans, renk: 'linear-gradient(135deg,#ff4f8b,#7a2bff)' },
+    { id: 'mesaj', ad: 'Mesajlar', ik: IKON.mesaj, renk: 'linear-gradient(135deg,#3ad1ff,#2a6bff)' },
+    { id: 'x', ad: 'X', ik: IKON.x, renk: '#0b0b0b' },
+    { id: 'aile', ad: 'Aile', ik: IKON.aile, renk: 'linear-gradient(135deg,#2bd96b,#128c4a)' },
+    { id: 'banka', ad: 'Kasabank', ik: IKON.banka, renk: 'linear-gradient(135deg,#f5c451,#c47d10)' },
+    { id: 'kargo', ad: 'Kargola', ik: IKON.kargo, renk: 'linear-gradient(135deg,#ff8a3d,#e0491b)' },
+    { id: 'kamera', ad: 'Kamera', ik: IKON.kamera, renk: 'linear-gradient(135deg,#5b5b66,#2a2a33)' },
+    { id: 'ayar', ad: 'Ayarlar', ik: IKON.ayar, renk: 'linear-gradient(135deg,#8a8a95,#4b4b55)' }
   ];
   const UYG_EKRAN = ['ana', 'mesaj', 'x', 'aile', 'banka', 'kargo', 'ayar', 'dk'];
   function durumCiz() {
@@ -1049,7 +1101,7 @@
   function uygBas(baslik, renk, sag) {
     return `<div class="uyg-bas" style="--uc:${renk}"><button class="geri" id="geriBtn" aria-label="Ana ekran">‹</button><b>${baslik}</b><span class="uyg-sag">${sag || ''}</span></div>`;
   }
-  function geriBagla(fn) { const g = $('#geriBtn'); if (g) g.onclick = () => { Ses.tik(); (fn || ana)(); }; }
+  function geriBagla(fn) { const g = $('#geriBtn'); if (g) g.onclick = () => { Ses.tik(); if (fn) istenenGecis = 'geri'; (fn || ana)(); }; }
 
   /* ---------- gün başlangıcı: bildirimler, DM'ler, aile grubu ---------- */
   function gunBasla() {
@@ -1263,12 +1315,16 @@
     ekran('mesaj'); S.okunmamis.mesaj = 0;
     panel.innerHTML = uygBas('Mesajlar', '#2a6bff', `<small>${S.dmler.filter(d => !d.okundu).length} yeni</small>`) + `
       <div class="dm-liste">${S.dmler.length ? S.dmler.map(d => `<button class="dm-oge${d.okundu ? '' : ' yeni'}${d.bitti ? ' bitti' : ''}" data-dm="${d.id}">${avatar(d.kim)}<div><b style="color:${d.renk}">${esc(d.kim)}</b><span>${esc(d.mesajlar[d.mesajlar.length - 1].t || (d.mesajlar[d.mesajlar.length - 1].kilit ? '🔒 Kilitli içerik' : ''))}</span></div><small>${d.tur === 'ozel' ? '💎' : d.tur === 'istek' ? '💸' : d.tur === 'sapik' ? '⚠️' : ''} ${esc(d.saat)}</small></button>`).join('') : '<p class="alt">Mesaj yok.</p>'}</div>`;
-    geriBagla(); panel.querySelectorAll('[data-dm]').forEach(b => b.onclick = () => dmAc(S.dmler.find(d => d.id === b.dataset.dm)));
+    geriBagla(); panel.querySelectorAll('[data-dm]').forEach(b => b.onclick = () => { istenenGecis = 'ileri'; dmAc(S.dmler.find(d => d.id === b.dataset.dm)); });
     kaydet();
   }
   function dmAc(d) {
     ekran('mesaj'); d.okundu = true; kaydet();
-    const balon = m => m.kilit ? `<div class="balon ben kilit"><img src="${(S.icerikler.find(i => i.id === m.kilit) || {}).img || ''}" alt=""><span>🔒 ${usd(m.fiyat)}${m.acildi ? ' · açıldı ✓' : ''}</span></div>` : `<div class="balon ${m.ben ? 'ben' : ''}">${esc(m.t)}</div>`;
+    // son karşı mesajdan önceki kendi mesajlarım okundu sayılır
+    let sonKarsi = -1; d.mesajlar.forEach((m, i) => { if (!m.ben) sonKarsi = i; });
+    const alt = (m, i) => `<small class="b-saat">${esc(m.saat || d.saat || '')}${m.ben ? `<i class="tik${i < sonKarsi || d.yaziyor ? ' okundu' : ''}">✓✓</i>` : ''}</small>`;
+    const balon = (m, i) => m.kilit ? `<div class="balon ben kilit"><img src="${(S.icerikler.find(x => x.id === m.kilit) || {}).img || ''}" alt=""><span>🔒 ${usd(m.fiyat)}${m.acildi ? ' · açıldı ✓' : ''}</span>${alt(m, i)}</div>` : `<div class="balon ${m.ben ? 'ben' : ''}${/^💸|^🔓/.test(m.t) ? ' para' : ''}">${esc(m.t)}${alt(m, i)}</div>`;
+    const durum = d.yaziyor ? '<em class="yaziyor-yazi">yazıyor…</em>' : d.bitti ? 'son görülme ' + esc(S.saat) : 'çevrimiçi';
     let secenek = [];
     if (!d.bitti) {
       if (d.tur === 'istek' || d.tur === 'ozel') secenek = [['gonder', `🔒 Galeriden kilitli gönder (teklif ${usd(d.istek.teklif)})`], ['pazarlik', `💬 Pazarlık: ${usd(Math.round(d.istek.teklif * 1.6))} iste`], ['flort', '😘 Flört et, oyala'], ['red', 'Reddet']];
@@ -1276,38 +1332,48 @@
       else if (d.tur === 'sapik') secenek = d.alt === 'bedava' ? [['engelle', '🚫 Engelle'], ['bedava', 'Bir tane bedava at']] : d.alt === 'ifsa' ? [['engelle', '🚫 Engelle ve şikâyet et'], ['cevap', 'Semtini söyle']] : [['bildir', '🚫 Engelle, platforma bildir'], ['ode', `$200 öde`]];
       else if (d.tur === 'hikaye') { const h = V.DM.find(x => x.id === d.hid); if (h) secenek = h.s.map((s, j) => ['h' + j, s.l]); }
     }
-    panel.innerHTML = uygBas(esc(d.kim), d.renk || '#2a6bff') + `<div class="dm-akis">${d.mesajlar.map(balon).join('')}</div>
-      <div class="secenekler dm-sec">${secenek.map(([id, l]) => `<button class="secenek" data-s="${id}"><b>${esc(l)}</b></button>`).join('')}</div>`;
+    panel.innerHTML = uygBas(`<span class="dm-bas">${avatar(d.kim)}<span><b style="color:${d.renk || '#fff'}">${esc(d.kim)}</b><small>${durum}</small></span></span>`, d.renk || '#2a6bff', d.tur === 'ozel' ? '<small>💎 VIP</small>' : d.tur === 'sapik' ? '<small class="uyari">⚠️ şüpheli</small>' : '')
+      + `<div class="dm-akis"><p class="gun-ayrac">Bugün</p>${d.mesajlar.map(balon).join('')}${d.yaziyor ? '<div class="balon yaziyor"><i></i><i></i><i></i></div>' : ''}</div>
+      <div class="dm-sec">${secenek.length ? `<div class="hizli">${secenek.map(([id, l]) => `<button class="hizli-c" data-s="${id}">${esc(l)}</button>`).join('')}</div>` : ''}
+        <div class="dm-yaz"><span>${d.bitti ? 'Sohbet kapandı' : 'Mesaj yaz…'}</span><b>${secenek.length ? '➤' : '🎤'}</b></div></div>`;
     geriBagla(mesajlar);
     panel.querySelectorAll('[data-s]').forEach(b => b.onclick = () => dmSecim(d, b.dataset.s));
     ekranIc.scrollTop = ekranIc.scrollHeight;
   }
-  function dmCevap(d, t, gecikme = 700) { setTimeout(() => { d.mesajlar.push({ t }); kaydet(); Ses.bildirim(); if (document.body.dataset.ekran === 'mesaj') dmAc(d); }, gecikme); }
+  function dmCevap(d, t, gecikme = 700) {
+    // önce "yazıyor…", sonra mesaj; uzun mesaj daha uzun yazılır
+    const acik = () => document.body.dataset.ekran === 'mesaj' && panel.querySelector('.dm-akis');
+    setTimeout(() => { d.yaziyor = (d.yaziyor || 0) + 1; if (acik()) dmAc(d); }, Math.min(400, gecikme / 2));
+    setTimeout(() => {
+      d.yaziyor = Math.max(0, (d.yaziyor || 1) - 1); d.mesajlar.push({ t, saat: S.saat }); kaydet(); Ses.bildirim();
+      if (acik()) dmAc(d);
+    }, gecikme + 500 + Math.min(1400, t.length * 18));
+  }
   function dmSecim(d, s) {
     const k = Sohbet.kisi(d.kim) || { comert: 0.4 };
     Ses.tik();
     if (s === 'gonder') return galeriSec(d);
     if (s === 'pazarlik') {
-      d.mesajlar.push({ ben: true, t: `Bu kadar özel bir şey için ${usd(Math.round(d.istek.teklif * 1.6))} olur 😏` });
+      d.mesajlar.push({ ben: true, saat: S.saat, t: `Bu kadar özel bir şey için ${usd(Math.round(d.istek.teklif * 1.6))} olur 😏` });
       if (rnd() < 0.3 + k.comert * 0.5) { d.istek.teklif = Math.round(d.istek.teklif * 1.6); dmCevap(d, sec(['Tamam… ikna oldum 🥵 gönder', 'Pahalısın ama değersin 💸', 'Of tamam, ama iyi bir şey olsun'])); }
       else { d.bitti = true; dmCevap(d, sec(['Bu fiyata başkası var', 'Çok pahalı, boşver 🙄', 'Kartım limitte, başka zaman'])); }
       kaydet(); return dmAc(d);
     }
     if (s === 'flort') {
-      d.mesajlar.push({ ben: true, t: sec(['Belki… sabırlı olana 😘', 'Sen hep böyle tatlı mısın?', 'Bu gece yayında bekliyorum 🔥', 'Kilidi açan bilir 😏']) });
+      d.mesajlar.push({ ben: true, saat: S.saat, t: sec(['Belki… sabırlı olana 😘', 'Sen hep böyle tatlı mısın?', 'Bu gece yayında bekliyorum 🔥', 'Kilidi açan bilir 😏']) });
       if (rnd() < 0.35 + k.comert * 0.3) { const b = Math.round(R(2, 9)); S.gunluk.dm += b; dmCevap(d, `💸 ${usd(b)} bahşiş gönderdi: "${sec(['sadece cevap verdin diye', 'kalbim', 'yarın da yaz'])}"`); }
       else dmCevap(d, sec(['😳😳', 'ben eridim', 'uyuyamayacağım şimdi']));
       S.sadakat = clamp(S.sadakat + 1); if (d.tur === 'flort') d.bitti = true; kaydet(); return dmAc(d);
     }
-    if (s === 'sesli') { S.enerji = clamp(S.enerji - 5); d.mesajlar.push({ ben: true, t: '🎧 Sesli mesaj (0:14) · fısıltıyla "iyi geceler"' }); const b = Math.round(R(5, 15)); S.gunluk.dm += b; dmCevap(d, `💸 ${usd(b)} gönderdi: "bunu her gece dinleyeceğim"`); d.bitti = true; kaydet(); return dmAc(d); }
-    if (s === 'red') { d.bitti = true; d.mesajlar.push({ ben: true, t: 'Bu sefer olmaz 🙂' }); dmCevap(d, sec(['tamam 💔', 'ben de seni çok seviyordum', 'neyse, başka yayıncı mı yok'])); kaydet(); return dmAc(d); }
-    if (s === 'engelle' || s === 'bildir') { d.bitti = true; d.mesajlar.push({ ben: true, t: '🚫 Engellendi ve bildirildi' }); S.risk = clamp(S.risk - 2); d.mesajlar.push({ t: 'DansKasa Güvenlik: Hesap incelemeye alındı. Kişisel bilgilerini asla paylaşma.' }); kaydet(); return dmAc(d); }
-    if (s === 'bedava') { d.bitti = true; d.mesajlar.push({ ben: true, t: '🔓 Bedava bir kare gönderildi' }); S.sizinti = `Bedava diye atılan kare dolaşıyor: @${K().kullanici} 👀`; S.aile = clamp(S.aile + 6); dmCevap(d, 'teşekkürler 😏 (ödeme yapmadı, kareyi 12 gruba attı)'); kaydet(); return dmAc(d); }
-    if (s === 'cevap') { d.bitti = true; d.mesajlar.push({ ben: true, t: 'Kadıköy taraflarındayım' }); S.risk = clamp(S.risk + 12); S.aile = clamp(S.aile + 5); dmCevap(d, 'harika, yakındayız 🙂 (bu iyi bir fikir değildi)'); kaydet(); return dmAc(d); }
-    if (s === 'ode') { d.bitti = true; S.gunluk.tl -= Math.round(200 * S.kur); d.mesajlar.push({ ben: true, t: `💸 $200 gönderildi` }); dmCevap(d, 'güzel. haftaya yine konuşuruz.'); kaydet(); return dmAc(d); }
+    if (s === 'sesli') { S.enerji = clamp(S.enerji - 5); d.mesajlar.push({ ben: true, saat: S.saat, t: '🎧 Sesli mesaj (0:14) · fısıltıyla "iyi geceler"' }); const b = Math.round(R(5, 15)); S.gunluk.dm += b; dmCevap(d, `💸 ${usd(b)} gönderdi: "bunu her gece dinleyeceğim"`); d.bitti = true; kaydet(); return dmAc(d); }
+    if (s === 'red') { d.bitti = true; d.mesajlar.push({ ben: true, saat: S.saat, t: 'Bu sefer olmaz 🙂' }); dmCevap(d, sec(['tamam 💔', 'ben de seni çok seviyordum', 'neyse, başka yayıncı mı yok'])); kaydet(); return dmAc(d); }
+    if (s === 'engelle' || s === 'bildir') { d.bitti = true; d.mesajlar.push({ ben: true, saat: S.saat, t: '🚫 Engellendi ve bildirildi' }); S.risk = clamp(S.risk - 2); d.mesajlar.push({ t: 'DansKasa Güvenlik: Hesap incelemeye alındı. Kişisel bilgilerini asla paylaşma.' }); kaydet(); return dmAc(d); }
+    if (s === 'bedava') { d.bitti = true; d.mesajlar.push({ ben: true, saat: S.saat, t: '🔓 Bedava bir kare gönderildi' }); S.sizinti = `Bedava diye atılan kare dolaşıyor: @${K().kullanici} 👀`; S.aile = clamp(S.aile + 6); dmCevap(d, 'teşekkürler 😏 (ödeme yapmadı, kareyi 12 gruba attı)'); kaydet(); return dmAc(d); }
+    if (s === 'cevap') { d.bitti = true; d.mesajlar.push({ ben: true, saat: S.saat, t: 'Kadıköy taraflarındayım' }); S.risk = clamp(S.risk + 12); S.aile = clamp(S.aile + 5); dmCevap(d, 'harika, yakındayız 🙂 (bu iyi bir fikir değildi)'); kaydet(); return dmAc(d); }
+    if (s === 'ode') { d.bitti = true; S.gunluk.tl -= Math.round(200 * S.kur); d.mesajlar.push({ ben: true, saat: S.saat, t: `💸 $200 gönderildi` }); dmCevap(d, 'güzel. haftaya yine konuşuruz.'); kaydet(); return dmAc(d); }
     if (s[0] === 'h') {
       const h = V.DM.find(x => x.id === d.hid), sc = h.s[+s.slice(1)];
-      S.kullanilanDM.push(h.id); d.bitti = true; d.mesajlar.push({ ben: true, t: sc.l.replace(/^"|"$/g, '') });
+      S.kullanilanDM.push(h.id); d.bitti = true; d.mesajlar.push({ ben: true, saat: S.saat, t: sc.l.replace(/^"|"$/g, '') });
       const c = etkiUygula(sc.fx); dmCevap(d, sablon(sc.c)); kaydet(); dmAc(d);
       if (c) panel.insertAdjacentHTML('beforeend', c);
     }
@@ -1323,7 +1389,7 @@
   }
   function kilitliGonder(d, ic) {
     const ces = icerikCesaret(ic), q = d.istek;
-    d.mesajlar.push({ ben: true, kilit: ic.id, fiyat: q.teklif, acildi: false });
+    d.mesajlar.push({ ben: true, saat: S.saat, kilit: ic.id, fiyat: q.teklif, acildi: false });
     const uygun = ces >= q.ces && (!q.set || q.set === ic.set);
     if (uygun) {
       d.bitti = true; const m = d.mesajlar[d.mesajlar.length - 1]; m.acildi = true;
