@@ -45,8 +45,11 @@
   const SAC_DOSYA = { kisa: 'SimpleParted', uzun: 'Long', topuz: 'Buns', kazinmis: 'Buzzed', kisakesim: 'BuzzedFemale' };
   const KLIP = {
     bekle: 'Idle_Loop', konus: 'Idle_Talking_Loop', dans: 'Dance_Loop', sarki: 'Idle_Talking_Loop', selam: 'Idle_Loop',
-    poz: 'Idle_Loop', ozel: 'Idle_Loop', opucuk: 'Idle_Loop', tesekkur: 'Idle_Loop', ic: 'Idle_Loop', panik: 'Jump_Loop', sok: 'Hit_Head', gul: 'Idle_Talking_Loop', sergile: 'Idle_Loop'
+    poz: 'Idle_Loop', ozel: 'Idle_Loop', opucuk: 'Idle_Loop', tesekkur: 'Idle_Loop', ic: 'Idle_Loop', panik: 'Jump_Loop', sok: 'Hit_Head', gul: 'Idle_Talking_Loop', sergile: 'Idle_Loop',
+    podyum: 'Walk_Formal_Loop'
   };
+  // dans çeşitleri: hazır klip ya da bekleme üstüne işlemsel hareket
+  const DANS = ['klip', 'klip', 'dalga', 'kalca'];
 
   // yüz dokusundaki noktalar (piksel/1024): göz merkezleri, göz yarıçapı, dudak, yanak
   const YUZ = {
@@ -116,13 +119,42 @@
       uYa1: { value: uv(yz.y1, yz.yr) }, uYa2: { value: uv(yz.y2, yz.yr) },
       uRuj: { value: dogrusal(mk.ruj[0]) }, uRujA: { value: mk.ruj[1] }, uFar: { value: dogrusal(mk.far[0]) }, uFarA: { value: mk.far[1] },
       uLiner: { value: mk.liner }, uKanat: { value: mk.kanat || 0 }, uAllik: { value: mk.allik }, uRujParlak: { value: mk.parlak },
-      uParilti: { value: c.parilti != null ? c.parilti : 0.25 }
+      uParilti: { value: c.parilti != null ? c.parilti : 0.25 },
+      // mimik: göz kırpma (sol/sağ), gülümseme, ağız açma, dudak büzme; doku→bağlama ölçeği
+      uKirp: { value: new T.Vector2() }, uGulus: { value: 0 }, uAgiz: { value: 0 }, uBuz: { value: 0 }, uYuzOlcek: { value: lm.yuzOlcek || new T.Vector2(0, 0) }
     };
     m.onBeforeCompile = sh => {
       Object.assign(sh.uniforms, u);
       // bol kıyafet: gövdenin önündeki çıkıntılar (göğüs, kasık) bağlama uzayında düzleştirilir
       sh.vertexShader = `uniform mat4 uBind, uBindInv; uniform float uZRef[40]; uniform float uY0, uY1, uXKenar, uDuz;
+uniform vec4 uG1, uG2, uDudak; uniform vec2 uKirp, uYuzOlcek; uniform float uGulus, uAgiz, uBuz;
 varying vec3 vBind;
+// göz kapağı: üst kapak göz çizgisine iner, alt kapak biraz kalkar (k<0: gözler irileşir)
+vec3 kapak(vec2 u, vec4 G, float k) {
+  vec2 q = (u - G.xy) / G.zw;
+  float w = 1.0 - smoothstep(0.9, 1.7, length(q));
+  float hy = G.w * abs(uYuzOlcek.y);
+  float ust = w * (1.0 - smoothstep(-0.15, 0.2, q.y)) * clamp(-q.y, 0.0, 1.3);
+  float alt = w * smoothstep(0.05, 0.4, q.y) * clamp(q.y, 0.0, 1.0);
+  return vec3(0.0, -k * ust * hy + max(k, 0.0) * 0.3 * alt * hy, max(k, 0.0) * ust * hy * 0.25);
+}
+// yüz dokusu koordinatına göre mimik (yalnızca yüz adası)
+vec3 yuzDeform(vec2 u) {
+  if (u.x > 0.4 || u.y > 0.4 || uYuzOlcek.x == 0.0) return vec3(0.0);
+  vec3 d = kapak(u, uG1, uKirp.x) + kapak(u, uG2, uKirp.y);
+  vec2 m = (u - uDudak.xy) / uDudak.zw;
+  float hx = uDudak.z * uYuzOlcek.x, hy = uDudak.w * abs(uYuzOlcek.y);
+  float rm = length(m * vec2(0.75, 1.0));
+  float alt = (1.0 - smoothstep(0.8, 2.6, rm)) * smoothstep(-0.25, 0.35, m.y);
+  d.y -= uAgiz * alt * hy * 1.6;
+  float kose = 1.0 - smoothstep(0.2, 1.1, length(vec2(abs(m.x) - 1.0, m.y * 1.3)));
+  d.y += uGulus * kose * hy * 0.9;
+  d.x += uGulus * kose * sign(m.x) * hx * 0.18;
+  float dud = 1.0 - smoothstep(0.7, 1.4, rm);
+  d.x -= uBuz * dud * m.x * hx * 0.35;
+  d.z += uBuz * dud * hy * 0.9;
+  return d;
+}
 vec4 duzlestir(vec3 p, out float rw) {
   vec3 b = (uBind * vec4(p, 1.0)).xyz;
   rw = 0.0;
@@ -139,10 +171,10 @@ vec4 duzlestir(vec3 p, out float rw) {
 }
 ` + sh.vertexShader
         .replace('#include <beginnormal_vertex>', '#include <beginnormal_vertex>\nfloat rw;\nvec4 dz = duzlestir(position, rw);\nvBind = (uBind * vec4(position, 1.0)).xyz;\nobjectNormal = normalize(mix(objectNormal, normalize(mat3(uBindInv) * normalize(vec3(dz.x * 1.6, 0.0, max(dz.z, 0.0) + 0.05))), max(rw * 0.8, dz.w)));')
-        .replace('#include <begin_vertex>', '#include <begin_vertex>\ntransformed = (uBindInv * vec4(dz.xyz, 1.0)).xyz;');
+        .replace('#include <begin_vertex>', '#include <begin_vertex>\ntransformed = (uBindInv * vec4(dz.xyz + yuzDeform(uv), 1.0)).xyz;');
       sh.fragmentShader = `uniform float uBelY, uYakaY, uOmuzX, uKoltukY, uKolBit, uDesen, uKemer, uUstUst, uUstAlt, uDekolte, uAltUst, uAltAlt, uAyakUst, uCorap, uCorapUst, uPuruz;
 uniform vec3 uUst, uUst2, uAlt, uAyak, uTen, uTenRenk, uGogus, uRuj, uFar;
-uniform float uIc, uIcUst, uUcgen, uJartiyer, uUylukX, uFile, uRujA, uFarA, uLiner, uKanat, uAllik, uRujParlak, uParilti;
+uniform float uIc, uIcUst, uUcgen, uJartiyer, uUylukX, uFile, uRujA, uFarA, uLiner, uKanat, uAllik, uRujParlak, uParilti, uAgiz;
 uniform vec4 uG1, uG2, uDudak, uYa1, uYa2;
 varying vec3 vBind;
 vec3 leopar(vec2 p, vec3 a, vec3 b) {
@@ -258,6 +290,11 @@ vec3 gozMakyaj(vec3 renk, vec2 uv, vec4 G, float sh, float cilt) {
       renk = mix(renk, renk * vec3(1.12, 0.74, 0.78), al * uAllik * cilt);
       renk = gozMakyaj(renk, vUv, uG1, sh, cilt);
       renk = gozMakyaj(renk, vUv, uG2, sh, cilt);
+      // ağız açıkken dudak arası koyu (ağız içi)
+      vec2 am = (vUv - uDudak.xy) / uDudak.zw;
+      float yarik = (1.0 - smoothstep(0.02, 0.06 + 0.32 * uAgiz, abs(am.y + 0.06))) * (1.0 - smoothstep(0.5, 0.85, abs(am.x))) * smoothstep(0.04, 0.12, uAgiz);
+      renk = mix(renk, vec3(0.06, 0.012, 0.016), yarik * cilt);
+      rujParlak *= 1.0 - yarik;
     }
     #endif
     diffuseColor.rgb = renk;
@@ -267,34 +304,43 @@ vec3 gozMakyaj(vec3 renk, vec2 uv, vec4 G, float sh, float cilt) {
         .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\n  normal = normalize(mix(normal, geometryNormal, kumasMaske * 0.9));');
     };
     if (window.__lbdEnv) { m.envMap = window.__lbdEnv; m.envMapIntensity = 0.4; }
-    m.customProgramCacheKey = () => 'lbd-govde4';
+    m.customProgramCacheKey = () => 'lbd-govde5';
+    m.userData.mimik = u;
     return m;
   }
   function gozMalzemesi(asil, renk) {
     const m = asil.clone();
-    const u = { uGoz: { value: dogrusal(renk) } };
+    const u = { uGoz: { value: renk ? dogrusal(renk) : new T.Color(0, 0, 0) }, uRenkli: { value: renk ? 1 : 0 }, uBakis: { value: new T.Vector2() } };
     m.onBeforeCompile = sh => {
       Object.assign(sh.uniforms, u);
-      sh.fragmentShader = 'uniform vec3 uGoz;\n' + sh.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>
+      sh.fragmentShader = 'uniform vec3 uGoz; uniform float uRenkli; uniform vec2 uBakis;\n' + sh.fragmentShader.replace('#include <map_fragment>', `#ifdef USE_MAP
+  diffuseColor *= texture2D(map, vUv - uBakis);
+  #endif
   #ifdef USE_UV
-  { float r = length(vUv - 0.5);
+  if (uRenkli > 0.5) { float r = length(vUv - uBakis - 0.5);
     float iris = (1.0 - smoothstep(0.095, 0.108, r)) * smoothstep(0.036, 0.05, r);
     float l = dot(diffuseColor.rgb, vec3(0.3, 0.59, 0.11));
     diffuseColor.rgb = mix(diffuseColor.rgb, uGoz * (0.35 + l * 5.0), iris * 0.9); }
   #endif`);
     };
-    m.customProgramCacheKey = () => 'lbd-goz';
+    // ıslak göz: ışık noktası yansısın
+    m.roughness = 0.12; m.metalness = 0;
+    if (window.__lbdEnv) { m.envMap = window.__lbdEnv; m.envMapIntensity = 0.7; }
+    m.customProgramCacheKey = () => 'lbd-goz2';
+    m.userData.goz = u;
     return m;
   }
-  function sacMalzemesi(asil, renk, opaklik = 1) {
+  function sacMalzemesi(asil, renk, opaklik = 1, kasYon) {
     const m = asil.clone();
-    const u = { uSac: { value: dogrusal(renk) } };
+    const u = { uSac: { value: dogrusal(renk) }, uKas: { value: 0 }, uKasYon: { value: kasYon || new T.Vector3() } };
     m.onBeforeCompile = sh => {
       Object.assign(sh.uniforms, u);
+      if (kasYon) sh.vertexShader = 'uniform float uKas; uniform vec3 uKasYon;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\ntransformed += uKasYon * uKas;');
       sh.fragmentShader = 'uniform vec3 uSac;\n' + sh.fragmentShader.replace('#include <map_fragment>', '#include <map_fragment>\n  float sl = dot(diffuseColor.rgb, vec3(0.3, 0.59, 0.11));\n  diffuseColor.rgb = uSac * (0.45 + sl * 2.2);');
     };
     if (window.__lbdEnv) { m.envMap = window.__lbdEnv; m.envMapIntensity = 0.3; }
-    m.customProgramCacheKey = () => 'lbd-sac';
+    m.customProgramCacheKey = () => kasYon ? 'lbd-kas' : 'lbd-sac';
+    m.userData.kas = u;
     if (opaklik < 1) { m.transparent = true; m.opacity = opaklik; m.depthWrite = false; }
     return m;
   }
@@ -336,6 +382,19 @@ vec3 gozMakyaj(vec3 renk, vec2 uv, vec4 G, float sh, float cilt) {
     };
     lm.uylukX = Math.abs(nokta('thigh_l').x) + 0.005;
     {
+      // yüz adası (doku sol üst): bağlama x ~ u, y ~ v için en küçük kareler eğimi
+      const pz = beden.geometry.attributes.position, uvA = beden.geometry.attributes.uv, v = new T.Vector3();
+      let n = 0, su = 0, sx = 0, suu = 0, sux = 0, sv = 0, sy = 0, svv = 0, svy = 0;
+      for (let i = 0; i < pz.count; i++) {
+        const u = uvA.getX(i), w = uvA.getY(i);
+        if (u > 0.08 && u < 0.3 && w > 0.12 && w < 0.32) {
+          v.fromBufferAttribute(pz, i).applyMatrix4(beden.matrixWorld);
+          n++; su += u; sx += v.x; suu += u * u; sux += u * v.x; sv += w; sy += v.y; svv += w * w; svy += w * v.y;
+        }
+      }
+      lm.yuzOlcek = n > 20 ? new T.Vector2((n * sux - su * sx) / (n * suu - su * su), (n * svy - sv * sy) / (n * svv - sv * sv)) : null;
+    }
+    {
       // göğüs ucu (bağlama uzayında en öndeki nokta; üçgen bikini kapları buna göre)
       const pz = beden.geometry.attributes.position, v = new T.Vector3(), en = new T.Vector3(0.09, lm.yakaY - 0.17, 0);
       for (let i = 0; i < pz.count; i++) {
@@ -372,10 +431,15 @@ vec3 gozMakyaj(vec3 renk, vec2 uv, vec4 G, float sh, float cilt) {
       lm.y0 = y0; lm.y1 = y1; lm.xKenar = lm.omuzX - 0.04;
     }
     beden.material = govdeMalzemesi(beden.material, lm, c.kiyafet, c.ten, c);
-    if (gozler && GOZ[c.goz]) gozler.material = gozMalzemesi(gozler.material, GOZ[c.goz]);
+    if (gozler) gozler.material = gozMalzemesi(gozler.material, GOZ[c.goz] || null);
     const yasK = c.yas >= 45 ? Math.min(1, (c.yas - 42) / 22) : 0;
     const sacRenk = '#' + new T.Color(c.sacRenk).lerp(new T.Color('#c9c6c0'), yasK).getHexString();
-    if (kaslar) kaslar.material = sacMalzemesi(kaslar.material, sacRenk);
+    if (kaslar) {
+      // kaş kaldırma yönü: bağlama uzayında yukarı, kaş mesh'inin yerel ölçeğinde ~7 mm
+      const ters = kaslar.matrixWorld.clone().invert();
+      const yon = new T.Vector3(0, 1, 0).transformDirection(ters).multiplyScalar(0.007 / kaslar.matrixWorld.getMaxScaleOnAxis());
+      kaslar.material = sacMalzemesi(kaslar.material, sacRenk, 1, yon);
+    }
 
     // göz konumu: gözlük ve aksesuar yerleşimi için
     let gozMerkez = nokta('Head').add(new T.Vector3(0, 0.07, 0.09)), gozGen = 0.065;
@@ -420,7 +484,10 @@ vec3 gozMakyaj(vec3 renk, vec2 uv, vec4 G, float sh, float cilt) {
     }
     eylem.Idle_Loop.play();
     const gozY = gozMerkez.y * s;
-    G.userData = { model: true, lm, mixer, eylem, aktif: eylem.Idle_Loop, kemik, h: (gozY - 0.21) / 1.45, anim: { ad: 'bekle', t: 0, sure: 0 } };
+    G.userData = { model: true, lm, mixer, eylem, aktif: eylem.Idle_Loop, kemik, h: (gozY - 0.21) / 1.45, anim: { ad: 'bekle', t: 0, sure: 0 },
+      // mimik durumu: şu anki değerler ve hedefler yumuşak geçer
+      yuz: { mimik: beden.material.userData.mimik, goz: gozler && gozler.material.userData.goz, kas: kaslar && kaslar.material.userData.kas,
+        kirp: 0, kirpT: 1 + Math.random() * 3, gozKirp: [0, 0], gulus: 0.15, agiz: 0, buz: 0, kasD: 0, bakis: new T.Vector2(), bakisH: new T.Vector2(), bakisT: 1, zaman: Math.random() * 10, yaw: 0, pitch: 0 } };
     return G;
   }
 
@@ -435,15 +502,17 @@ vec3 gozMakyaj(vec3 renk, vec2 uv, vec4 G, float sh, float cilt) {
     kemik.quaternion.premultiply(yerel);
     kemik.updateMatrixWorld(true);
   }
-  const X = new T.Vector3(1, 0, 0), Z = new T.Vector3(0, 0, 1), Y = new T.Vector3(0, 1, 0);
+  const X = new T.Vector3(1, 0, 0), Z = new T.Vector3(0, 0, 1), Y = new T.Vector3(0, 1, 0), Y_ = Y;
 
   function oynat(G, ad, sure) {
     const U = G.userData;
-    U.anim = { ad, t: 0, sure: sure || 0, cesit: ad === 'ozel' ? ['gobek', 'yavas', 'sac'][Math.floor(Math.random() * 3)] : null };
-    const hedef = U.eylem[KLIP[ad] || 'Idle_Loop'] || U.eylem.Idle_Loop;
+    const cesit = ad === 'ozel' ? ['gobek', 'yavas', 'sac'][Math.floor(Math.random() * 3)] : ad === 'dans' ? DANS[Math.floor(Math.random() * DANS.length)] : null;
+    U.anim = { ad, t: 0, sure: sure || 0, cesit, kirpAn: Math.random() };
+    const klip = ad === 'dans' && cesit !== 'klip' ? 'Idle_Loop' : KLIP[ad] || 'Idle_Loop';
+    const hedef = U.eylem[klip] || U.eylem.Idle_Loop;
     if (hedef !== U.aktif) {
       hedef.reset().setEffectiveWeight(1).play();
-      U.aktif.crossFadeTo(hedef, 0.25, false);
+      U.aktif.crossFadeTo(hedef, 0.4, false);
       U.aktif = hedef;
     }
   }
@@ -455,8 +524,32 @@ vec3 gozMakyaj(vec3 renk, vec2 uv, vec4 G, float sh, float cilt) {
     G.updateMatrixWorld(true);
     // klipte olmayan hareketler: hazır pozun üstüne kemik döndürme
     const k = U.kemik, t = U.anim.t, z = U.anim.sure ? Math.sin(Math.min(1, t / U.anim.sure) * Math.PI) : 1;
-    const gir = Math.min(1, t / 0.25);
+    // işlemsel katman yumuşak girer ve hareket bitmeden yumuşak çıkar
+    const gir = Math.min(1, t / 0.3) * (U.anim.sure ? Math.max(0, Math.min(1, (U.anim.sure - t) / 0.35)) : 1);
     switch (U.anim.ad) {
+      case 'dans': {
+        const c = U.anim.cesit;
+        if (c === 'dalga') {
+          // vücut dalgası: kalçadan başa sırayla
+          const v = t * 4.2;
+          dondur(G, k.pelvis, X, Math.sin(v + 0.8) * 0.1 * gir); dondur(G, k.spine_01, X, Math.sin(v) * 0.14 * gir);
+          dondur(G, k.spine_02, X, Math.sin(v - 0.8) * 0.14 * gir); dondur(G, k.spine_03, X, Math.sin(v - 1.6) * 0.11 * gir);
+          dondur(G, k.Head, X, Math.sin(v - 2.4) * 0.12 * gir); dondur(G, k.pelvis, Z, Math.sin(v * 0.5) * 0.08 * gir);
+          dondur(G, k.upperarm_l, Z, (1.0 + Math.sin(v - 1) * 0.25) * gir); dondur(G, k.lowerarm_l, Z, (0.9 + Math.sin(v - 1.6) * 0.4) * gir);
+          dondur(G, k.upperarm_r, Z, -(1.0 + Math.sin(v - 1) * 0.25) * gir); dondur(G, k.lowerarm_r, Z, -(0.9 + Math.sin(v - 1.6) * 0.4) * gir);
+          if (k.pelvis) k.pelvis.position.y += Math.sin(v * 2) * 0.012 * gir;
+        } else if (c === 'kalca') {
+          // kalça salınımı, eller başın üstünde
+          const v = t * 3.4;
+          dondur(G, k.pelvis, Z, Math.sin(v) * 0.2 * gir); dondur(G, k.pelvis, Y, Math.sin(v * 0.5) * 0.15 * gir);
+          dondur(G, k.spine_01, Z, -Math.sin(v) * 0.1 * gir); dondur(G, k.spine_02, Z, -Math.sin(v) * 0.08 * gir);
+          dondur(G, k.Head, Z, Math.sin(v - 0.6) * 0.08 * gir);
+          dondur(G, k.upperarm_l, Z, 2.45 * gir); dondur(G, k.lowerarm_l, Z, (1.25 + Math.sin(v) * 0.15) * gir);
+          dondur(G, k.upperarm_r, Z, -2.45 * gir); dondur(G, k.lowerarm_r, Z, -(1.25 - Math.sin(v) * 0.15) * gir);
+          if (k.pelvis) k.pelvis.position.y += -Math.abs(Math.sin(v)) * 0.018 * gir;
+        }
+        break;
+      }
       case 'selam':
         dondur(G, k.upperarm_r, Z, -2.3 * gir); dondur(G, k.lowerarm_r, Z, (-0.3 + Math.sin(t * 12) * 0.45) * gir); break;
       case 'poz':
@@ -502,6 +595,75 @@ vec3 gozMakyaj(vec3 renk, vec2 uv, vec4 G, float sh, float cilt) {
       case 'sergile':
         dondur(G, k.upperarm_l, Z, 0.45 * gir); dondur(G, k.lowerarm_l, Y, -1.3 * gir); dondur(G, k.Head, Y, 0.25 * gir); break;
     }
+    canlilik(G, dt);
+  }
+
+  /* ---------- canlılık: nefes, bakış, göz kırpma, mimik ---------- */
+  // hareket başına yüz ifadesi: gülüş, göz kısma (taban), ağız, büzme, kaş
+  const IFADE = {
+    bekle: { g: 0.18, k: 0.05 }, konus: { g: 0.35, k: 0.08, konus: 1 }, sarki: { g: 0.3, k: 0.15, konus: 1 }, gul: { g: 0.85, k: 0.3, konus: 1, kas: 0.3 },
+    dans: { g: 0.55, k: 0.18 }, ozel: { g: 0.22, k: 0.4, kas: 0.25, a: 0.12 }, opucuk: { g: 0.1, k: 0.25, buz: 1 }, poz: { g: 0.6, k: 0.12, goz: 1 },
+    tesekkur: { g: 0.95, k: 0.3, kas: 0.4 }, selam: { g: 0.8, k: 0.1, kas: 0.6 }, sergile: { g: 0.5, k: 0.1 }, ic: { g: 0.1, k: 0.2, a: 0.25 },
+    sok: { g: 0, k: -0.35, kas: 1, a: 0.5 }, panik: { g: 0, k: -0.3, kas: 1, a: 0.6 }, podyum: { g: 0.3, k: 0.2 }
+  };
+  const _v1 = new T.Vector3(), _v2 = new T.Vector3(), _q2 = new T.Quaternion();
+  const yaklas = (a, b, h, dt) => a + (b - a) * Math.min(1, dt * h);
+  function canlilik(G, dt) {
+    const U = G.userData, Y = U.yuz, k = U.kemik, A = U.anim, t = A.t;
+    if (!Y) return;
+    Y.zaman += dt;
+    const z = Y.zaman, f = IFADE[A.ad] || IFADE.bekle;
+    const sakin = !['dans', 'ozel', 'panik', 'sok'].includes(A.ad);
+    // nefes ve ağırlık aktarma (beklerken belirgin)
+    const nefes = Math.sin(z * 1.75);
+    dondur(G, k.spine_03, X, -nefes * 0.018); dondur(G, k.clavicle_l, Z, nefes * 0.02); dondur(G, k.clavicle_r, Z, -nefes * 0.02);
+    if (sakin) {
+      const kay = Math.sin(z * 0.42) * (A.ad === 'bekle' ? 1 : 0.4);
+      dondur(G, k.pelvis, Z, kay * 0.05); dondur(G, k.spine_02, Z, -kay * 0.035); dondur(G, k.Head, Z, kay * 0.03 + Math.sin(z * 0.9) * 0.015);
+    }
+    // baş kameraya döner (dans ve panikte serbest)
+    let yawH = 0, pitchH = 0;
+    if (U.bakHedef && k.Head && sakin) {
+      k.Head.getWorldPosition(_v1);
+      _v2.copy(U.bakHedef).sub(_v1).applyQuaternion(G.getWorldQuaternion(_q2).invert());
+      yawH = Math.max(-0.6, Math.min(0.6, Math.atan2(_v2.x, _v2.z)));
+      pitchH = Math.max(-0.3, Math.min(0.3, -Math.atan2(_v2.y, Math.hypot(_v2.x, _v2.z))));
+    }
+    Y.yaw = yaklas(Y.yaw, yawH, 3, dt); Y.pitch = yaklas(Y.pitch, pitchH, 3, dt);
+    dondur(G, k.neck_01, Y_, Y.yaw * 0.4); dondur(G, k.Head, Y_, Y.yaw * 0.6); dondur(G, k.Head, X, Y.pitch * 0.7);
+    // göz kırpma: 2–6 sn'de bir, bazen çift
+    Y.kirpT -= dt;
+    if (Y.kirpT <= 0) { Y.kirp = 0.16; Y.kirpT = Math.random() < 0.2 ? 0.28 : 2 + Math.random() * 4; }
+    const kirpAn = Y.kirp > 0 ? 1 - Math.abs(Y.kirp - 0.08) / 0.08 : 0;
+    if (Y.kirp > 0) Y.kirp = Math.max(0, Y.kirp - dt);
+    // poz: ortasında göz kırp (wink)
+    const goz = f.goz && A.sure && t > A.sure * 0.35 && t < A.sure * 0.6 ? 1 : 0;
+    const taban = f.k;
+    Y.gozKirp[0] = yaklas(Y.gozKirp[0], Math.max(taban, kirpAn), kirpAn > 0 ? 40 : 8, dt);
+    Y.gozKirp[1] = yaklas(Y.gozKirp[1], Math.max(taban, kirpAn, goz), kirpAn > 0 || goz ? 40 : 8, dt);
+    // ağız: konuşurken açılıp kapanır
+    const konus = f.konus ? 0.22 + 0.4 * Math.abs(Math.sin(z * 10.5) * Math.sin(z * 3.3 + 1)) : 0;
+    const gulusH = f.g + (A.ad === 'bekle' ? Math.max(0, Math.sin(z * 0.23)) * 0.35 : 0);
+    Y.gulus = yaklas(Y.gulus, gulusH, 4, dt);
+    Y.agiz = yaklas(Y.agiz, Math.max(f.a || 0, konus), 18, dt);
+    Y.buz = yaklas(Y.buz, f.buz && A.sure && t < A.sure * 0.6 ? 1 : 0, 10, dt);
+    Y.kasD = yaklas(Y.kasD, f.kas || 0, 6, dt);
+    // göz bakışı: küçük sıçramalar; özel dansta aşağı bakıp kameraya döner
+    Y.bakisT -= dt;
+    if (Y.bakisT <= 0) {
+      Y.bakisT = 0.6 + Math.random() * 2;
+      const r = Math.random();
+      Y.bakisH.set(r < 0.55 ? 0 : (Math.random() - 0.5) * 0.06, r < 0.55 ? 0 : (Math.random() - 0.5) * 0.03);
+      if (A.ad === 'ozel' && Math.random() < 0.5) Y.bakisH.set(0, -0.035);
+    }
+    Y.bakis.x = yaklas(Y.bakis.x, Y.bakisH.x, 25, dt); Y.bakis.y = yaklas(Y.bakis.y, Y.bakisH.y, 25, dt);
+    // shader'a aktar
+    const M = Y.mimik && Y.mimik.uKirp;
+    if (M) {
+      Y.mimik.uKirp.value.set(Y.gozKirp[0], Y.gozKirp[1]); Y.mimik.uGulus.value = Y.gulus; Y.mimik.uAgiz.value = Y.agiz; Y.mimik.uBuz.value = Y.buz;
+    }
+    if (Y.goz) Y.goz.uBakis.value.copy(Y.bakis);
+    if (Y.kas) Y.kas.uKas.value = Y.kasD - Y.gozKirp[0] * 0.25;
   }
 
   window.Model = { yukle, kur, oynat, guncelle, hazir: () => !!V, KIYAFET, MAKYAJ, GOZ };

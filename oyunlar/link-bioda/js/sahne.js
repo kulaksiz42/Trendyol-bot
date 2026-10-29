@@ -541,6 +541,8 @@
     if (document.hidden) return;
     const dt = Math.min(0.05, saat.getDelta()), z = saat.elapsedTime;
     if (oyuncu) {
+      // karakter kameraya bakar (mimik katmanı başını ve gözlerini buna göre çevirir)
+      oyuncu.userData.bakHedef = kamPos;
       kisiGuncelle(oyuncu, dt, z);
       if (kameraMod === 'kabin') {
         if (!surukle) donus += dt * 0.25;
@@ -637,6 +639,10 @@
             col *= mix(vec3(1.0), vec3(1.06, 0.97, 1.05), 0.6);
             col += vec3(0.010, 0.0, 0.016) * (1.0 - l);
             col = mix(vec3(l), col, 1.1);
+            // sinematik ton: gölgeler soğuk-mor, ışıklar şeftali; hafif S eğrisi
+            col *= mix(vec3(0.93, 0.95, 1.08), vec3(1.07, 1.0, 0.93), smoothstep(0.04, 0.6, l));
+            float l2 = clamp(dot(col, vec3(0.299, 0.587, 0.114)), 0.0, 1.0);
+            col *= mix(1.0, (l2 * l2 * (3.0 - 2.0 * l2) + 0.002) / (l2 + 0.002), 0.22);
             col *= mix(1.0, smoothstep(0.95, 0.2, length(c * vec2(1.0, 1.15))), 0.6 * uGuc);
             float n = fract(sin(dot(floor(vUv * uCoz) + uZaman * 61.0, vec2(12.9898, 78.233))) * 43758.5453);
             col += (n - 0.5) * 0.016 * uGuc * (0.5 + l);
