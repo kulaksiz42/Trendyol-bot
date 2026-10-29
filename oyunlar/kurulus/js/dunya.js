@@ -13,6 +13,10 @@
   let insanlar = null, insanBas = null, insanYuk = null, insanVeri = [];
   let olay = {};                              // dışarıya bildirimler: onTik, onYer
   let mevsimAy = 3;
+  let tip = 'sogut';                          // harita: 'sogut' vadisi ya da 'bursa'
+  let dunyaNesne = [];                        // harita değişince silinecek nesneler
+  let buhar = [];                             // kaplıca buharı
+  const ekle = (...o) => { o.forEach(x => { sahne.add(x); dunyaNesne.push(x); }); };
 
   /* ---------- gürültü (tohumlu) ---------- */
   function rastgele(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
@@ -28,7 +32,23 @@
   const fbm = (x, z) => gurultu(x, z) * 0.55 + gurultu(x * 2.1, z * 2.1) * 0.28 + gurultu(x * 4.3, z * 4.3) * 0.17;
   // dere: vadinin ortasından kıvrılarak geçer
   const dereX = z => Math.sin(z * 0.07) * 7 + Math.sin(z * 0.023 + 1) * 4 - 6;
+  // Bursa: arkada (−z) Uludağ yamacı, ortada Hisar tepesi, batıda kaplıcalar, önde ova, Gökdere
+  const gokdereX = z => 12 + Math.sin(z * 0.09) * 3.5;
+  const HISAR = { x: -5, z: -6, r: 9.5 };
+  const KAPLICA = [[-27, -4], [-31, 3], [-24, 6]];
+  function yukseklikBursa(x, z) {
+    const yamac = Math.pow(Math.max(0, -z - 6) / 34, 1.35) * 22;
+    let h = 0.9 + fbm(x * 0.05 + 3, z * 0.05 - 7) * 1.4 + yamac + Math.max(0, -z - 26) * 0.3;
+    const dh = Math.hypot(x - HISAR.x, z - HISAR.z);
+    if (dh < HISAR.r) h = Math.max(h, 4.2 + fbm(x * 0.2, z * 0.2) * 0.25);
+    else if (dh < HISAR.r + 4) h = Math.max(h, 4.2 - (dh - HISAR.r) * 0.85);
+    const dd = Math.abs(x - gokdereX(z));
+    if (dd < 2.4 && z > -26) h = Math.min(h, SU_Y - 0.3 + Math.pow(dd / 2.4, 2) * 1.2);
+    else if (dd < 5 && z > -26) h = Math.min(h, h * 0.7 + 0.4);
+    return h;
+  }
   function yukseklik(x, z) {
+    if (tip === 'bursa') return yukseklikBursa(x, z);
     const dd = Math.abs(x - dereX(z));
     const tepe = Math.pow(Math.min(1, Math.max(0, (Math.hypot(x, z * 0.8) - 20) / 22)), 1.6) * 14;   // kenarlarda tepeler
     const dogu = Math.max(0, x - 18) * 0.35;                                                         // doğuda kayalık yamaç
@@ -63,15 +83,59 @@
     isik.castShadow = true; isik.shadow.mapSize.set(1024, 1024);
     Object.assign(isik.shadow.camera, { left: -48, right: 48, top: 48, bottom: -48, near: 1, far: 140 });
     isik.shadow.bias = -0.0006; sahne.add(isik);
-    karolar(); araziKur(); suKur(); daglar(); agaclar(); kayalar(); kale(); insanKur();
+    haritaKur(tip); insanKur();
     saat = new T.Clock();
     boyut(); window.addEventListener('resize', boyut);
     dokunma(renderer.domElement);
     renderer.setAnimationLoop(kare);
   }
+  // haritayı (yeniden) kur: eski arazi, ağaç, dekor ve binalar silinir
+  function haritaKur(t) {
+    tip = t || 'sogut';
+    dunyaNesne.forEach(o => { sahne.remove(o); if (o.geometry) o.geometry.dispose(); }); dunyaNesne = [];
+    binaNesne.forEach(g => sahne.remove(g)); binaNesne.clear();
+    agacVeri = []; buhar = [];
+    karolar(); araziKur(); suKur(); daglar(); agaclar(); kayalar();
+    if (tip === 'bursa') { uludag(); hisar(); kaplicalar(); } else kale();
+    sahne.fog.far = tip === 'bursa' ? 230 : 170;
+    if (araziTaban) mevsim(mevsimAy);
+  }
+  function uludag() {
+    const m = new T.MeshLambertMaterial({ color: 0x6f7f5e, flatShading: true }), kar = new T.MeshLambertMaterial({ color: 0xf4f7f9, flatShading: true });
+    const d = new T.Mesh(new T.ConeGeometry(80, 64, 9), m); d.position.set(8, 22, -98); ekle(d);
+    const z = new T.Mesh(new T.ConeGeometry(30, 24, 9), kar); z.position.set(8, 43, -98); ekle(z);
+    for (const [x, h] of [[-70, 44], [85, 50]]) { const y = new T.Mesh(new T.ConeGeometry(55, h, 7), m); y.position.set(x, h / 2 - 4, -110); ekle(y); }
+  }
+  // Bizans surları: Hisar tepesinin kenarı (kapısı güneyde)
+  function hisar() {
+    const tas = new T.MeshLambertMaterial({ color: 0xb8ab90, flatShading: true }), koyu = new T.MeshLambertMaterial({ color: 0x9a8c70, flatShading: true });
+    const R = HISAR.r - 0.5, n = 14;
+    for (let k = 0; k < n; k++) {
+      const a = k / n * Math.PI * 2, b = (k + 1) / n * Math.PI * 2;
+      const x1 = HISAR.x + Math.cos(a) * R, z1 = HISAR.z + Math.sin(a) * R, x2 = HISAR.x + Math.cos(b) * R, z2 = HISAR.z + Math.sin(b) * R;
+      const y = yukseklik(x1, z1);
+      const kule = new T.Mesh(new T.BoxGeometry(1.1, 2.7, 1.1), tas); kule.position.set(x1, y + 1.1, z1); kule.castShadow = true; ekle(kule);
+      const dis = new T.Mesh(new T.BoxGeometry(1.3, 0.3, 1.3), koyu); dis.position.set(x1, y + 2.55, z1); ekle(dis);
+      if (k === Math.round(n * 0.25)) continue;   // güney kapısı
+      const sur = new T.Mesh(new T.BoxGeometry(Math.hypot(x2 - x1, z2 - z1), 1.7, 0.5), tas);
+      sur.position.set((x1 + x2) / 2, y + 0.65, (z1 + z2) / 2); sur.rotation.y = -Math.atan2(z2 - z1, x2 - x1); sur.castShadow = true; ekle(sur);
+    }
+  }
+  // kaplıca havuzları ve buhar
+  function kaplicalar() {
+    const suM = new T.MeshPhongMaterial({ color: 0x7fd6cf, shininess: 90, specular: 0xffffff }), tas = new T.MeshLambertMaterial({ color: 0xd8d0bc, flatShading: true });
+    const buharM = new T.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.35, depthWrite: false });
+    KAPLICA.forEach(([x, z]) => {
+      const y = yukseklik(x, z);
+      const kenar = new T.Mesh(new T.CylinderGeometry(1.9, 2.1, 0.35, 10), tas); kenar.position.set(x, y + 0.1, z); ekle(kenar);
+      const su2 = new T.Mesh(new T.CylinderGeometry(1.55, 1.55, 0.36, 10), suM); su2.position.set(x, y + 0.13, z); ekle(su2);
+      for (let k = 0; k < 6; k++) { const b = new T.Mesh(new T.SphereGeometry(0.5, 6, 5), buharM); b.userData = { x: x + (rnd() - 0.5) * 1.6, z: z + (rnd() - 0.5) * 1.6, y, f: rnd() }; ekle(b); buhar.push(b); }
+    });
+  }
   function boyut() {
     const k = renderer.domElement.parentElement, w = k.clientWidth, h = k.clientHeight;
-    renderer.setSize(w, h); kamera.aspect = w / h; kamera.updateProjectionMatrix();
+    // dikey telefonda yatay görüş dar kalmasın: dar ekranda görüş açısı büyür
+    renderer.setSize(w, h); kamera.aspect = w / h; kamera.fov = w < h ? 58 : 42; kamera.updateProjectionMatrix();
   }
 
   /* ---------- karolar ---------- */
@@ -83,11 +147,21 @@
         const [x, z] = dunyadan(i, j), h = [];
         for (const [a, b] of [[-1, -1], [1, -1], [-1, 1], [1, 1], [0, 0]]) h.push(yukseklik(x + a * K / 2, z + b * K / 2));
         const enAz = Math.min(...h), enCok = Math.max(...h), egim = enCok - enAz, ort = h[4];
-        let tip = 'cayir';
-        if (enAz < SU_Y + 0.05) tip = 'su';
-        else if (egim > 1.7 || ort > 10.5 || (x > 20 && fbm(x * 0.12, z * 0.12) > 0.52)) tip = 'kaya';
-        else if (fbm(x * 0.07 + 40, z * 0.07 - 20) > 0.6 && ort > 1.6) tip = 'orman';
-        karo[i][j] = { h: ort, egim, tip, dolu: 0, agac: [] };
+        let t = 'cayir', kaplica = false, ova = false;
+        if (tip === 'bursa') {
+          const dh = Math.hypot(x - HISAR.x, z - HISAR.z);
+          if (enAz < SU_Y + 0.05) t = 'su';
+          else if (dh > HISAR.r - 1.6 && dh < HISAR.r + 0.6) t = 'sur';
+          else if (egim > 2.2 || ort > 15) t = 'kaya';
+          else if (z < -12 && fbm(x * 0.08 + 9, z * 0.08) > 0.42) t = 'orman';
+          kaplica = KAPLICA.some(([kx, kz]) => Math.hypot(x - kx, z - kz) < 6);
+          ova = z > 10;
+        } else {
+          if (enAz < SU_Y + 0.05) t = 'su';
+          else if (egim > 1.7 || ort > 10.5 || (x > 20 && fbm(x * 0.12, z * 0.12) > 0.52)) t = 'kaya';
+          else if (fbm(x * 0.07 + 40, z * 0.07 - 20) > 0.6 && ort > 1.6) t = 'orman';
+        }
+        karo[i][j] = { h: ort, egim, tip: t, dolu: t === 'sur' ? -1 : 0, agac: [], kaplica, ova };
       }
     }
   }
@@ -96,6 +170,7 @@
   const RENK = {
     cayir: [new T.Color('#6ea33f'), new T.Color('#74a843')], orman: [new T.Color('#4f8534'), new T.Color('#54893a')],
     kaya: [new T.Color('#9c9586'), new T.Color('#8a8475')], su: [new T.Color('#b7a676'), new T.Color('#c2b383')],
+    sur: [new T.Color('#b8ab90'), new T.Color('#ad9f84')],
     kar: new T.Color('#f2f5f7'), kuru: new T.Color('#b5a35a')
   };
   let araziTaban;
@@ -119,7 +194,7 @@
     g.setAttribute('color', new T.BufferAttribute(renk, 3));
     araziRenk = g.attributes.color;
     arazi = new T.Mesh(g, new T.MeshLambertMaterial({ vertexColors: true, flatShading: true }));
-    arazi.receiveShadow = true; sahne.add(arazi);
+    arazi.receiveShadow = true; ekle(arazi);
   }
   // mevsime göre arazi rengi: kışın kar, yazın sararan çayır
   function mevsim(ay) {
@@ -140,18 +215,18 @@
   }
   function suKur() {
     su = new T.Mesh(new T.PlaneGeometry(W + 40, W + 40), new T.MeshPhongMaterial({ color: 0x4c8fb5, transparent: true, opacity: 0.82, shininess: 80, specular: 0x9fd2ff }));
-    su.rotation.x = -Math.PI / 2; su.position.y = SU_Y; sahne.add(su);
+    su.rotation.x = -Math.PI / 2; su.position.y = SU_Y; ekle(su);
   }
   function daglar() {
     const m = new T.MeshLambertMaterial({ color: 0x7d8a6a, flatShading: true }), kar = new T.MeshLambertMaterial({ color: 0xf2f5f7, flatShading: true });
     for (let k = 0; k < 26; k++) {
       const a = k / 26 * Math.PI * 2 + rnd() * 0.2, r = 95 + rnd() * 30, h = 18 + rnd() * 26;
       const d = new T.Mesh(new T.ConeGeometry(16 + rnd() * 14, h, 6 + Math.floor(rnd() * 3)), m);
-      d.position.set(Math.cos(a) * r, h / 2 - 2, Math.sin(a) * r); d.rotation.y = rnd() * 3; sahne.add(d);
-      if (h > 34) { const z = new T.Mesh(new T.ConeGeometry((16 + 8) * 0.28, h * 0.26, 6), kar); z.position.set(d.position.x, h - 2 - h * 0.13, d.position.z); sahne.add(z); }
+      d.position.set(Math.cos(a) * r, h / 2 - 2, Math.sin(a) * r); d.rotation.y = rnd() * 3; ekle(d);
+      if (h > 34) { const z = new T.Mesh(new T.ConeGeometry((16 + 8) * 0.28, h * 0.26, 6), kar); z.position.set(d.position.x, h - 2 - h * 0.13, d.position.z); ekle(z); }
     }
     const zemin = new T.Mesh(new T.CircleGeometry(260, 24), new T.MeshLambertMaterial({ color: 0x6f8f4a }));
-    zemin.rotation.x = -Math.PI / 2; zemin.position.y = -0.4; sahne.add(zemin);
+    zemin.rotation.x = -Math.PI / 2; zemin.position.y = -0.4; ekle(zemin);
   }
 
   /* ---------- ağaçlar ve kayalar (tek çizimde yüzlerce) ---------- */
@@ -179,7 +254,7 @@
       if (a.i >= 0) karo[a.i][a.j].agac.push(n);
     });
     agacMevsim(3);
-    sahne.add(agacKutle, agacGovde);
+    ekle(agacKutle, agacGovde);
   }
   function agacMevsim(ay) {
     if (!agacKutle) return;
@@ -204,7 +279,7 @@
     kayaKutle = new T.InstancedMesh(new T.DodecahedronGeometry(0.7, 0), new T.MeshLambertMaterial({ color: 0x8d877a, flatShading: true }), konum.length);
     const m = new T.Matrix4(), q = new T.Quaternion(), e = new T.Euler();
     konum.forEach(([x, z], n) => { const s = 0.6 + rnd() * 1.1; m.compose(new T.Vector3(x, yukseklik(x, z), z), q.setFromEuler(e.set(rnd() * 3, rnd() * 3, 0)), new T.Vector3(s, s * 0.7, s)); kayaKutle.setMatrixAt(n, m); });
-    kayaKutle.castShadow = true; kayaKutle.receiveShadow = true; sahne.add(kayaKutle);
+    kayaKutle.castShadow = true; kayaKutle.receiveShadow = true; ekle(kayaKutle);
   }
   // ufukta Bilecik tekfurunun kalesi (görsel)
   function kale() {
@@ -224,8 +299,8 @@
     g.traverse(o => { if (o.isMesh) { o.castShadow = true; } });
     g.position.set(62, yukseklik(44, -40) + 4, -58); g.scale.setScalar(1.1);
     const tepe = new T.Mesh(new T.ConeGeometry(20, 14, 7), new T.MeshLambertMaterial({ color: 0x7a8a5c, flatShading: true }));
-    tepe.position.set(62, 1, -58); sahne.add(tepe);
-    g.position.y = 7.5; sahne.add(g);
+    tepe.position.set(62, 1, -58); ekle(tepe);
+    g.position.y = 7.5; ekle(g);
     olay.kale = g;
   }
 
@@ -322,6 +397,61 @@
         a.position.set(-1.1 + k * 0.75, 0, 0.6 + (k % 2) * 0.5); a.rotation.y = rnd() * 6; g.add(a);
       }
     },
+    tasev(g) {
+      kutu(g, 1.35, 0.7, 1.15, 0xc9b48e); kutu(g, 1.6, 0.75, 1.4, 0xf1e9d8, 0, 0.7, 0.08);
+      kutu(g, 1.62, 0.06, 1.42, 0x6b4a2f, 0, 0.7, 0.08); kutu(g, 1.62, 0.06, 1.42, 0x6b4a2f, 0, 1.43, 0.08);
+      const c = koni(g, 1.25, 0.6, 0xa4452e, 0, 1.47, 0.08, 4); c.rotation.y = Math.PI / 4; c.scale.set(1.05, 1, 1);
+      kutu(g, 0.3, 0.5, 0.05, 0x5a3a24, 0.3, 0, 0.59); for (const x of [-0.45, 0, 0.45]) kutu(g, 0.22, 0.3, 0.05, 0x3a4a5a, x, 0.92, 0.79);
+    },
+    cami(g) {
+      // almaşık duvar: taş ve tuğla şeritleri
+      for (let k = 0; k < 6; k++) kutu(g, 3.0, 0.32, 2.4, k % 2 ? 0xb5553a : 0xdccdaa, 0, k * 0.32, -0.3);
+      silindir(g, 1.0, 1.08, 0.3, 0xdccdaa, 0, 1.92, -0.85, 12); kubbe(g, 1.0, 0x7a8a96, 0, 2.22, -0.85);
+      silindir(g, 1.0, 1.08, 0.3, 0xdccdaa, 0, 1.92, 0.3, 12); kubbe(g, 1.0, 0x7a8a96, 0, 2.22, 0.3);
+      // son cemaat yeri: revak ve küçük kubbeler
+      kutu(g, 3.2, 0.12, 0.9, 0xdccdaa, 0, 1.25, 1.35);
+      for (let k = 0; k < 5; k++) { const x = -1.3 + k * 0.65; kutu(g, 0.12, 1.25, 0.12, 0xdccdaa, x, 0, 1.75); kubbe(g, 0.3, 0x7a8a96, x, 1.37, 1.35); }
+      // minare
+      silindir(g, 0.26, 0.3, 4.6, 0xdccdaa, 1.85, 0, -1.3, 10); silindir(g, 0.36, 0.36, 0.12, 0xb8a888, 1.85, 3.5, -1.3, 10);
+      koni(g, 0.27, 1.0, 0x7a8a96, 1.85, 4.6, -1.3, 10); silindir(g, 0.03, 0.03, 0.4, 0xc9a548, 1.85, 5.55, -1.3, 4);
+      kutu(g, 0.5, 0.9, 0.06, 0x4a3424, 0, 0, 0.92);
+    },
+    imaret(g) {
+      kutu(g, 3.3, 1.2, 1.6, 0xd2c3a2, 0, 0, -0.3);
+      for (let k = 0; k < 3; k++) kubbe(g, 0.48, 0x7a8a96, -1.05 + k * 1.05, 1.2, -0.3);
+      for (const x of [-1.4, 1.4]) { silindir(g, 0.14, 0.16, 0.9, 0xb5553a, x, 1.2, -0.9, 6); }
+      kutu(g, 3.3, 0.05, 1.2, 0xb5a35a, 0, 0, 1.15);
+      for (let k = 0; k < 3; k++) { kutu(g, 0.8, 0.4, 0.4, 0x8a6440, -1 + k, 0, 1.2); }
+      g.userData.duman = true;
+    },
+    medrese(g) {
+      const tas = 0xdccdaa;
+      for (let k = 0; k < 4; k++) { kutu(g, 0.8, 0.9, 0.8, tas, -1.35 + k * 0.9, 0, -1.4); kubbe(g, 0.3, 0x7a8a96, -1.35 + k * 0.9, 0.9, -1.4); }
+      for (let k = 0; k < 3; k++) { for (const x of [-1.4, 1.4]) { kutu(g, 0.8, 0.9, 0.8, tas, x, 0, -0.5 + k * 0.85); kubbe(g, 0.3, 0x7a8a96, x, 0.9, -0.5 + k * 0.85); } }
+      kutu(g, 1.2, 1.4, 1.0, tas, 0, 0, 1.3); silindir(g, 0.55, 0.6, 0.2, tas, 0, 1.4, 1.3, 10); kubbe(g, 0.55, 0x7a8a96, 0, 1.6, 1.3);
+      kutu(g, 1.6, 0.04, 1.6, 0x6fa043, 0, 0, -0.2); silindir(g, 0.25, 0.3, 0.3, 0x8a9aa0, 0, 0, -0.2, 8);
+    },
+    hamam(g) {
+      kutu(g, 2.9, 1.1, 2.4, 0xd8cbb0);
+      kubbe(g, 0.85, 0x9aa6ae, -0.55, 1.1, -0.2); kubbe(g, 0.55, 0x9aa6ae, 0.85, 1.1, -0.6); kubbe(g, 0.55, 0x9aa6ae, 0.85, 1.1, 0.6);
+      for (let k = 0; k < 6; k++) { const a = k / 6 * 6.28; kutu(g, 0.08, 0.05, 0.08, 0xfff5c0, -0.55 + Math.cos(a) * 0.45, 1.85, -0.2 + Math.sin(a) * 0.45); }
+      silindir(g, 0.12, 0.14, 0.7, 0xb5553a, 1.2, 1.1, -1.0, 6); kutu(g, 0.5, 0.8, 0.06, 0x4a3424, 0, 0, 1.21);
+      g.userData.buhar = true;
+    },
+    dutluk(g) {
+      for (let a = 0; a < 3; a++) for (let b = 0; b < 3; b++) {
+        const x = -1.2 + a * 1.2, z = -1.2 + b * 1.2;
+        silindir(g, 0.08, 0.1, 0.6, 0x6b4a2f, x, 0, z, 5);
+        const y = new T.Mesh(new T.IcosahedronGeometry(0.5, 0), mz(0x3f7a35)); y.position.set(x, 0.85, z); g.add(y);
+      }
+      kutu(g, 0.9, 0.55, 0.6, 0x9a7048, 1.4, 0, 1.45); for (let k = 0; k < 3; k++) kutu(g, 0.7, 0.04, 0.4, 0xf4f0e6, 1.4, 0.12 + k * 0.14, 1.75);
+    },
+    bedesten(g) {
+      kutu(g, 3.4, 1.3, 2.5, 0xc9b48e);
+      for (let a = 0; a < 3; a++) for (let b = 0; b < 2; b++) { silindir(g, 0.52, 0.55, 0.15, 0xc9b48e, -1.1 + a * 1.1, 1.3, -0.6 + b * 1.2, 10); kubbe(g, 0.52, 0x7a8a96, -1.1 + a * 1.1, 1.45, -0.6 + b * 1.2); }
+      for (const x of [-1.1, 1.1]) kutu(g, 0.6, 0.9, 0.06, 0x3a3a3a, x, 0, 1.26);
+      for (let k = 0; k < 4; k++) kutu(g, 0.4, 0.3, 0.4, [0xb83a2a, 0x2f5f9a, 0xd2a032, 0x7a2a6a][k], -1.4 + k * 0.9, 0, 1.6);
+    },
     han(g) {
       const tas = 0xc9b48e;
       kutu(g, 3.6, 1.5, 0.5, tas, 0, 0, -1.55); kutu(g, 3.6, 1.5, 0.5, tas, 0, 0, 1.55); kutu(g, 0.5, 1.5, 3.1, tas, -1.55, 0, 0); kutu(g, 0.5, 1.5, 3.1, tas, 1.55, 0, 0);
@@ -344,6 +474,12 @@
     (YAPICI[tip] || YAPICI.cadir)(ic);
     ic.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
     g.add(ic); g.userData.ic = ic; g.userData.mevsim = ic.userData.mevsim; g.userData.anim = ic.userData.anim;
+    if (ic.userData.duman || ic.userData.buhar) {
+      const m = new T.MeshBasicMaterial({ color: ic.userData.buhar ? 0xffffff : 0xd8d8d8, transparent: true, opacity: 0.4, depthWrite: false });
+      const parca = []; for (let k = 0; k < 4; k++) { const b = new T.Mesh(new T.SphereGeometry(0.28, 6, 5), m.clone()); b.userData.f = k / 4; g.add(b); parca.push(b); }
+      const x0 = ic.userData.buhar ? -0.55 : -1.4, y0 = ic.userData.buhar ? 2.0 : 2.2, z0 = ic.userData.buhar ? -0.2 : -0.9;
+      g.userData.anim = t => parca.forEach(b => { const u = (t * 0.3 + b.userData.f) % 1; b.position.set(x0 + Math.sin(t + b.userData.f * 7) * 0.2, y0 + u * 2.4, z0); b.scale.setScalar(0.6 + u * 1.5); b.material.opacity = 0.4 * (1 - u); });
+    }
     g.userData.boy = boy;
     return g;
   }
@@ -382,6 +518,8 @@
   }
   // üretim çevresi: oduncu ağaç, taş ocağı kaya sayar (0.2–1)
   function cevre(b, v) {
+    if (v.kaplicaBonus) return yakinda(b, v.boy, 'kaplica') ? v.kaplicaBonus : 1;
+    if (v.ovaBonus) return yakinda(b, v.boy, 'ova') ? v.ovaBonus : 1;
     if (v.zemin === 'orman') {
       let say = 0, ornek = null;
       for (let i = b.x - 4; i <= b.x + 4; i++) for (let j = b.z - 4; j <= b.z + 4; j++) {
@@ -407,6 +545,7 @@
       if (k.dolu) return [false, 'Dolu'];
       if (k.tip === 'su') return [false, 'Su'];
       if (k.tip === 'kaya') return [false, 'Kayalık'];
+      if (k.tip === 'sur') return [false, 'Bizans surları'];
       if (k.egim > (v.zemin === 'duz' ? 0.9 : 1.4)) return [false, 'Çok eğimli'];
     }
     if (v.zemin === 'orman' || v.zemin === 'kaya') {
@@ -539,6 +678,7 @@
       if (g.userData.bitis) { g.userData.bitis += dt; const s = 1 + Math.sin(Math.min(1, g.userData.bitis / 0.5) * Math.PI) * 0.08; g.userData.ic.scale.set(s, s, s); if (g.userData.bitis > 0.5) { g.userData.bitis = 0; g.userData.ic.scale.set(1, 1, 1); } }
     });
     su.material.opacity = 0.8 + Math.sin(zaman * 0.8) * 0.03;
+    buhar.forEach(b => { const u = (zaman * 0.25 + b.userData.f) % 1; b.position.set(b.userData.x + Math.sin(zaman + b.userData.f * 9) * 0.3, b.userData.y + 0.4 + u * 3.2, b.userData.z); b.scale.setScalar(0.5 + u * 1.4); b.material.opacity = 0.35 * (1 - u); });
     if (hayalet && hayalet.userData.taban) hayalet.userData.taban.material.opacity = 0.3 + Math.sin(zaman * 5) * 0.1;
     renderer.render(sahne, kamera);
   }
@@ -586,7 +726,10 @@
   // savaş ekranı açıkken şehir çizimini durdur (pil ve GPU)
   function duraklat(d) { renderer.setAnimationLoop(d ? null : kare); if (!d) saat.getDelta(); }
 
-  window.Dunya = { duraklat, askerGoster,
+  // bir binanın yanında kaplıca ya da ova var mı (hamam ve dutluk bonusu)
+  function yakinda(b, boy, ozellik) { for (let i = b.x - 2; i < b.x + boy + 2; i++) for (let j = b.z - 2; j < b.z + boy + 2; j++) if (karo[i] && karo[i][j] && karo[i][j][ozellik]) return true; return false; }
+
+  window.Dunya = { haritaKur, harita: () => tip, yakinda, duraklat, askerGoster,
     kur, mevsim, binaEkle, binaGuncelle, binaKaldir, cevre, uygun, yerlestirmeBasla, yerlestirmeBitir, yerlestirDondur,
     yerlestirme: () => yerlestir, nufusGuncelle, odakla, ekranKonum, baslangicYeri, karo: () => karo, dunyadan,
     hiz: h => { hizCarpan = h; }, kamera: () => kamera, kontrol: () => kontrol

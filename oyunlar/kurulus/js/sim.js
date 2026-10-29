@@ -24,6 +24,25 @@
     if (!d.kaleler) { d.kaleler = {}; V.HARITA.yerler.forEach(y => { d.kaleler[y.id] = { sahip: y.sahip, garnizon: y.garnizon || 0 }; }); }
     if (d.fetih == null) d.fetih = 0;
     if (!d.tarihNot) d.tarihNot = [];
+    if (!d.sehir) d.sehir = 'sogut';
+    if (!d.eyalet) d.eyalet = [];
+    if (d.kaynak.ipek == null) d.kaynak.ipek = 0;
+    if (d.kulliye == null) d.kulliye = 0;
+  }
+  // külliye: bir caminin 7 karo yakınında imaret, medrese ve hamam
+  function kulliyeSay() {
+    const bitmis = t => S.binalar.filter(b => b.tip === t && b.insa >= 1);
+    const yakin = (a, b) => Math.max(Math.abs(a.x - b.x), Math.abs(a.z - b.z)) <= 7;
+    return bitmis('cami').filter(c => ['imaret', 'medrese', 'hamam'].every(t => bitmis(t).some(b => yakin(c, b)))).length;
+  }
+  // başkenti Bursa'ya taşı: Söğüt eyalet olur ve her ay gelir gönderir
+  function baskentTasi() {
+    const u = S.uretim || {};
+    S.eyalet.push({ ad: 'Söğüt', gelir: { yiyecek: Math.round((u.yiyecek || 10) * 0.35), odun: Math.round((u.odun || 5) * 0.35), tas: Math.round((u.tas || 2) * 0.35), akce: Math.round((u.akce || 5) * 0.4) } });
+    S.sehir = 'bursa'; S.binalar = []; S.merkez = null;
+    S.nufus = Math.round(S.nufus * 0.65) + 90;   // obanın bir kısmı göçer, Bursa'nın Rum halkı kalır
+    S.memnun = Math.max(S.memnun, 60);
+    kaydet();
   }
   const birlikV = id => V.BIRLIKLER.find(b => b.id === id);
   const yerV = id => V.HARITA.yerler.find(y => y.id === id);
@@ -83,7 +102,7 @@
     for (const [id, n] of Object.entries(sefer.ordu)) { const b = birlikV(id); guc += n * b.saldiri * (sur > 1.05 ? Math.pow(b.kusatma, 0.9) : (id === 'akinci' ? 1.25 : 1)); }
     guc *= 0.85 + S.memnun / 400;
     // tarih ivmesi: gerçek fetih yılı geçtiyse savunma zayıflar, çok erkense güçlenir
-    const ivme = S.yil >= y.fetih ? 0.6 : 1 + Math.min(1.5, (y.fetih - S.yil) * 0.05);
+    const ivme = (S.yil >= y.fetih ? 0.6 : 1 + Math.min(1.5, (y.fetih - S.yil) * 0.05)) * (y.abluka && S.yil >= y.abluka ? 0.75 : 1);
     const savunma = k.garnizon * 4 * sur * ivme * (0.85 + Math.random() * 0.3);
     const zafer = guc > savunma;
     const oran = zafer ? Math.max(0.05, Math.min(0.55, savunma / guc * 0.4)) : Math.min(0.85, 0.35 + savunma / Math.max(1, guc) * 0.15);
@@ -101,8 +120,8 @@
   }
   const say = tip => S.binalar.filter(b => b.tip === tip && b.insa >= 1).length;
   const sayHepsi = tip => S.binalar.filter(b => b.tip === tip).length;
-  function konut() { return S.binalar.reduce((t, b) => t + (b.insa >= 1 ? binaV(b.tip).konut || 0 : 0), 0); }
-  function acikMi(tip) { const v = binaV(tip); return !v.kilit || say(v.kilit) > 0; }
+  function konut() { return Math.round(S.binalar.reduce((t, b) => t + (b.insa >= 1 ? binaV(b.tip).konut || 0 : 0), 0) * (1 + Math.min(2, S.kulliye || 0) * 0.15)); }
+  function acikMi(tip) { const v = binaV(tip); return (!v.sehir || v.sehir === S.sehir) && (!v.kilit || say(v.kilit) > 0); }
   function alinabilir(tip) {
     const v = binaV(tip);
     if (v.tekil && sayHepsi(tip)) return false;
@@ -122,7 +141,7 @@
     S.binalar = S.binalar.filter(x => x !== b);
   }
   // işçiler: önce yiyecek, sonra diğerleri
-  const ONCELIK = ['tarla', 'agil', 'oduncu', 'tasocagi', 'pazar', 'han'];
+  const ONCELIK = ['tarla', 'agil', 'imaret', 'oduncu', 'tasocagi', 'dutluk', 'pazar', 'bedesten', 'hamam', 'medrese', 'han'];
   function isciDagit() {
     let bos = Math.max(0, Math.floor(S.nufus * 0.62) - asker());   // çocuk, yaşlı ve askerler hariç
     S.binalar.forEach(b => { b.isci = 0; });
@@ -138,18 +157,31 @@
     // inşaat
     S.binalar.forEach(b => { if (b.insa < 1) b.insa = Math.min(1, b.insa + 1 / binaV(b.tip).sure); });
     isciDagit();
-    // üretim
+    // üretim (medrese: ilim çarpanı)
+    const ilim = 1 + Math.min(2, S.binalar.filter(b => b.tip === 'medrese' && b.insa >= 1 && b.isci > 0).length) * 0.08;
+    rapor.ipek = 0;
+    const uretim = {};
     for (const b of S.binalar) {
       if (b.insa < 1) continue;
-      const v = binaV(b.tip); if (!v.uretim) continue;
+      const v = binaV(b.tip);
+      if (v.tuketim && b.isci) for (const [k, m] of Object.entries(v.tuketim)) rapor[k] -= m * b.isci / v.isci;
+      if (!v.uretim) continue;
       b.cevre = cevre ? cevre(b) : 1; b.son = {};
       for (const [k, m] of Object.entries(v.uretim)) {
-        const u = m * b.isci * (v.hasat ? V.HASAT[ay] : 1) * b.cevre * (0.8 + S.memnun / 250);
-        rapor[k] += u; b.son[k] = u;
+        const u = m * b.isci * (v.hasat ? V.HASAT[ay] : 1) * (v.ipekMevsim ? V.IPEK_MEVSIM[ay] : 1) * b.cevre * (0.8 + S.memnun / 250) * ilim;
+        rapor[k] += u; b.son[k] = u; uretim[k] = (uretim[k] || 0) + u;
+      }
+      // bedesten: ipeği akçeye çevirir
+      if (v.ipekTuketim && b.isci) {
+        const ip = Math.min(S.kaynak.ipek + rapor.ipek, v.ipekTuketim * b.isci / v.isci);
+        rapor.ipek -= ip; rapor.akce += ip * v.ipekAkce; b.son.akce = (b.son.akce || 0) + ip * v.ipekAkce;
       }
       if (v.nufusAkce) { const u = S.nufus * v.nufusAkce * (b.isci / v.isci); rapor.akce += u; b.son.akce = (b.son.akce || 0) + u; }
     }
+    S.uretim = uretim;
     rapor.akce += S.nufus * V.VERGI;
+    // eyaletlerden gelir
+    S.eyalet.forEach(e => { for (const [k, m] of Object.entries(e.gelir)) rapor[k] = (rapor[k] || 0) + m; });
     // tımar: fethedilen kalelerin geliri
     const kaleSay = Object.entries(S.kaleler).filter(([id, k]) => k.sahip === 'osm' && id !== 'sogut').length;
     rapor.akce += kaleSay * 3; rapor.yiyecek += kaleSay * 4;
@@ -183,12 +215,14 @@
     // nüfus
     const yer = konut() - S.nufus;
     if (S.kaynak.yiyecek > S.nufus * 0.5 && yer > 0) {
-      const art = Math.max(S.memnun > 45 ? 1 : 0, S.nufus * V.DOGUM * (S.memnun / 60)) + (S.memnun > 62 ? V.GOC * (S.memnun - 60) / 10 : 0);
+      const imaret = S.binalar.some(b => b.tip === 'imaret' && b.insa >= 1 && b.isci > 0) ? 1.35 : 1;
+      const art = Math.max(S.memnun > 45 ? 1 : 0, S.nufus * V.DOGUM * (S.memnun / 60) * imaret) + (S.memnun > 62 ? V.GOC * (S.memnun - 60) / 10 : 0);
       S._artKesir = (S._artKesir || 0) + art;
       const tam = Math.min(yer, Math.floor(S._artKesir)); S.nufus += tam; S._artKesir -= tam;
     }
     // memnuniyet: mescit, ev, yiyecek bolluğu, kalabalık
-    let hedef = 45;
+    S.kulliye = kulliyeSay();
+    let hedef = 45 + Math.min(2, S.kulliye) * 10;
     S.binalar.forEach(b => { if (b.insa >= 1) hedef += binaV(b.tip).memnun || 0; });
     hedef += clamp((S.kaynak.yiyecek / Math.max(1, S.nufus) - 1) * 8, -15, 12);
     if (yer < 0) hedef += yer * 2;
@@ -200,8 +234,8 @@
     // görev
     const g = V.GOREVLER[S.gorev];
     let bitenGorev = null;
-    if (g && g.kosul({ say, nufus: S.nufus, asker: asker(), fetih: S.fetih })) {
-      for (const [k, m] of Object.entries(g.odul)) S.kaynak[k] += m;
+    if (g && g.kosul({ say, nufus: S.nufus, asker: asker(), fetih: S.fetih, sehir: S.sehir, kulliye: S.kulliye })) {
+      for (const [k, m] of Object.entries(g.odul)) { if (k === 'memnun') S.memnun = Math.min(100, S.memnun + m); else S.kaynak[k] += m; }
       bitenGorev = g; S.gorev++;
     }
     kaydet();
@@ -213,5 +247,5 @@
   function yukle() { try { const d = JSON.parse(localStorage.getItem(KAYIT) || 'null'); if (d && d.surum === 1) { S = d; orduAlanlari(S); } return d && d.surum === 1 ? d : null; } catch (e) { return null; } }
   function sil() { try { localStorage.removeItem(KAYIT); } catch (e) { } }
 
-  window.Sim = { dusmanOrdusu, meydanBitir, asker, egitimBaslat, seferBaslat, seferSuresi, birlikV, yerV, yeni, yukle, kaydet, sil, durum: () => S, ayGec, binaEkle, binaYik, say, konut, acikMi, alinabilir, binaV, tarihYazi, isciDagit };
+  window.Sim = { baskentTasi, kulliyeSay, dusmanOrdusu, meydanBitir, asker, egitimBaslat, seferBaslat, seferSuresi, birlikV, yerV, yeni, yukle, kaydet, sil, durum: () => S, ayGec, binaEkle, binaYik, say, konut, acikMi, alinabilir, binaV, tarihYazi, isciDagit };
 })();

@@ -12,9 +12,12 @@ window.VERI = {
     yiyecek: { ad: 'Yiyecek', ikon: '🌾' },
     odun: { ad: 'Odun', ikon: '🪵' },
     tas: { ad: 'Taş', ikon: '🪨' },
-    akce: { ad: 'Akçe', ikon: '🪙' }
+    akce: { ad: 'Akçe', ikon: '🪙' },
+    ipek: { ad: 'İpek', ikon: '🧵' }
   },
-  BASLANGIC_KAYNAK: { yiyecek: 140, odun: 90, tas: 20, akce: 40 },
+  // ipek böceği mevsimi (dut yaprağı: Mayıs–Ağustos)
+  IPEK_MEVSIM: [0, 0, 0, 0.2, 1.2, 1.6, 1.6, 1.2, 0.4, 0, 0, 0],
+  BASLANGIC_KAYNAK: { yiyecek: 140, odun: 90, tas: 20, akce: 40, ipek: 0 },
   BASLANGIC_NUFUS: 20,
 
   /* binalar
@@ -22,7 +25,7 @@ window.VERI = {
      konut: barınma; zemin: 'duz' (eğimsiz çayır), 'orman' (ağaca yakın), 'kaya' (kayaya yakın);
      kilit: açılması için gereken bina; sure: inşaat süresi (ay) */
   BINALAR: [
-    { id: 'cadir', ad: 'Alaçık çadır', acik: 'Kayı obasının keçe çadırı. 5 kişi barınır.', boy: 1, maliyet: { odun: 8 }, konut: 5, sure: 0.5, grup: 'Konut' },
+    { id: 'cadir', ad: 'Alaçık çadır', acik: 'Kayı obasının keçe çadırı. 5 kişi barınır.', boy: 1, maliyet: { odun: 8 }, konut: 5, sure: 0.5, grup: 'Konut', sehir: 'sogut' },
     { id: 'ev', ad: 'Ahşap ev', acik: 'Yerleşik hayata geçiş. 9 kişi barınır, memnuniyet artar.', boy: 1, maliyet: { odun: 25, tas: 6 }, konut: 9, sure: 1.5, kilit: 'mescit', grup: 'Konut', memnun: 1 },
     { id: 'tarla', ad: 'Tarla', acik: 'Buğday. Yazın bol, kışın az ürün verir.', boy: 2, maliyet: { odun: 12 }, isci: 4, uretim: { yiyecek: 2.4 }, hasat: true, zemin: 'duz', sure: 1, grup: 'Üretim' },
     { id: 'agil', ad: 'Koyun ağılı', acik: 'Konar-göçer Kayı\'nın sürüsü. Her mevsim yiyecek.', boy: 2, maliyet: { odun: 18 }, isci: 2, uretim: { yiyecek: 2.2 }, sure: 1, grup: 'Üretim' },
@@ -32,6 +35,14 @@ window.VERI = {
     { id: 'mescit', ad: 'Mescit', acik: 'Obanın ilk mescidi. Memnuniyet artar, ahşap ev açılır.', boy: 2, maliyet: { odun: 40, tas: 20, akce: 25 }, sure: 3, grup: 'Külliye', memnun: 12, tekil: true },
     { id: 'meydan', ad: 'Alay meydanı', acik: 'Gazilerin talim yeri. Yaya ve okçu yetiştirir.', boy: 2, maliyet: { odun: 35, tas: 10 }, sure: 1.5, grup: 'Askerî', tekil: true },
     { id: 'ahir', ad: 'Ahır', acik: 'Atlar ve akıncılar için. Akıncı yetiştirmeyi açar.', boy: 2, maliyet: { odun: 45, tas: 10, akce: 20 }, sure: 2, kilit: 'meydan', grup: 'Askerî', tekil: true },
+    // Bursa (başkent olduktan sonra açılır)
+    { id: 'tasev', ad: 'Taş ev', acik: 'Taş zemin kat, ahşap cumbalı üst kat. 12 kişi barınır.', boy: 1, maliyet: { odun: 15, tas: 25 }, konut: 12, sure: 2, grup: 'Konut', memnun: 1, sehir: 'bursa' },
+    { id: 'cami', ad: 'Cami', acik: 'Zaviyeli, iki kubbeli erken Osmanlı camisi. Külliyenin kalbi.', boy: 2, maliyet: { odun: 60, tas: 80, akce: 60 }, sure: 5, grup: 'Külliye', memnun: 14, sehir: 'bursa' },
+    { id: 'imaret', ad: 'İmaret', acik: 'Yoksula, talebeye, yolcuya aş. Her ay yiyecek harcar, nüfus artışını hızlandırır.', boy: 2, maliyet: { odun: 40, tas: 40, akce: 30 }, isci: 3, tuketim: { yiyecek: 8 }, sure: 3, grup: 'Külliye', memnun: 8, sehir: 'bursa' },
+    { id: 'medrese', ad: 'Medrese', acik: 'Hücreli avlu ve dershane. Her medrese tüm üretimi %8 artırır (en çok 2).', boy: 2, maliyet: { odun: 40, tas: 50, akce: 50 }, isci: 2, sure: 4, grup: 'Külliye', memnun: 4, ilim: 0.08, sehir: 'bursa' },
+    { id: 'hamam', ad: 'Hamam', acik: 'Kubbeli hamam. Kaplıca yakınına kurulursa iki kat gelir.', boy: 2, maliyet: { odun: 30, tas: 50, akce: 40 }, isci: 2, uretim: { akce: 1.4 }, sure: 3, grup: 'Külliye', memnun: 6, kaplicaBonus: 2, sehir: 'bursa' },
+    { id: 'dutluk', ad: 'Dutluk', acik: 'Dut ağaçları ve ipek böceği. Yazın ipek verir; ovada daha verimli.', boy: 2, maliyet: { odun: 15 }, isci: 3, uretim: { ipek: 0.9 }, ipekMevsim: true, zemin: 'duz', ovaBonus: 1.3, sure: 1.5, grup: 'Üretim', sehir: 'bursa' },
+    { id: 'bedesten', ad: 'Bedesten', acik: 'Kubbeli kapalı çarşı. İpeği akçeye çevirir: ipek başına 6 akçe.', boy: 2, maliyet: { odun: 50, tas: 90, akce: 80 }, isci: 4, uretim: { akce: 2 }, ipekTuketim: 8, ipekAkce: 6, sure: 5, kilit: 'pazar', grup: 'Ticaret', memnun: 3, sehir: 'bursa' },
     { id: 'han', ad: 'Han', acik: 'Kervanlar konaklar. Akçe ve ün getirir.', boy: 2, maliyet: { odun: 60, tas: 40, akce: 30 }, isci: 3, uretim: { akce: 2.2 }, sure: 4, kilit: 'pazar', grup: 'Ticaret', memnun: 3 }
   ],
 
@@ -59,9 +70,9 @@ window.VERI = {
       { id: 'lefke', ad: 'Lefke', e: 40.36, b: 30.01, sahip: 'biz', garnizon: 20, sur: 1.2, fetih: 1313, not: "Sakarya kıyısındaki kale. Fetih yılı yaklaşık." },
       { id: 'koyunhisar', ad: 'Koyunhisar', e: 40.6, b: 29.55, sahip: 'biz', garnizon: 34, sur: 1.0, fetih: 1302, savas: true, not: "Bapheus Savaşı (27 Temmuz 1302 ya da 1299). Yeri bilinmiyor; İzmit ile İznik arası bir ova." },
       { id: 'gemlik', ad: 'Gemlik', eski: 'Kios', e: 40.43, b: 29.15, sahip: 'biz', garnizon: 34, sur: 1.4, fetih: 1302, not: "Koyunhisar zaferinden sonra alındı." },
-      { id: 'iznik', ad: 'İznik', eski: 'Nikaia', e: 40.43, b: 29.72, sahip: 'biz', garnizon: 150, sur: 2.6, fetih: 1331, not: "Uzun kuşatmadan sonra 1331'de Orhan Bey'e teslim oldu." },
+      { id: 'iznik', ad: 'İznik', eski: 'Nikaia', e: 40.43, b: 29.72, sahip: 'biz', garnizon: 110, sur: 2.6, fetih: 1331, not: "Uzun kuşatmadan sonra 1331'de Orhan Bey'e teslim oldu." },
       { id: 'mudanya', ad: 'Mudanya', e: 40.38, b: 28.88, sahip: 'biz', garnizon: 40, sur: 1.4, fetih: 1321, not: "1321'de Orhan Bey aldı." },
-      { id: 'bursa', ad: 'Bursa', eski: 'Prusa', e: 40.19, b: 29.06, sahip: 'biz', garnizon: 180, sur: 2.8, fetih: 1326, not: "1317–1326 kuşatması; 6 Nisan 1326'da teslim oldu." },
+      { id: 'bursa', ad: 'Bursa', eski: 'Prusa', e: 40.19, b: 29.06, sahip: 'biz', garnizon: 95, sur: 2.6, abluka: 1317, fetih: 1326, not: "1317–1326 kuşatması; 6 Nisan 1326'da teslim oldu." },
       { id: 'izmit', ad: 'İzmit', eski: 'Nikomedia', e: 40.77, b: 29.93, sahip: 'biz', garnizon: 160, sur: 2.5, fetih: 1337, not: "Bithynia'daki son Bizans kalesi, 1337'de alındı." },
       { id: 'kostantiniye', ad: 'Konstantinopolis', e: 41.01, b: 28.98, sahip: 'biz', garnizon: 2000, sur: 5, fetih: 1453, kapali: true, not: "Bizans'ın başkenti. Fethi 1453'te." },
       { id: 'kutahya', ad: 'Kütahya ↓', e: 39.66, b: 29.98, sahip: 'ger', kapali: true, not: "Germiyanoğulları'nın merkezi. Bu dönemin en güçlü beyliklerinden." },
@@ -87,7 +98,12 @@ window.VERI = {
     { id: 'g8', ad: 'Nüfusu 100\'e çıkar', kosul: s => s.nufus >= 100, odul: { akce: 60 } },
     { id: 'g9', ad: 'Alay meydanı kur, 10 asker yetiştir', kosul: s => s.say('meydan') >= 1 && s.asker >= 10, odul: { akce: 40 } },
     { id: 'g10', ad: 'Haritadan ilk seferi yap: İnegöl ya da Yenişehir', kosul: s => s.fetih >= 1, odul: { akce: 80, yiyecek: 60 } },
-    { id: 'g11', ad: 'Han kur, kervan yolunu aç', kosul: s => s.say('han') >= 1, odul: { akce: 80 } }
+    { id: 'g11', ad: 'Han kur, kervan yolunu aç', kosul: s => s.say('han') >= 1, odul: { akce: 80 } },
+    { id: 'g12', ad: 'Bursa\'yı al ve başkenti oraya taşı', kosul: s => s.sehir === 'bursa', odul: { akce: 100, tas: 60 } },
+    { id: 'g13', ad: 'Bursa\'nın ilk camisini yap', kosul: s => s.say('cami') >= 1, odul: { akce: 80 } },
+    { id: 'g14', ad: 'İpek ticareti: dutluk ve bedesten kur', kosul: s => s.say('dutluk') >= 1 && s.say('bedesten') >= 1, odul: { akce: 120 } },
+    { id: 'g15', ad: 'Külliye: cami, imaret, medrese ve hamamı yan yana kur', kosul: s => s.kulliye >= 1, odul: { akce: 150, memnun: 10 } },
+    { id: 'g16', ad: 'Bursa\'yı 300 kişilik bir şehir yap', kosul: s => s.nufus >= 300, odul: { akce: 200 } }
   ],
 
   // tüketim

@@ -91,7 +91,7 @@
   }
   function tahmin(y) {
     const S = Sim.durum(), k = S.kaleler[y.id];
-    const ivme = S.yil >= y.fetih ? 0.6 : 1 + Math.min(1.5, (y.fetih - S.yil) * 0.05);
+    const ivme = (S.yil >= y.fetih ? 0.6 : 1 + Math.min(1.5, (y.fetih - S.yil) * 0.05)) * (y.abluka && S.yil >= y.abluka ? 0.75 : 1);
     return Math.round(k.garnizon * 4 * (y.sur || 1) * ivme);
   }
   function orduGucu(o, y) {
@@ -122,7 +122,9 @@
       }
       return;
     } else if (k.sahip === 'osm' && id !== 'sogut') govde += '<p class="h-not">Senin toprağın: her ay 3 akçe ve 4 yiyecek (tımar).</p>';
+    if (id === 'bursa' && k.sahip === 'osm' && S.sehir !== 'bursa') govde += '<button class="btn" id="hTasi">Başkenti Bursa\'ya taşı</button>';
     b.innerHTML = govde;
+    const t = b.querySelector('#hTasi'); if (t) t.onclick = () => { if (cb.tasi) cb.tasi(); };
   }
   function guncelle() { if (el) { ciz(); bilgi(secili); } }
 

@@ -26,16 +26,17 @@ button{font:inherit;color:inherit;cursor:pointer}
 
 /* üst çubuk */
 .ust{position:fixed;left:8px;right:8px;top:calc(8px + env(safe-area-inset-top));z-index:10;border-radius:16px;padding:8px 10px;display:grid;gap:6px}
-.kaynaklar{display:flex;gap:4px;justify-content:space-between;white-space:nowrap}
+.ust>*{min-width:0}
+.kaynaklar{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 6px;white-space:nowrap}
 .kay{display:flex;align-items:center;gap:2px;font-weight:700;font-size:13px;min-width:0}
 .kay i{font-style:normal;font-size:13px}
 .kay small{font-weight:600;font-size:10px;color:var(--soluk)}
 .kay small.art{color:var(--yesil)}.kay small.eks{color:var(--kirmizi)}
 .kay.uyari{color:var(--kirmizi)}
 .zaman{display:flex;align-items:center;gap:8px}
-.tarih{font:700 19px var(--f-baslik);color:var(--altin2);flex:1}
+.tarih{font:700 19px var(--f-baslik);color:var(--altin2);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tarih small{font:600 12px var(--f-govde);color:var(--soluk);margin-left:6px}
-.hiz{display:flex;gap:3px}
+.hiz{display:flex;gap:3px;flex:none}
 .hiz button{width:34px;height:28px;border-radius:8px;border:1px solid rgba(217,180,90,.3);background:rgba(255,255,255,.04);font-size:12px;font-weight:800;letter-spacing:-1px}
 .hiz button[aria-pressed="true"]{background:var(--altin);color:var(--lac);border-color:var(--altin)}
 .gorev{position:fixed;left:8px;top:calc(96px + env(safe-area-inset-top));z-index:9;border-radius:12px;padding:6px 10px;max-width:72%;font-size:12.5px}

@@ -2,9 +2,10 @@
 'use strict';
 (function () {
   const V = window.VERI, $ = s => document.querySelector(s);
-  const IKON = { cadir: '⛺', ev: '🏠', tarla: '🌾', agil: '🐑', oduncu: '🪓', tasocagi: '⛏️', pazar: '🏪', mescit: '🕌', han: '🐫', meydan: '🚩', ahir: '🐎' };
+  const IKON = { cadir: '⛺', ev: '🏠', tarla: '🌾', agil: '🐑', oduncu: '🪓', tasocagi: '⛏️', pazar: '🏪', mescit: '🕌', han: '🐫', meydan: '🚩', ahir: '🐎', tasev: '🏘️', cami: '🕌', imaret: '🍲', medrese: '📜', hamam: '♨️', dutluk: '🌳', bedesten: '🏛️' };
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const tam = x => Math.floor(x).toLocaleString('tr-TR');
+  // kısa sayı: 1.962 → 1,9b, 15.400 → 15b (üst çubuğa sığsın)
+  const tam = x => { x = Math.floor(x); return x >= 10000 ? Math.floor(x / 1000) + 'b' : x >= 1000 ? (Math.floor(x / 100) / 10).toString().replace('.', ',') + 'b' : String(x); };
   let S = null, modal = false, secili = null, sonAylik = {};
 
   Dunya.kur($('#sahne'), { onTik: binaBilgi, onKare: kare });
@@ -19,12 +20,17 @@
       <button class="btn ${kayit ? 'ikincil' : ''}" id="yeni">Obayı kur</button>
       <small>Bir parmakla kaydır: gez · İki parmakla: yakınlaştır ve döndür. Olaylar Wikipedia'daki tarih çizelgesine dayanır; tartışmalı tarihler belirtilir.</small></div>`;
     document.body.appendChild(el);
-    if (kayit) $('#devam').onclick = () => { el.remove(); S = kayit; dunyayiKur(); basla(); };
+    if (kayit) $('#devam').onclick = () => { el.remove(); S = kayit; if (S.sehir === 'bursa') Dunya.haritaKur('bursa'); dunyayiKur(); basla(); };
     $('#yeni').onclick = () => { if (kayit && !confirm('Kayıtlı oyun silinsin mi?')) return; el.remove(); Sim.sil(); S = Sim.yeni(); obayiKur(); basla(); };
   }
   // başlangıç: 4 çadır ve bir ağıl hazır gelir
   function obayiKur() {
     const [ci, cj] = Dunya.baslangicYeri();
+    hazirKoy(ci, cj, [['cadir', 0, 0], ['cadir', 2, 0], ['cadir', 0, 2], ['cadir', 2, 2], ['agil', -3, 0]]);
+    S.merkez = [ci, cj];
+  }
+  // merkezin çevresine hazır binalar koy (oyun başı ve başkent taşıma)
+  function hazirKoy(ci, cj, liste) {
     const koy = (tip, di, dj) => {
       const v = Sim.binaV(tip);
       // hedef noktanın çevresinde halka halka uygun yer ara
@@ -34,8 +40,31 @@
         if (Dunya.uygun(v, i, j)[0]) { const bina = Sim.binaEkle(tip, i, j, 0, true); Dunya.binaEkle(bina, v); return; }
       }
     };
-    koy('cadir', 0, 0); koy('cadir', 2, 0); koy('cadir', 0, 2); koy('cadir', 2, 2); koy('agil', -3, 0);
+    liste.forEach(([t, a, b]) => koy(t, a, b));
+  }
+  // başkent Bursa'ya taşınır: yeni harita, Hisar içinde Bizans'tan kalan taş evler ve pazar
+  function baskentTasi() {
+    Sim.baskentTasi();
+    // Söğüt görevleri yarım kaldıysa Bursa görevlerine geç
+    const g12 = V.GOREVLER.findIndex(g => g.id === 'g12'); if (S.gorev < g12) S.gorev = g12;
+    Dunya.haritaKur('bursa');
+    const ci = 17, cj = 17;
+    hazirKoy(ci, cj, [['tasev', -2, -2], ['tasev', 2, -2], ['tasev', -2, 2], ['tasev', 2, 2], ['tasev', 0, -3], ['tasev', 0, 3], ['pazar', -1, 0]]);
     S.merkez = [ci, cj];
+    const [x, z] = Dunya.dunyadan(ci, cj); Dunya.odakla(x, z);
+    const k = Dunya.kamera(); k.position.set(x - 14, 34, z + 46);
+    Dunya.mevsim(S.ay); Sim.isciDagit(); Dunya.nufusGuncelle(S.nufus, S.binalar, Sim.binaV);
+    Dunya.askerGoster(0, null);
+    Sim.kaydet(); binaCubugu(); ciz();
+    ferman({ yil: S.yil, ay: S.ay, baslik: 'Bursa artık başkent', kaynak: 'en Wikipedia: Siege of Bursa', metin: 'Beylik Bursa\'ya taşındı. Hisar\'ın içinde Bizans\'tan kalan taş evler ve bir pazar var. Söğüt eyalet oldu, her ay gelir gönderecek. Orhan Bey Bursa\'yı imaretler, hamamlar, camiler ve hanlarla büyüttü; sıra sende. İpucu: cami, imaret, medrese ve hamamı yan yana kurarsan külliye oluşur.', fx: {} });
+  }
+  function baskentTeklifi() {
+    modal = true;
+    const el = document.createElement('div'); el.className = 'ferman';
+    el.innerHTML = `<div class="kag"><p class="yil">${V.AYLAR[S.ay].toUpperCase()} ${S.yil}</p><h2>Başkent Bursa'ya taşınsın mı?</h2><p>Bursa (Prusa) artık senin. Uludağ'ın eteğinde, kaplıcaları, bereketli ovası ve ticaret yollarıyla bir başkent olmaya hazır. Taşınırsan yeni şehrini Bursa'da kuracaksın; Söğüt eyalet olarak gelir göndermeye devam eder.</p>
+      <div class="sec"><button data-t="1">Başkenti Bursa'ya taşı</button><button data-t="0">Şimdilik Söğüt'te kal (haritadan sonra da taşıyabilirsin)</button></div></div>`;
+    document.body.appendChild(el);
+    el.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { el.remove(); modal = false; if (b.dataset.t === '1') baskentTasi(); else tarihKontrol(); });
   }
   function dunyayiKur() { S.binalar.forEach(b => Dunya.binaEkle(b, Sim.binaV(b.tip))); }
   function basla() {
@@ -99,7 +128,7 @@
   }
   function haritaAc() {
     modal = true;
-    Harita.ac({ kapat: () => { modal = false; ciz(); }, sefer: hedef => { Dunya.askerGoster(S.ordu.yaya + S.ordu.okcu + S.ordu.akinci, S.binalar.find(b => b.tip === 'meydan')); bildirim(`Ordu ${esc(Sim.yerV(hedef).ad)} yolunda.`); ciz(); } });
+    Harita.ac({ kapat: () => { modal = false; ciz(); }, tasi: () => { Harita.kapat(); baskentTeklifi(); }, sefer: hedef => { Dunya.askerGoster(S.ordu.yaya + S.ordu.okcu + S.ordu.akinci, S.binalar.find(b => b.tip === 'meydan')); bildirim(`Ordu ${esc(Sim.yerV(hedef).ad)} yolunda.`); ciz(); } });
   }
   // tarihî meydan savaşı: 3D savaş ekranı
   function meydanSavasi(hedef) {
@@ -131,7 +160,7 @@
       ${r.ivme < 1 ? '<p class="kaynak">Tarihte bu kale bu yıllarda Osmanlı\'ya geçti; savunması zayıflamıştı.</p>' : r.ivme > 1.2 ? '<p class="kaynak">Tarihin önüne geçtin: bu kale gerçekte daha sonra alındı, savunması çok güçlüydü.</p>' : ''}
       <button class="btn" id="tm">Devam</button></div>`;
     document.body.appendChild(el);
-    el.querySelector('#tm').onclick = () => { el.remove(); modal = false; Dunya.askerGoster(S.ordu.yaya + S.ordu.okcu + S.ordu.akinci, S.binalar.find(b => b.tip === 'meydan')); ciz(); tarihKontrol(); };
+    el.querySelector('#tm').onclick = () => { el.remove(); modal = false; Dunya.askerGoster(S.ordu.yaya + S.ordu.okcu + S.ordu.akinci, S.binalar.find(b => b.tip === 'meydan')); ciz(); if (r.hedef === 'bursa' && r.zafer && S.sehir !== 'bursa') baskentTeklifi(); else tarihKontrol(); };
   }
   function hiz(h) {
     S.hiz = h; Dunya.hiz(h);
@@ -148,6 +177,7 @@
         <span class="kay"><i>🪵</i>${tam(k.odun)}${fark('odun')}</span>
         <span class="kay"><i>🪨</i>${tam(k.tas)}${fark('tas')}</span>
         <span class="kay"><i>🪙</i>${tam(k.akce)}${fark('akce')}</span>
+        ${S.sehir === 'bursa' || k.ipek > 0 ? `<span class="kay"><i>🧵</i>${tam(k.ipek)}${fark('ipek')}</span>` : ''}
         <span class="kay ${S.nufus >= konut ? 'uyari' : ''}"><i>👥</i>${S.nufus}<small>/${konut}</small></span>
         <span class="kay"><i>${S.memnun > 65 ? '😊' : S.memnun > 40 ? '😐' : '😠'}</i>${Math.round(S.memnun)}</span></div>
       <div class="zaman"><div class="tarih">${V.AYLAR[S.ay]} ${S.yil}<small>${mevsimAdi(S.ay)} · boşta ${S.bosIsci || 0} kişi</small></div>
@@ -162,7 +192,9 @@
   /* ---------- bina çubuğu ve yerleştirme ---------- */
   function binaCubugu() {
     const yer = Dunya.yerlestirme();
-    $('#binalar').innerHTML = V.BINALAR.map(v => {
+    // başka şehre özgü binalar gösterilmez (Bursa yapıları başkent taşınınca açılır)
+    const liste = V.BINALAR.filter(v => !v.sehir || v.sehir === S.sehir).sort((a, b) => (b.sehir === S.sehir) - (a.sehir === S.sehir));
+    $('#binalar').innerHTML = liste.map(v => {
       const acik = Sim.acikMi(v.id), al = Sim.alinabilir(v.id);
       const maliyet = Object.entries(v.maliyet).map(([k, m]) => V.KAYNAK[k].ikon + m).join(' ');
       return `<button class="bina" data-bina="${v.id}" aria-pressed="${!!(yer && yer.v.id === v.id)}" ${!acik ? 'disabled' : ''}>
@@ -211,6 +243,9 @@
         ${uretim ? `<div><span>Bu ayki üretim</span><span>${uretim}</span></div>` : ''}
         ${v.zemin === 'orman' || v.zemin === 'kaya' ? `<div><span>${v.zemin === 'orman' ? 'Çevredeki orman' : 'Çevredeki kayalık'}</span><span>%${Math.round((b.cevre || 1) * 100)}</span></div>` : ''}
         ${v.konut ? `<div><span>Barınan</span><span>${v.konut} kişi</span></div>` : ''}
+        ${v.kaplicaBonus ? `<div><span>Kaplıca yakınında</span><span>${(b.cevre || 1) > 1 ? 'evet, ×2' : 'hayır'}</span></div>` : ''}
+        ${v.ovaBonus ? `<div><span>Ovada</span><span>${(b.cevre || 1) > 1 ? 'evet, ×1,3' : 'hayır'}</span></div>` : ''}
+        ${b.tip === 'cami' ? `<div><span>Külliye</span><span>${S.kulliye ? 'kuruldu ✓' : '7 karo içinde imaret, medrese ve hamam gerekli'}</span></div>` : ''}
         ${v.hasat ? `<div><span>Hasat</span><span>${mevsimAdi(S.ay)}: ×${V.HASAT[S.ay].toString().replace('.', ',')}</span></div>` : ''}
       </div>
       ${v.isci && b.isci < v.isci ? '<p class="alt-baslik" style="margin-top:8px">Çalışan eksik: nüfus artınca dolar. Önce yiyecek binaları dolar.</p>' : ''}
@@ -243,16 +278,24 @@
   }
   function ferman(e) {
     modal = true; S.okunan.push(e.baslik); Sim.kaydet();
+    if (e.son) {
+      S.okunan.push(e.baslik);
+      if (S.kaleler.bursa.sahip === 'osm') { if (S.sehir !== 'bursa') { modal = false; return baskentTeklifi(); } modal = false; return tarihKontrol(); }
+      e = Object.assign({}, e, { fx: {}, son: false, metin: e.metin + ' Senin ordun henüz Bursa\'ya girmedi.', secim: [
+        { l: 'Tarihin akışına bırak: Bursa teslim oldu', fx: { akce: 40 }, c: 'Bursa kapılarını Orhan Bey\'e açtı.', bursa: true },
+        { l: 'Bursa\'yı haritadan kendim kuşatacağım', fx: {}, c: 'Kuşatma sürüyor; Bursa abluka altında ve zayıfladı.' }] });
+    }
     if (e.savas && S.kaleler.koyunhisar.sahip !== 'osm') {
       e = Object.assign({}, e, { fx: {}, metin: e.metin + ' Tarih seni bekliyor: haritadan Koyunhisar\'a sefer düzenle. Bizans ordusu ovada.' });
     }
     const el = document.createElement('div'); el.className = 'ferman';
-    const kapat = () => { el.remove(); modal = false; Dunya.nufusGuncelle(S.nufus, S.binalar, Sim.binaV); ciz(); binaCubugu(); Sim.kaydet(); if (e.son) bolumSonu(); else tarihKontrol(); };
+    const kapat = () => { el.remove(); modal = false; Dunya.nufusGuncelle(S.nufus, S.binalar, Sim.binaV); ciz(); binaCubugu(); Sim.kaydet(); if (e._bursaTeklif && S.sehir !== 'bursa') baskentTeklifi(); else tarihKontrol(); };
     const govde = sonuc => `<p class="yil">${V.AYLAR[e.ay].toUpperCase()} ${e.yil}</p><h2>${esc(e.baslik)}</h2><p>${esc(e.metin)}</p><p class="kaynak">Kaynak: ${esc(e.kaynak)}</p>${sonuc || ''}`;
     if (e.secim) {
       el.innerHTML = `<div class="kag">${govde()}<div class="sec">${e.secim.map((s, i) => `<button data-s="${i}">${esc(s.l)}<div class="fx">${Object.entries(s.fx).map(([k, m]) => `<span>${fxYazi({ [k]: m })}</span>`).join('')}</div></button>`).join('')}</div></div>`;
       el.querySelectorAll('[data-s]').forEach(b => b.onclick = () => {
         const s = e.secim[+b.dataset.s]; fxUygula(s.fx);
+        if (s.bursa) { S.kaleler.bursa.sahip = 'osm'; S.kaleler.bursa.garnizon = 0; S.fetih++; e._bursaTeklif = true; }
         el.querySelector('.kag').innerHTML = govde(`<p class="sonuc">${esc(s.c)}</p><button class="btn" id="tm">Devam</button>`);
         el.querySelector('#tm').onclick = kapat;
       });
