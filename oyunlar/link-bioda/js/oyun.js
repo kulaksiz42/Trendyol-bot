@@ -355,7 +355,7 @@
     const saat = bul(V.SAATLER, S.secim.saat);
     const tk = 1 + (yasGrubu(K().yas) === trend.yas ? 0.35 : 0) + (K().tarz === trend.tarz ? 0.25 : 0) + (S.secim.tema === trend.tema ? 0.3 : 0);
     // kitle büyüdükçe izleyici artışı yavaşlar (karekök): kartopu değil, emek
-    return (8 + Math.sqrt(S.takipci) * 0.7 + Math.sqrt(S.abone) * 1.8) * saat.izleyici * tk * (S.env.ringlight ? 1.1 : 1) * (S.env.telefon ? 1.12 : 1) * S.yarin;
+    return (8 + Math.sqrt(S.takipci) * 0.55 + Math.sqrt(S.abone) * 1.8) * saat.izleyici * tk * (S.env.ringlight ? 1.1 : 1) * (S.env.telefon ? 1.12 : 1) * S.yarin;
   }
 
   /* ---------- canlı yayın ---------- */
@@ -1387,7 +1387,7 @@
     const ces = icerikCesaret(ic), set = bul(V.CEKIM_SET, ic.set);
     const deger = 4 + ces * 7 + set.bonus * 40 + (S.env.ringlight ? 3 : 0);
     // gerçekte kilitli içerik dönüşümü abonelerin %5–15'i civarı
-    return clamp((0.03 + ces * 0.022 + set.bonus * 0.4 - Math.max(0, ic.fiyat - deger) * 0.006 + (S.sadakat - 50) * 0.0008) * (S.env.telefon ? 1.2 : 1), 0.01, 0.25);
+    return clamp((0.016 + ces * 0.012 + set.bonus * 0.25 - Math.max(0, ic.fiyat - deger) * 0.004 + (S.sadakat - 50) * 0.0005) * (S.env.telefon ? 1.2 : 1), 0.005, 0.12);
   }
   function topluSat(ic) {
     ic.gonderildi = true;
