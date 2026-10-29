@@ -394,6 +394,7 @@ window.VERI = {
     { id: 'enerji', kat: 'Tüketim', ad: 'Enerji içeceği (3\'lü)', fiyat: 210, stok: 3, acik: 'Yayında +35 enerji.' },
     { id: 'telefon', kat: 'Büyük alım', ad: 'iPhone 17 Pro', fiyat: 119999, acik: 'Kamera kalitesi uçar: izleyici +%12, kilitli içerik satışları +%20. Kartla da alınır (faizi sana).' },
     { id: 'studyo', kat: 'Büyük alım', ad: 'Ayrı ev: kiralık 1+1 (depozito + ilk ay)', fiyat: 84000, acik: 'Kadıköy arka sokak, 28.000 TL/ay. Annen kapıyı çalamaz, aile radarı −25. Haftalık kira 7.000 TL olur.' },
+    { id: 'avukat', kat: 'Hayat', ad: 'Avukat (bilişim ve ceza)', fiyat: 25000, acik: 'Hesap hareketlerini düzene sokar, içerikleri gözden geçirir. Risk −25. Tekrar alınabilir.', fx: { risk: -25 }, birikir: true },
     { id: 'bulasik', kat: 'Hayat', ad: 'Annene bulaşık makinesi', fiyat: 24000, acik: 'Aile radarı −30. Ama "parayı nereden buldun?"', fx: { aile: -30, risk: 8 } },
     { id: 'altin', kat: 'Hayat', ad: 'Gram altın', fiyat: 6400, acik: 'Birikim. Risk +3.', fx: { risk: 3 }, birikir: true }
   ],

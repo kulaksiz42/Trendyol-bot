@@ -1033,7 +1033,7 @@
     if (u.stok) S.stok.enerji = (S.stok.enerji || 0) + u.stok;
     else if (u.kiyafet) S.kiyafetler.push(u.id);
     else if (u.aksesuar) S.aksesuarlar.push(u.id);
-    else if (u.birikir) S.altin += 1;
+    else if (u.birikir) { if (u.id === 'altin') S.altin += 1; }
     else if (u.fx) S.bayrak['aldi_' + u.id] = true;
     else S.env[u.id] = true;
     let c = '';
@@ -1219,6 +1219,11 @@
     if (S.gun > 1 && S.gun % 7 === 1 && S.gun <= 22) { const h = V.HAFTALAR[hafta() - 1]; bildirimEkle('dans', `${hafta()}. hafta · ${h.ad}`, h.acik, true); }
     if (S.gun % 7 === 6 && S.gun < 28) { const t = `Yarın kira günü. ${tl(kiraTutar())}, aksatma lütfen 🙏`; dmEkle({ kim: 'Ev sahibi Nuri Bey', renk: '#f5c451', tur: 'bilgi', mesajlar: [{ t }] }); bildirimEkle('mesaj', 'Ev sahibi Nuri Bey', t, true); }
     if (S.gun % 7 === 0 && S.gun <= 28) bildirimEkle('banka', 'Kasabank', `Bugün kira günü: ${tl(kiraTutar())} gün sonunda hesabından çekilecek.`, true);
+    if (S.risk >= 75 && !S.bayrak['riskUyari' + Math.floor(S.gun / 5)]) {
+      S.bayrak['riskUyari' + Math.floor(S.gun / 5)] = true;
+      dmEkle({ kim: 'Kuzen Deniz', renk: '#7ee0ff', tur: 'bilgi', mesajlar: [{ t: 'Bak ciddi söylüyorum: geçen ay 25 kişiye operasyon yapıldı, 17si tutuklandı. Hesap hareketlerine MASAK bakıyor. Bir avukatla konuş ya da biraz sakin takıl. 🙏' }] });
+      bildirimEkle('mesaj', 'Kuzen Deniz', 'Bak ciddi söylüyorum: operasyon haberlerini gördün mü?', true);
+    }
     if (S.gun >= VG.secimGun && !S.vergiTipi && !S.bayrak.vergiSoruldu) {
       S.bayrak.vergiSoruldu = true; S.okunmamis.banka = 1;
       bildirimEkle('banka', 'Kasabank', 'Hesabınıza yurt dışından düzenli para girişi var. Hesap türünüzü seçmeniz gerekiyor.', true);
