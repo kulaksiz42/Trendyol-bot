@@ -208,7 +208,7 @@ window.Sim = (function () {
     Object.entries(et.k || {}).forEach(([k, v]) => S.kesim[k].m += v);
     Object.entries(et.i || {}).forEach(([k, v]) => S.kurum[k] = clamp(S.kurum[k] + v));
     Object.entries(et.d || {}).forEach(([k, v]) => S.dis[k] = clamp(S.dis[k] + v));
-    Object.entries(et.b || {}).forEach(([k, v]) => S.b[k] = (S.b[k] || 0) + v);
+    Object.entries(et.b || {}).forEach(([k, v]) => S.b[k] = typeof v === 'string' ? v : (S.b[k] || 0) + v);
     const e = et.e || {};
     if (e.guven) S.eko.guven = clamp(S.eko.guven + e.guven);
     if (e.kur) { S.eko.kur *= 1 + e.kur / 100; S.soklar.push({ k: 'enf', v: e.kur * 0.25, ay: 8 }); }
