@@ -54,11 +54,13 @@
     ui.innerHTML = `<div class="ust"><div class="bar">${BAYRAK}<div class="tarih"><b id="trh"></b><span id="unvan"></span></div>
       <div class="hiz"><button data-h="0" aria-label="Duraklat">❚❚</button><button data-h="1">1×</button><button data-h="2">2×</button><button data-h="4">4×</button></div></div>
       <div class="gostergeler" id="gos"></div><div class="serit"><em>GÜNDEM</em><div><span id="hbr"></span></div></div></div>
-      <div class="lejant" id="lej"></div>
+      <div class="lejant" id="lej"></div><button class="gundem-btn" id="gundem">📨 Gündem <b>0</b></button>
       <nav class="alt"><button data-p="ekonomi"><span>📊</span>Ekonomi</button><button data-p="yatirim" id="btnYat"><span>🏗️</span>Yatırım</button><button data-p="halk"><span>👥</span>Halk</button><button data-p="dunya"><span>🌍</span>Dünya</button><button data-p="gorunum"><span>🗺️</span>Harita</button></nav>`;
     ui.querySelectorAll('[data-h]').forEach(b => b.onclick = () => hiz(+b.dataset.h));
     ui.querySelectorAll('[data-p]').forEach(b => b.onclick = () => panelAc(b.dataset.p));
-    hiz(S.hiz || 1); hud(); haberEkle(null); lejant();
+    S.masa = S.masa || []; S.log = S.log || [];
+    ui.querySelector('#gundem').onclick = () => panelAc('gundem');
+    hiz(S.hiz || 1); hud(); haberEkle(null); lejant(); gundemRozet();
   }
   function hiz(h) { S.hiz = h; ui.querySelectorAll('[data-h]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.h === h)); }
   let onceki = null;
@@ -121,24 +123,47 @@
   /* ---------- zaman döngüsü ---------- */
   function dongu(t) {
     const dt = Math.min(0.2, (t - sonT) / 1000); sonT = t;
-    if (S && !modal && !panelModal() && S.hiz > 0) {
+    if (S && !modal && !panel && S.hiz > 0) {
       acc += dt * S.hiz;
       while (acc >= GUN_SURE && !modal) {
         acc -= GUN_SURE;
         const o = Sim.gunGec();
         if (o.ay) {
           haritaRenk(false, o.anket); hud(); aylikHud(); Harita.projeleriCiz(S.projeler); Harita.mitingCiz(S.iktidar ? {} : S.miting); Sim.kaydet();
-          o.biten.forEach(p => { const P = V.PROJE[p.tip]; bildirim(`${P.ikon} ${P.ad} ${p.il}'de hizmete açıldı`); haberEkle(`${p.il}: ${P.ad} açıldı`); });
+          o.biten.forEach(p => { const P = V.PROJE[p.tip]; bildirim(`${P.ikon} ${P.ad} ${p.il}'de hizmete açıldı`); haberEkle(`${p.il}: ${P.ad} açıldı`); logla(`${P.ikon} ${p.il}: ${P.ad} açıldı`); });
           if (o.yil) bildirim(`Yeni yıl: yatırım ödeneği ${S.odenek.toFixed(1).replace('.', ',')} milyar`);
         }
         const tStr = Sim.iso(Sim.gunTarih(S.gun)), h = V.HABER.find(x => x[0] === tStr); if (h) haberEkle(h[1]);
-        const ol = Sim.bekleyenOlay(); if (ol) { acc = 0; olayAc(ol); }
+        const ol = Sim.bekleyenOlay(); if (ol) olayIsle(ol);
+        const gec = !modal && ((S.masa || []).find(m => S.gun - m.gelis >= sureOf(m.id)) || (S.masa.length >= DOSYA_MAX && S.masa[0]));
+        if (gec) { acc = 0; dosyaAc(gec.id, true); }
       }
       hud();
     } else acc = 0;
     requestAnimationFrame(dongu);
   }
-  const panelModal = () => !!ilSecimi && false;
+  const DOSYA_SURE = 60, DOSYA_MAX = 3;
+  const sureOf = id => { const o = V.OLAY.find(x => x.id === id); return o && o.sure !== undefined ? o.sure : DOSYA_SURE; };
+  const KARAR_TUR = ['karar', 'butce', 'asgari'];
+  function logla(m) { S.log = S.log || []; const t = Sim.gunTarih(S.gun); S.log.unshift({ t: `${t.getUTCDate()} ${V.AYLAR[t.getUTCMonth()].slice(0, 3)} ${t.getUTCFullYear()}`, m }); S.log = S.log.slice(0, 40); }
+  function olayIsle(ol) {
+    S.masa = S.masa || [];
+    if (ol.tur === 'haber') {
+      Sim.etkiUygula(ol.etki); Sim.olayBitti(ol); haberEkle(ol.baslik); logla('🔴 ' + ol.baslik + ': ' + ol.metin);
+      bildirim('🔴 Son dakika: ' + ol.baslik); return;
+    }
+    if (KARAR_TUR.includes(ol.tur) && ol.id !== 'kurulus') {
+      S.masa.push({ id: ol.id, gelis: S.gun }); gundemRozet();
+      const ad = ol.baslik || (ol.tur === 'butce' ? ol.yil + ' bütçesi' : ol.yil + ' asgari ücreti');
+      bildirim('📨 Masanda yeni dosya: ' + ad); haberEkle(ad); return;
+    }
+    acc = 0; olayAc(ol);
+  }
+  function gundemRozet() {
+    const b = ui.querySelector('#gundem'); if (!b) return; const n = (S.masa || []).length;
+    b.classList.toggle('var', n > 0); b.querySelector('b').textContent = n;
+  }
+  function dosyaAc(id, zorunlu) { if (document.querySelector('.kart-ort')) return; const o = V.OLAY.find(x => x.id === id); if (o) olayAc(o, zorunlu); }
 
   /* ---------- olay kartları ---------- */
   function kartAc(html, kur) {
@@ -156,33 +181,42 @@
     if (et.e && et.e.guven) ekle('Piyasa', et.e.guven);
     return o.join('');
   }
-  function olayAc(o) {
+  // karar kartının üstü: sonraya bırak / süre doldu
+  function dosyaUst(o, z) {
+    if (o.id === 'kurulus') return '';
+    const m = (S.masa || []).find(x => x.id === o.id); if (!m) return '';
+    if (S.gun - m.gelis >= sureOf(o.id)) z = true;
+    if (z && S.masa.length >= DOSYA_MAX && S.gun - m.gelis < sureOf(o.id)) return '<span class="zorunlu">📚 Masan doldu, önce bu dosyaya karar ver</span>';
+    return z ? '<span class="zorunlu">⏰ Süre doldu, karar vermen gerekiyor</span>' : `<button class="sonra" data-sonra>Sonraya bırak · ${Math.max(0, sureOf(o.id) - (S.gun - m.gelis))} gün</button>`;
+  }
+  function sonraBagla(el) { const b = el.querySelector('[data-sonra]'); if (b) b.onclick = () => { el.remove(); modal = false; gundemRozet(); }; }
+  function olayAc(o, z) {
     if (o.yer === 'Siirt') S.b.basbakan = 1;
-    if (o.tur === 'karar') return kararKart(o);
+    if (o.tur === 'karar') return kararKart(o, z);
     if (o.tur === 'haber') return haberKart(o);
-    if (o.tur === 'butce') return butceKart(o);
-    if (o.tur === 'asgari') return asgariKart(o);
+    if (o.tur === 'butce') return butceKart(o, z);
+    if (o.tur === 'asgari') return asgariKart(o, z);
     if (o.tur === 'secim') return secimEkrani(o);
     if (o.tur === 'son') return sonKart(o);
   }
   function kapatVeDevam(el, o) {
-    el.remove(); Sim.olayBitti(o); modal = false; haritaRenk(); hud(); Sim.kaydet();
+    el.remove(); Sim.olayBitti(o); modal = false; haritaRenk(); hud(); gundemRozet(); Sim.kaydet();
     if (o.id === 'kurulus') setTimeout(() => bildirim('📣 Kampanya menüsünden bölgelerde teşkilat kur, illerde miting yap', 5000), 400);
   }
-  function kararKart(o) {
-    const el = kartAc(`<div class="ust-serit"><span>Başbakanlık · Karar</span><span class="yer">${esc(o.yer || '')} · ${tarihYazi(o.t)}</span></div>
-      <div class="govde"><h2>${esc(o.baslik)}</h2><p>${esc(o.metin)}</p>
+  function kararKart(o, z) {
+    const el = kartAc(`<div class="ust-serit"><span>${S.iktidar ? 'Başbakanlık' : 'Genel Merkez'} · Karar</span><span class="yer">${esc(o.yer || '')} · ${tarihYazi(o.t)}</span></div>
+      <div class="govde">${dosyaUst(o, z)}<h2>${esc(o.baslik)}</h2><p>${esc(o.metin)}</p>
       ${o.s.map((s, i) => `<button class="secenek" data-i="${i}">${esc(s.ad)}<div class="ip">${ipuclari(s.etki)}</div></button>`).join('')}</div>`);
-    if (o.yer && Harita.iller[o.yer]) Harita.odakla(o.yer, 70);
+    sonraBagla(el);
     el.querySelectorAll('.secenek').forEach(b => b.onclick = () => {
       const s = o.s[+b.dataset.i]; if (o.e) Sim.etkiUygula({ e: o.e }); Sim.etkiUygula(s.etki);
       S.kararlar = (S.kararlar || 0) + 1; if (s.tarih) S.tarihle = (S.tarihle || 0) + 1;
-      haberEkle(o.baslik + ': ' + s.ad);
+      haberEkle(o.baslik + ': ' + s.ad); logla('✍️ ' + o.baslik + ': ' + s.ad);
       el.querySelector('.kart').innerHTML = `<div class="ust-serit"><span>Kararın</span><span class="yer">${tarihYazi(o.t)}</span></div><div class="govde"><h2>${esc(s.ad)}</h2>
         ${s.sonuc ? `<p>${esc(s.sonuc)}</p>` : ''}<div class="ip">${ipuclari(s.etki)}</div>
         <div class="tarihte"><b>${s.tarih ? 'Tarihteki kararla aynı' : 'Gerçekte ne oldu?'}</b>${esc(o.tarih)}</div>
         <button class="btn" id="dv">Devam</button></div>`;
-      el.querySelector('#dv').onclick = () => { kapatVeDevam(el, o); Harita.genel(); };
+      el.querySelector('#dv').onclick = () => kapatVeDevam(el, o);
     });
   }
   function haberKart(o) {
@@ -192,7 +226,7 @@
     haberEkle(o.baslik);
     el.querySelector('#dv').onclick = () => kapatVeDevam(el, o);
   }
-  function butceKart(o) {
+  function butceKart(o, z) {
     const SEC_B = [
       { ad: 'Sıkı bütçe', h: -1, a: 'Faiz dışı fazla, düşük harcama. Enflasyon hızla düşer, piyasa güvenir; halk sıkılır.' },
       { ad: 'Dengeli bütçe', h: 0, a: 'Programla uyumlu, sınırlı sosyal harcama.' },
@@ -200,18 +234,19 @@
       { ad: 'Seçim bütçesi', h: 2, a: 'Bol harcama. Kısa vadede çok sevilir, faturası ağır gelir.' }
     ];
     const el = kartAc(`<div class="ust-serit"><span>Maliye · ${o.yil} bütçesi</span><span class="yer">${tarihYazi(o.t)}</span></div>
-      <div class="govde"><h2>${o.yil} bütçesi</h2><p>Bütçe açığı GSYH'nin ${yz(S.eko.acik)}'i, borç ${yz(S.eko.borc, 0)}. ${S.pol.imf ? 'IMF programı sürüyor; gevşek bir bütçe programla çatışır.' : 'IMF programı yok; piyasalar bütçeye dikkatle bakıyor.'}</p>
+      <div class="govde">${dosyaUst(o, z)}<h2>${o.yil} bütçesi</h2><p>Bütçe açığı GSYH'nin ${yz(S.eko.acik)}'i, borç ${yz(S.eko.borc, 0)}. ${S.pol.imf ? 'IMF programı sürüyor; gevşek bir bütçe programla çatışır.' : 'IMF programı yok; piyasalar bütçeye dikkatle bakıyor.'}</p>
       ${SEC_B.map((s, i) => `<button class="secenek" data-i="${i}">${s.ad}${S.pol.h === s.h ? ' <small style="color:#8a6a10">(şu anki)</small>' : ''}<div class="ip"><span>${esc(s.a)}</span></div></button>`).join('')}
       <div class="tarihte"><b>Gerçekte</b>2003–2007 bütçeleri IMF programına uygun, faiz dışı fazla veren sıkı bütçelerdi.</div></div>`);
     el.querySelectorAll('.secenek').forEach(b => b.onclick = () => {
       const s = SEC_B[+b.dataset.i], et = { e: { h: s.h } };
       if (S.pol.imf && s.h > 0) { et.e.guven = -5 * s.h; et.i = { isd: -3 * s.h }; }
       if (s.h === 2) et.k = { sag: 2, muh: 1 };
-      Sim.etkiUygula(et); bildirim(`${o.yil} bütçesi: ${s.ad}`); kapatVeDevam(el, o);
+      Sim.etkiUygula(et); bildirim(`${o.yil} bütçesi: ${s.ad}`); logla(`💰 ${o.yil} bütçesi: ${s.ad}`); kapatVeDevam(el, o);
     });
+    sonraBagla(el);
   }
   const ASGARI_GERCEK = { 2004: 303.68, 2005: 350.15, 2006: 380.46, 2007: 403.03 };
-  function asgariKart(o) {
+  function asgariKart(o, z) {
     const enf = Math.max(3, S.eko.enf), A = S.asgari, para = v => v.toFixed(2).replace('.', ',') + (S.b.ytl ? ' YTL' : ' YTL');
     const SEC_A = [
       { ad: 'Enflasyon kadar artır', o: enf, et: {} },
@@ -219,13 +254,14 @@
       { ad: 'Sınırlı artış, istihdamı koru', o: Math.max(2, enf - 6), et: { k: { sag: -2, muh: -1 }, i: { isd: 3 }, e: { guven: 2 } } }
     ];
     const el = kartAc(`<div class="ust-serit"><span>Çalışma · Asgari ücret</span><span class="yer">${tarihYazi(o.t)}</span></div>
-      <div class="govde"><h2>${o.yil} asgari ücreti</h2><p>Net asgari ücret şu an ${para(A)}. Enflasyon ${yz(S.eko.enf)}. Sendikalar refah payı, işverenler sınırlı artış istiyor.</p>
+      <div class="govde">${dosyaUst(o, z)}<h2>${o.yil} asgari ücreti</h2><p>Net asgari ücret şu an ${para(A)}. Enflasyon ${yz(S.eko.enf)}. Sendikalar refah payı, işverenler sınırlı artış istiyor.</p>
       ${SEC_A.map((s, i) => `<button class="secenek" data-i="${i}">${s.ad} <b>→ ${para(A * (1 + s.o / 100))}</b><div class="ip">${ipuclari(s.et) || '<span>Dengeli</span>'}</div></button>`).join('')}
       <div class="tarihte"><b>Gerçekte</b>${o.yil}'te net asgari ücret ${String(ASGARI_GERCEK[o.yil]).replace('.', ',')} YTL oldu.</div></div>`);
     el.querySelectorAll('.secenek').forEach(b => b.onclick = () => {
       const s = SEC_A[+b.dataset.i]; S.asgari = A * (1 + s.o / 100); Sim.etkiUygula(s.et);
-      haberEkle(`Asgari ücret ${para(S.asgari)} oldu`); kapatVeDevam(el, o);
+      haberEkle(`Asgari ücret ${para(S.asgari)} oldu`); logla(`👷 Asgari ücret ${para(S.asgari)}`); kapatVeDevam(el, o);
     });
+    sonraBagla(el);
   }
   function sonKart(o) {
     const e = S.eko, g = V.GERCEK[2007], c = (ad, sen, ger, d = 1) => `<div class="satir"><span class="ad">${ad}</span><b style="width:70px;text-align:right">${sen}</b><span class="kucuk" style="width:70px;text-align:right">${ger}</span></div>`;
@@ -272,7 +308,7 @@
         kat.querySelector('#mc').innerHTML = `<p class="not" style="text-align:center">Partin ${n} ilde birinci çıktı. Gerçekte AK Parti il genel meclisi seçimlerinde %41,7 aldı.</p>`;
         mesaj = `Yerel seçim: ${yz(r.ulusal.akp)} oy, ${n} il`;
       }
-      haberEkle(mesaj);
+      haberEkle(mesaj); logla('🗳️ ' + mesaj);
       const b = kat.querySelector('#atla'); b.className = 'btn'; b.textContent = kayip ? 'Sonucu gör' : 'Devam';
       b.onclick = () => {
         kat.remove(); document.body.classList.remove('secimde'); Sim.olayBitti(o);
@@ -376,6 +412,12 @@
         ${Object.entries(V.PROJE).map(([k, P]) => { const erken = yil < P.yil, var_ = P.tekil && S.projeler.some(p => p.tip === k); return `<div class="proje"><span class="em">${P.ikon}</span><span class="ad"><b>${P.ad}</b><span class="kucuk">${P.maliyet.toString().replace('.', ',')} milyar · ${P.sure} ay${P.il ? ' · ' + P.il : ''}</span><br><span class="kucuk">${esc(P.bilgi)}</span></span><button data-proje="${k}" ${erken || var_ ? 'disabled' : ''}>${erken ? P.yil : var_ ? 'Var' : 'Kur'}</button></div>`; }).join('')}
         ${liste ? '<div class="baslik2">Projelerin</div>' + liste : ''}`];
     },
+    gundem() {
+      const masa = (S.masa || []).map(m => { const o = V.OLAY.find(x => x.id === m.id); const ad = o.baslik || (o.tur === 'butce' ? o.yil + ' bütçesi' : o.yil + ' asgari ücreti'); return `<button class="dosya" data-dosya="${o.id}"><span style="font-size:22px">📁</span><span class="ad"><b>${esc(ad)}</b><span class="kucuk">${tarihYazi(o.t)}${o.yer ? ' · ' + esc(o.yer) : ''}</span></span><span class="sure">${Math.max(0, sureOf(o.id) - (S.gun - m.gelis))} gün</span></button>`; }).join('');
+      return ['Gündem', `<div class="baslik2" style="margin-top:0">Masandaki dosyalar</div>${masa || '<p class="not">Bekleyen karar yok. Zaman aktıkça yeni dosyalar gelecek.</p>'}
+        <p class="kucuk">Panel açıkken zaman durur. Bir dosyayı süresi içinde açmazsan kendiliğinden önüne gelir.</p>
+        <div class="baslik2">Son gelişmeler</div>${(S.log || []).map(l => `<div class="log"><small>${l.t}</small>${esc(l.m)}</div>`).join('') || '<p class="not">Henüz bir şey yok.</p>'}`];
+    },
     kampanya() {
       const T = Sim.teskilatOrani(), tarih = S.b.secimTarihi ? Math.max(0, Sim.tarihGun('2002-11-03') - S.gun) + ' gün kaldı (3 Kasım 2002)' : 'Seçim tarihi belli değil; olağan seçim 2004\'te';
       const bekle = Math.max(0, 7 - (S.gun - S.mitingSon));
@@ -439,6 +481,7 @@
         document.body.appendChild(ban); ban.querySelector('button').onclick = () => { ilSecimi = null; ban.remove(); };
       });
     },
+    gundem(el) { el.querySelectorAll('[data-dosya]').forEach(b => b.onclick = () => dosyaAc(b.dataset.dosya, false)); },
     gorunum(el, v, ciz) {
       el.querySelectorAll('[data-mod]').forEach(b => b.onclick = () => { mod = b.dataset.mod; haritaRenk(); lejant(); ciz(); });
       el.querySelector('#tr').onclick = () => { Harita.genel(); panelKapat(); };
@@ -460,7 +503,7 @@
     if (r === 'yorgun') return bildirim(`Sonraki miting için ${7 - (S.gun - S.mitingSon)} gün bekle`);
     if (r === 'para') return bildirim('Kasada yeterli para yok');
     panelKapat(); Harita.mitingCiz(S.miting); haritaRenk(); hud(); Sim.kaydet();
-    bildirim(`📣 ${il} mitingi: meydan doldu`); haberEkle(`${S.ad}, ${il}'da on binlere seslendi`);
+    bildirim(`📣 ${il} mitingi: meydan doldu`); logla(`📣 ${il} mitingi`); haberEkle(`${S.ad}, ${il}'da on binlere seslendi`);
     Harita.odakla(il, 40);
   }
   function ilSecildi(ad) {

@@ -34,7 +34,7 @@ window.Sim = (function () {
   function yeni(ad) {
     S = {
       ad: ad || 'Başbakan', gun: 0, eko: Object.assign({ kurDeg: 0, nufus: 65 }, V.EKO_GECMIS[0][1]),
-      iktidar: false, teskilat: {}, kasa: 2.0, miting: {}, mitingSon: -99,
+      iktidar: false, teskilat: {}, kasa: 2.0, miting: {}, mitingSon: -99, masa: [], log: [],
       pol: { h: 0, vergi: 0, imf: true, mb: 'bagimsiz' },
       kesim: Object.fromEntries(Object.entries(V.KESIM).map(([k, s]) => [k, { v: V.VSTART[k], m: 0 }])),
       kurum: Object.fromEntries(Object.entries(V.KURUM).map(([k, s]) => [k, s.v])),
@@ -227,9 +227,10 @@ window.Sim = (function () {
   const clamp = v => Math.max(0, Math.min(100, v));
   function bekleyenOlay() {
     const bugun = iso(gunTarih(S.gun));
-    return V.OLAY.find(o => o.t <= bugun && !S.bitti.includes(o.id) && (!o.kosul || o.kosul(S))) || null;
+    const masa = S.masa || [];
+    return V.OLAY.find(o => o.t <= bugun && !S.bitti.includes(o.id) && !masa.some(m => m.id === o.id) && (!o.once || S.bitti.includes(o.once)) && (!o.kosul || o.kosul(S))) || null;
   }
-  function olayBitti(o) { S.bitti.push(o.id); }
+  function olayBitti(o) { S.bitti.push(o.id); if (S.masa) S.masa = S.masa.filter(m => m.id !== o.id); }
 
   /* ---------- zaman ---------- */
   // bir gün ilerlet; ay değişirse aylık hesapları yap

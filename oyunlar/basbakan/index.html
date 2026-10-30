@@ -124,9 +124,18 @@ body.basta .etiketler{display:none}
 .acilis input{width:100%;padding:14px;border-radius:12px;border:1px solid var(--cizgi);background:rgba(17,38,60,.9);color:var(--metin);font:600 16px var(--f);text-align:center;margin-bottom:10px}
 .acilis .btn{margin-top:8px}
 .uyari{font-size:11.5px;color:#7d90a5;margin-top:14px}
-.bildirim{position:fixed;left:50%;top:calc(130px + env(safe-area-inset-top));transform:translateX(-50%);z-index:45;background:rgba(11,26,43,.96);border:1px solid rgba(242,165,22,.5);color:var(--metin);padding:10px 16px;border-radius:12px;font-weight:600;font-size:14px;max-width:92vw;box-shadow:0 8px 30px rgba(0,0,0,.4);animation:sol .3s}
+.bildirim{position:fixed;left:50%;bottom:calc(128px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:45;background:rgba(11,26,43,.96);border:1px solid rgba(242,165,22,.5);color:var(--metin);padding:10px 16px;border-radius:12px;font-weight:600;font-size:14px;max-width:92vw;box-shadow:0 8px 30px rgba(0,0,0,.4);animation:sol .3s}
 .ilsec{position:fixed;left:50%;top:calc(132px + env(safe-area-inset-top));transform:translateX(-50%);z-index:20;background:var(--altin);color:#1b1300;font-weight:800;padding:9px 16px;border-radius:30px;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.4);display:flex;gap:10px;align-items:center}
 .ilsec button{border:0;background:#1b1300;color:#fff;border-radius:20px;padding:4px 10px;font-size:12px}
+.gundem-btn{position:fixed;right:10px;bottom:calc(76px + env(safe-area-inset-bottom));z-index:9;display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:22px;border:1px solid var(--cizgi);background:rgba(11,26,43,.93);font-weight:700;font-size:13px}
+.gundem-btn b{min-width:20px;height:20px;border-radius:10px;background:var(--kirmizi);color:#fff;font-size:12px;display:none;align-items:center;justify-content:center;padding:0 5px}
+.gundem-btn.var{border-color:var(--kirmizi);animation:nabiz 1.6s infinite}.gundem-btn.var b{display:flex}
+@keyframes nabiz{50%{box-shadow:0 0 0 6px rgba(227,10,23,.25)}}
+.dosya{display:flex;align-items:center;gap:10px;padding:11px 12px;margin:6px 0;border-radius:12px;border:1px solid rgba(227,10,23,.45);background:rgba(227,10,23,.08);width:100%;text-align:left}
+.dosya .ad{flex:1}.dosya .ad b{display:block}.dosya .sure{font:700 13px var(--fs);color:#ffb3b3;white-space:nowrap}
+.log{padding:7px 0;border-bottom:1px solid var(--cizgi);font-size:13px}.log small{color:var(--soluk);margin-right:6px}
+.sonra{float:right;margin:-4px 0 6px 10px;padding:6px 10px;border-radius:9px;border:1px solid #d9cfb9;background:transparent;color:#5a4d33;font-size:12.5px;font-weight:700}
+.zorunlu{display:inline-block;margin-bottom:6px;padding:3px 8px;border-radius:6px;background:#fde3e3;color:#b42323;font-size:12px;font-weight:700}
 .grafik{width:100%;height:46px;display:block}
 </style>
 </head>

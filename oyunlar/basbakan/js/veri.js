@@ -89,7 +89,7 @@ window.VERI = (function () {
         { ad: 'Milli Görüş çizgisini sürdür', etki: { k: { muh: 4, sag: -3, laik: -3 }, i: { ordu: -6, yargi: -6, medya: -3 }, b: { milliGorus: 1 } } },
         { ad: 'Ekonomi odaklı merkez sağ parti', etki: { k: { sag: 5, muh: -3, mil: 1 }, i: { isd: 5 } } }
       ] },
-    { id: '11eylul', t: '2001-09-12', tur: 'karar', baslik: '11 Eylül', yer: 'Ankara',
+    { id: '11eylul', sure: 7, t: '2001-09-12', tur: 'karar', baslik: '11 Eylül', yer: 'Ankara',
       metin: 'New York ve Washington\'da kaçırılan uçaklarla düzenlenen saldırılarda yaklaşık 3.000 kişi öldü. ABD, El Kaide\'yi sorumlu tutuyor ve Afganistan\'a müdahaleye hazırlanıyor. Dünya basını yeni partinin tavrını merak ediyor.',
       tarih: 'Türkiye\'de iktidar ve muhalefet partileri saldırıyı kınadı. Türkiye NATO müttefiki olarak ABD\'ye destek verdi.',
       s: [
@@ -97,7 +97,7 @@ window.VERI = (function () {
         { ad: 'Kına ama ABD\'nin bölge politikalarını eleştir', etki: { k: { muh: 2, mil: 1 }, d: { abd: -6, ort: 4 } } },
         { ad: 'Yorum yapma, iç meselelere odaklan', etki: { k: { sag: 1 }, i: { medya: -2 } } }
       ] },
-    { id: 'anayasa2001', t: '2001-10-03', tur: 'karar', baslik: '34 maddelik anayasa değişikliği', yer: 'TBMM',
+    { id: 'anayasa2001', sure: 1, t: '2001-10-03', tur: 'karar', baslik: '34 maddelik anayasa değişikliği', yer: 'TBMM',
       metin: 'Meclis\'te AB yolunda büyük bir anayasa paketi oylanıyor: düşünce özgürlüğü genişliyor, idam cezası sınırlanıyor, MGK\'da sivil üye sayısı artıyor.',
       tarih: 'Paket 3 Ekim 2001\'de geniş bir çoğunlukla kabul edildi.',
       s: [
@@ -105,7 +105,7 @@ window.VERI = (function () {
         { ad: 'Destekle ama "yetersiz" de, daha fazlasını iste', etki: { k: { kurt: 2, muh: 1 }, d: { ab: 3 }, i: { ordu: -2 } } },
         { ad: 'Karşı çık', etki: { k: { mil: 2, laik: -1 }, d: { ab: -4 } } }
       ] },
-    { id: 'dervis', t: '2001-12-10', tur: 'karar', baslik: 'Derviş programı', yer: 'Ankara',
+    { id: 'dervis', sure: 30, t: '2001-12-10', tur: 'karar', baslik: 'Derviş programı', yer: 'Ankara',
       metin: 'Ekonomiyi Dünya Bankası\'ndan gelen Kemal Derviş\'in programı yönetiyor: bankalarda temizlik, dalgalı kur, IMF kredileri. Esnaf kepenk kapatıyor, işsizlik artıyor. Muhalefet lideri olarak tavrın ne?',
       tarih: 'AK Parti programın sosyal maliyetini eleştirdi ama iktidara gelirse IMF ile çalışmayı sürdüreceğini açıkladı.',
       s: [
@@ -113,7 +113,7 @@ window.VERI = (function () {
         { ad: 'IMF\'ye karşı çık: "ekonomik bağımsızlık"', etki: { k: { muh: 2, mil: 2, sag: 1 }, i: { isd: -8 } } },
         { ad: 'Programı açıkça destekle', etki: { k: { sag: -3, muh: -1 }, i: { isd: 8 } } }
       ] },
-    { id: 'aday', t: '2002-03-12', tur: 'karar', baslik: 'Aday listeleri', yer: 'Ankara',
+    { id: 'aday', sure: 30, t: '2002-03-12', tur: 'karar', baslik: 'Aday listeleri', yer: 'Ankara',
       metin: 'Seçim olağan takvimde 2004\'te ama erken seçim konuşuluyor. Milletvekili adaylarını nasıl belirleyeceksin?',
       tarih: 'AK Parti teşkilatta temayül yoklaması yaptı; son sözü genel merkez söyledi.',
       s: [
@@ -121,7 +121,7 @@ window.VERI = (function () {
         { ad: 'Tam ön seçim: üyeler seçsin', etki: { k: { muh: 1, laik: 1 }, i: { medya: 4 } } },
         { ad: 'Tanınmış isimleri listeye al', etki: { k: { sag: 2, muh: -1 }, i: { medya: 3 }, e: { kasa: 0.6 } } }
       ] },
-    { id: 'ecevit', t: '2002-05-06', tur: 'karar', baslik: 'Başbakan hastanede', yer: 'Ankara',
+    { id: 'ecevit', sure: 15, t: '2002-05-06', tur: 'karar', baslik: 'Başbakan hastanede', yer: 'Ankara',
       metin: 'Başbakan Bülent Ecevit 4 Mayıs\'ta rahatsızlanarak hastaneye kaldırıldı. 77 yaşındaki başbakanın görevi sürdürüp sürdüremeyeceği tartışılıyor; piyasalar gergin.',
       tarih: 'Tartışmalar DSP\'ye sıçradı. Temmuz\'da Hüsamettin Özkan ve İsmail Cem başta olmak üzere çok sayıda milletvekili istifa etti.',
       s: [
@@ -129,7 +129,7 @@ window.VERI = (function () {
         { ad: 'Erken seçim çağrısı yap', etki: { k: { sag: 2, muh: 1, laik: -1 } } },
         { ad: '"İktidara hazırız" mesajı ver, ekonomi ekibini tanıt', etki: { k: { sag: 1 }, i: { isd: 5 } } }
       ] },
-    { id: 'gencparti', t: '2002-07-15', tur: 'karar', baslik: 'Genç Parti yükseliyor', yer: 'İstanbul',
+    { id: 'gencparti', sure: 20, t: '2002-07-15', tur: 'karar', baslik: 'Genç Parti yükseliyor', yer: 'İstanbul',
       metin: 'İş insanı Cem Uzan\'ın kurduğu Genç Parti, güçlü televizyon kanalları ve büyük vaatlerle meydanları dolduruyor. Seçmenin bir kısmı yeni yüzlere yöneliyor.',
       tarih: 'Genç Parti 2002 seçiminde %7,2 oy aldı ve barajı geçemedi.',
       s: [
@@ -139,7 +139,7 @@ window.VERI = (function () {
       ] },
     { id: 'erkensecim', t: '2002-07-31', tur: 'haber', baslik: 'Erken seçim: 3 Kasım',
       metin: 'Koalisyondaki çözülmenin ardından Meclis 3 Kasım 2002\'de erken seçime karar verdi (449 kabul). Seçime üç ay var. Teşkilatını ve mitinglerini hızlandırmanın tam zamanı.', etki: { b: { secimTarihi: 1 } } },
-    { id: 'uyum3', t: '2002-08-02', tur: 'karar', baslik: 'AB uyum paketi', yer: 'TBMM',
+    { id: 'uyum3', sure: 1, t: '2002-08-02', tur: 'karar', baslik: 'AB uyum paketi', yer: 'TBMM',
       metin: 'Meclis\'te büyük bir AB uyum paketi var: barış zamanında idam cezası kaldırılıyor, Kürtçe yayın ve kursların önü açılıyor. MHP karşı. Oylamada tavrın ne?',
       tarih: 'Paket 3 Ağustos 2002\'de kabul edildi; koalisyon ortağı MHP karşı oy verdi.',
       s: [
@@ -147,7 +147,7 @@ window.VERI = (function () {
         { ad: 'Karşı çık', etki: { k: { mil: 3, kurt: -3 }, d: { ab: -6 } } },
         { ad: 'Çekimser kal', etki: { k: { kurt: 1 }, d: { ab: 1 } } }
       ] },
-    { id: 'ysk', t: '2002-09-20', tur: 'karar', baslik: 'Adaylık engeli', yer: 'Ankara',
+    { id: 'ysk', sure: 10, t: '2002-09-20', tur: 'karar', baslik: 'Adaylık engeli', yer: 'Ankara',
       metin: 'Yüksek Seçim Kurulu, geçmişteki siyasi mahkûmiyetin nedeniyle milletvekili adaylığını kabul etmedi. Partin seçime genel başkanı aday olmadan girecek.',
       tarih: 'AK Parti Genel Başkanı da Eylül 2002\'de aynı nedenle aday gösterilemedi. Kampanyayı aday olmadan sürdürdü; yasak kampanyanın ana temalarından biri oldu.',
       s: [
@@ -155,7 +155,7 @@ window.VERI = (function () {
         { ad: 'Karara saygı göster, ekibini öne çıkar', etki: { k: { laik: 2, sag: 1 }, i: { yargi: 4, medya: 2 } } },
         { ad: 'Seçimi boykot etmekle tehdit et', etki: { k: { muh: 1, sag: -4, laik: -2 }, i: { yargi: -6 } } }
       ] },
-    { id: 'beyanname', t: '2002-10-01', tur: 'karar', baslik: 'Seçim beyannamesi', yer: 'Ankara',
+    { id: 'beyanname', sure: 25, t: '2002-10-01', tur: 'karar', baslik: 'Seçim beyannamesi', yer: 'Ankara',
       metin: 'Son ay. Kampanyanın ana mesajı ne olsun?',
       tarih: 'AK Parti kampanyada "yoksulluk, yolsuzluk ve yasaklarla mücadele" vurgusunu öne çıkardı.',
       s: [
@@ -164,7 +164,7 @@ window.VERI = (function () {
         { ad: 'Din ve vicdan özgürlüğü', etki: { k: { muh: 4, laik: -5 }, i: { ordu: -4, yargi: -3 } } }
       ] },
     { id: 'secim2002', t: '2002-11-03', tur: 'secim', secim: 'genel', baslik: 'Genel seçim', gercek: { akp: 34.28, chp: 19.39, mhp: 8.36, dyp: 9.54, gp: 7.25, sandalye: 363 } },
-    { id: 'yasak', t: '2002-11-16', tur: 'karar', baslik: 'Hükümeti kim kuracak?', yer: 'Ankara', kosul: s => s.iktidar,
+    { id: 'yasak', sure: 10, t: '2002-11-16', tur: 'karar', baslik: 'Hükümeti kim kuracak?', yer: 'Ankara', kosul: s => s.iktidar,
       metin: 'Partin seçimden birinci çıktı ama sen Meclis\'te değilsin: YSK adaylığını kabul etmemişti. Cumhurbaşkanı Sezer hükümeti kurma görevini kime verecek?',
       tarih: 'Gerçekte AK Parti Genel Başkanı da aynı yasak nedeniyle aday olamadı. 58. hükümeti Abdullah Gül kurdu (18 Kasım 2002). CHP\'nin desteğiyle anayasa değiştirildi; yasak kalktı.',
       s: [
@@ -172,7 +172,7 @@ window.VERI = (function () {
         { ad: 'Kabineyi perde arkasından sen yönet', etki: { k: { muh: 1, laik: -2 }, i: { medya: -4, yargi: -3 }, e: { guven: -2 } }, sonuc: '"İki başlı hükümet" tartışması başladı ama değişiklik yine Meclis\'ten geçti.' },
         { ad: 'Yasak kalkana dek erken seçim iste', etki: { k: { muh: 2, laik: -2, sag: -2 }, i: { isd: -6 }, e: { guven: -8 } }, sonuc: 'Piyasalar belirsizlikten hoşlanmadı. Meclis yine de anayasa değişikliğini kabul etti.' }
       ] },
-    { id: 'kopenhag', t: '2002-12-13', tur: 'karar', baslik: 'Kopenhag Zirvesi', yer: 'Kopenhag',
+    { id: 'kopenhag', sure: 20, t: '2002-12-13', tur: 'karar', baslik: 'Kopenhag Zirvesi', yer: 'Kopenhag',
       metin: 'AB liderleri Türkiye\'ye müzakere tarihi vermedi; kararı Aralık 2004\'e bıraktı. "Kopenhag kriterlerini karşılarsanız müzakereler gecikmeden başlar" dediler. Reform hızını sen belirleyeceksin.',
       tarih: 'Hükümet uyum paketlerini hızlandırdı; 2003–2004 arasında birçok anayasa ve yasa değişikliği yapıldı.',
       s: [
@@ -188,7 +188,7 @@ window.VERI = (function () {
         { ad: 'Programı sürdür ama sosyal harcamayı artır', etki: { k: { muh: 1, sag: 1 }, e: { guven: 2, imf: true, h: 0 } } },
         { ad: 'IMF\'den ayrıl, kendi yolumuzu çizelim', etki: { k: { mil: 3, muh: 1 }, i: { isd: -10 }, e: { guven: -15, imf: false, h: 1, kur: 8 } } }
       ] },
-    { id: 'tezkere', t: '2003-03-01', tur: 'karar', baslik: '1 Mart tezkeresi', yer: 'TBMM',
+    { id: 'tezkere', sure: 1, t: '2003-03-01', tur: 'karar', baslik: '1 Mart tezkeresi', yer: 'TBMM',
       metin: 'ABD, Irak\'a kuzeyden cephe açmak için on binlerce askerinin Türkiye\'de konuşlanmasını istiyor. Karşılığında milyarlarca dolarlık hibe ve kredi paketi var. Kamuoyunun büyük çoğunluğu savaşa karşı. Tezkere bugün Meclis\'te.',
       tarih: 'Parti grubu serbest bırakıldı. 264 kabul, 250 ret, 19 çekimser oy çıktı; salt çoğunluk sağlanamadığı için tezkere kabul edilmedi.',
       s: [
@@ -196,7 +196,7 @@ window.VERI = (function () {
         { ad: 'Grup kararıyla kabul ettir', etki: { k: { muh: -6, mil: -5, laik: -4 }, d: { abd: 12, ort: -8 }, e: { guven: 6 }, b: { kuzeyCephe: 1 } }, sonuc: 'Tezkere kabul edildi. Kuzeyden açılan cephe ve yardım paketi piyasayı rahatlattı ama sokakta öfke büyük.' },
         { ad: 'Hükümet olarak "hayır" de', etki: { k: { muh: 4, mil: 4, laik: 2 }, d: { abd: -18, ort: 6 }, e: { guven: -6 } }, sonuc: 'Tezkere Meclis\'e hiç gelmeden geri çekildi. Washington\'da hayal kırıklığı büyük.' }
       ] },
-    { id: 'siirt', t: '2003-03-10', tur: 'karar', baslik: 'Başbakanlık', yer: 'Siirt',
+    { id: 'siirt', sure: 5, t: '2003-03-10', tur: 'karar', baslik: 'Başbakanlık', yer: 'Siirt',
       metin: '9 Mart\'ta Siirt\'te yenilenen seçimi kazandın ve Meclis\'e girdin. Artık başbakansın. Kabinenin yüzü nasıl olsun?',
       tarih: '59. hükümet 14 Mart 2003\'te kuruldu. Ekonomiden Ali Babacan, maliyeden Kemal Unakıtan, dışişlerinden Abdullah Gül sorumlu oldu.',
       s: [
@@ -204,7 +204,7 @@ window.VERI = (function () {
         { ad: 'Parti tabanından güçlü isimler', etki: { k: { muh: 3, sag: 1 }, e: { guven: -2 } } },
         { ad: 'Farklı kesimlerden geniş bir kabine', etki: { k: { laik: 2, kurt: 1, mil: 1, muh: -1 }, i: { medya: 4 } } }
       ] },
-    { id: 'uyum7', t: '2003-07-30', tur: 'karar', baslik: '7. uyum paketi', yer: 'TBMM',
+    { id: 'uyum7', sure: 10, t: '2003-07-30', tur: 'karar', baslik: '7. uyum paketi', yer: 'TBMM',
       metin: 'Pakette MGK Genel Sekreterliği\'nin sivilleşmesi, Kürtçe özel kurs ve yayınların önünün açılması ve askerî harcamaların denetimi var. Ordu rahatsız; AB bekliyor.',
       tarih: '6. ve 7. uyum paketleri 2003 yazında kabul edildi. MGK\'nın yapısı değişti, genel sekreterliğe ilk kez bir sivil atandı (2004).',
       s: [
@@ -213,7 +213,7 @@ window.VERI = (function () {
         { ad: 'Paketi ertele', etki: { k: { kurt: -2, mil: 1 }, i: { ordu: 3 }, d: { ab: -6 } } }
       ] },
     { id: 'butce2004', t: '2003-10-15', tur: 'butce', yil: 2004 },
-    { id: 'istanbul', t: '2003-11-20', tur: 'karar', baslik: 'İstanbul\'da bombalı saldırılar', yer: 'İstanbul',
+    { id: 'istanbul', sure: 10, t: '2003-11-20', tur: 'karar', baslik: 'İstanbul\'da bombalı saldırılar', yer: 'İstanbul',
       metin: '15 Kasım\'da iki sinagoga, bugün de HSBC genel müdürlüğüne ve İngiltere Başkonsolosluğu\'na bombalı saldırı düzenlendi. 50\'yi aşkın kişi hayatını kaybetti. Saldırıları El Kaide üstlendi.',
       tarih: 'Türkiye, ABD ve İngiltere ile istihbarat paylaşımını artırdı. Saldırganlar ve destekçileri yakalanarak yargılandı.',
       s: [
@@ -222,7 +222,7 @@ window.VERI = (function () {
         { ad: 'Birlik çağrısı yap, ekonomiye güven ver', etki: { k: { sag: 1 }, e: { guven: -1 } } }
       ] },
     { id: 'asgari2004', t: '2003-12-20', tur: 'asgari', yil: 2004 },
-    { id: 'annan', t: '2004-02-12', tur: 'karar', baslik: 'Kıbrıs: Annan Planı', yer: 'Lefkoşa',
+    { id: 'annan', sure: 45, t: '2004-02-12', tur: 'karar', baslik: 'Kıbrıs: Annan Planı', yer: 'Lefkoşa',
       metin: 'BM Genel Sekreteri Kofi Annan\'ın planı adanın iki toplumunda referanduma gidecek. Plan bir federasyon öngörüyor. KKTC Cumhurbaşkanı Denktaş plana karşı; Türkiye\'nin tutumu belirleyici.',
       tarih: 'Türkiye planı destekledi. 24 Nisan 2004\'te Kıbrıslı Türklerin yaklaşık %65\'i "evet", Rumların yaklaşık %76\'sı "hayır" dedi. Ada bölünmüş olarak 1 Mayıs 2004\'te AB\'ye girdi.',
       s: [
@@ -231,7 +231,7 @@ window.VERI = (function () {
         { ad: 'Plana karşı çık', etki: { k: { mil: 5 }, i: { ordu: 3 }, d: { ab: -10, abd: -4 }, e: { guven: -3 } }, sonuc: 'Plan iki tarafta da reddedildi. Brüksel\'de Türkiye eleştiriliyor.' }
       ] },
     { id: 'yerel2004', t: '2004-03-28', tur: 'secim', secim: 'yerel', baslik: 'Yerel seçimler', gercek: { akp: 41.7 } },
-    { id: 'anayasa2004', t: '2004-05-07', tur: 'karar', baslik: 'Anayasa değişikliği: DGM\'ler ve idam', yer: 'TBMM',
+    { id: 'anayasa2004', sure: 5, t: '2004-05-07', tur: 'karar', baslik: 'Anayasa değişikliği: DGM\'ler ve idam', yer: 'TBMM',
       metin: 'Devlet Güvenlik Mahkemeleri\'ni kaldıran, idam cezasını her koşulda yasaklayan ve uluslararası insan hakları sözleşmelerini yasaların üstüne koyan paket önünde.',
       tarih: 'Paket 7 Mayıs 2004\'te kabul edildi. Haziran\'da TRT ilk kez Kürtçe dahil farklı dillerde yayına başladı.',
       s: [
@@ -239,7 +239,7 @@ window.VERI = (function () {
         { ad: 'Paketi geçir, yayın konusunu ertele', etki: { k: { kurt: 1, mil: -1 }, d: { ab: 4 } } },
         { ad: 'Sadece idam cezasını kaldır', etki: { k: { mil: 1 }, d: { ab: 1 } } }
       ] },
-    { id: 'tck', t: '2004-09-14', tur: 'karar', baslik: 'TCK ve zina tartışması', yer: 'Ankara',
+    { id: 'tck', sure: 10, t: '2004-09-14', tur: 'karar', baslik: 'TCK ve zina tartışması', yer: 'Ankara',
       metin: 'Yeni Türk Ceza Kanunu tasarısına zinanın yeniden suç sayılması önerisi eklendi. AB Komisyonu sert tepki gösterdi; ilerleme raporu yaklaşıyor.',
       tarih: 'Öneri geri çekildi; TCK zina düzenlemesi olmadan 26 Eylül 2004\'te kabul edildi.',
       s: [
@@ -247,7 +247,7 @@ window.VERI = (function () {
         { ad: 'Öneride ısrar et', etki: { k: { muh: 3, laik: -5 }, i: { medya: -4 }, d: { ab: -12 }, e: { guven: -4 } } }
       ] },
     { id: 'butce2005', t: '2004-10-15', tur: 'butce', yil: 2005 },
-    { id: 'brüksel', t: '2004-12-17', tur: 'karar', baslik: 'Brüksel Zirvesi', yer: 'Brüksel', kosul: s => s.dis.ab >= 45,
+    { id: 'brüksel', sure: 10, t: '2004-12-17', tur: 'karar', baslik: 'Brüksel Zirvesi', yer: 'Brüksel', kosul: s => s.dis.ab >= 45,
       metin: 'AB liderleri, katılım müzakerelerinin 3 Ekim 2005\'te başlamasına karar verdi. Bir şart var: Gümrük Birliği\'ni Kıbrıs dahil yeni üyelere genişleten Ankara Protokolü imzalanmalı.',
       tarih: 'Türkiye kararı kabul etti ve protokolü Temmuz 2005\'te imzaladı; ancak imzaya Kıbrıs\'ı tanımadığını belirten bir deklarasyon ekledi.',
       s: [
@@ -257,7 +257,7 @@ window.VERI = (function () {
     { id: 'brükselRet', t: '2004-12-17', tur: 'haber', baslik: 'Brüksel Zirvesi: tarih yok', kosul: s => s.dis.ab < 45,
       metin: 'Reformlar yetersiz bulundu; AB liderleri müzakere tarihi vermeyi erteledi. Piyasalar olumsuz tepki verdi.', etki: { e: { guven: -8 }, k: { mil: 1 } } },
     { id: 'asgari2005', t: '2004-12-20', tur: 'asgari', yil: 2005 },
-    { id: 'ytl', t: '2004-12-28', tur: 'karar', baslik: 'Altı sıfır', yer: 'Ankara',
+    { id: 'ytl', sure: 3, t: '2004-12-28', tur: 'karar', baslik: 'Altı sıfır', yer: 'Ankara',
       metin: 'Bir dolar 1.350.000 lira, bir ekmek 400.000 lira. Paradan altı sıfır atıp Yeni Türk Lirası\'na geçmek için her şey hazır. 1 Ocak\'ta başlayalım mı?',
       tarih: '1 Ocak 2005\'te YTL tedavüle girdi. 2009\'da "Yeni" ibaresi kaldırıldı.',
       s: [
@@ -284,7 +284,7 @@ window.VERI = (function () {
       metin: 'Lüksemburg\'da son dakikaya kadar süren pazarlığın ardından Türkiye ile katılım müzakereleri resmen başladı.', etki: { d: { ab: 5 }, e: { guven: 6 }, k: { sag: 1, laik: 1 } } },
     { id: 'butce2006', t: '2005-10-15', tur: 'butce', yil: 2006 },
     { id: 'asgari2006', t: '2005-12-20', tur: 'asgari', yil: 2006 },
-    { id: 'danistay', t: '2006-05-17', tur: 'karar', baslik: 'Danıştay saldırısı', yer: 'Ankara',
+    { id: 'danistay', sure: 10, t: '2006-05-17', tur: 'karar', baslik: 'Danıştay saldırısı', yer: 'Ankara',
       metin: 'Danıştay 2. Dairesi\'ne düzenlenen silahlı saldırıda bir üye hayatını kaybetti, dört üye yaralandı. Ertesi gün on binler cenazede laiklik için yürüdü.',
       tarih: 'Saldırgan yakalandı. Saldırı, sonraki yıllarda açılan Ergenekon davasında da yer aldı.',
       s: [
@@ -292,7 +292,7 @@ window.VERI = (function () {
         { ad: 'Kınama yap, kutuplaşmaya karşı uyar', etki: { k: { laik: -2, muh: 1 }, i: { yargi: -2 } }, tarih: true },
         { ad: 'Güvenlik bürokrasisinde soruşturma başlat', etki: { k: { laik: 1 }, i: { ordu: -2, yargi: 2 }, d: { ab: 2 } } }
       ] },
-    { id: 'dalga', t: '2006-06-05', tur: 'karar', baslik: 'Piyasada dalgalanma', yer: 'İstanbul',
+    { id: 'dalga', sure: 7, t: '2006-06-05', tur: 'karar', baslik: 'Piyasada dalgalanma', yer: 'İstanbul',
       metin: 'ABD\'de faizlerin yükselmesiyle yabancı yatırımcı gelişmekte olan ülkelerden çıkıyor. Lira birkaç haftada %20\'ye yakın değer kaybetti, borsa sert düştü.',
       tarih: 'Merkez Bankası Haziran 2006\'da faizi toplam 4,25 puan artırdı. Dalgalanma yaz sonunda yatıştı.', e: { kur: 16, guven: -10 },
       s: [
@@ -302,7 +302,7 @@ window.VERI = (function () {
       ] },
     { id: 'butce2007', t: '2006-10-15', tur: 'butce', yil: 2007 },
     { id: 'asgari2007', t: '2006-12-20', tur: 'asgari', yil: 2007 },
-    { id: 'dink', t: '2007-01-19', tur: 'karar', baslik: 'Hrant Dink suikastı', yer: 'İstanbul',
+    { id: 'dink', sure: 10, t: '2007-01-19', tur: 'karar', baslik: 'Hrant Dink suikastı', yer: 'İstanbul',
       metin: 'Agos gazetesi Genel Yayın Yönetmeni Hrant Dink, gazetesinin önünde silahlı saldırıda öldürüldü. Cenazesinde on binler "Hepimiz Hrant\'ız" diye yürüdü.',
       tarih: 'Tetikçi kısa sürede yakalandı. Kamu görevlilerinin ihmalleri yıllarca yargılandı; TCK 301. madde 2008\'de değiştirildi.',
       s: [
@@ -310,7 +310,7 @@ window.VERI = (function () {
         { ad: 'Failleri yakala, 301. maddeyi tartışmaya aç', etki: { k: { laik: 1 }, d: { ab: 3 } }, tarih: true },
         { ad: 'Soruşturmayı yargıya bırak', etki: { d: { ab: -2 } } }
       ] },
-    { id: 'cb', t: '2007-04-10', tur: 'karar', baslik: 'Cumhurbaşkanlığı seçimi', yer: 'Çankaya',
+    { id: 'cb', sure: 10, t: '2007-04-10', tur: 'karar', baslik: 'Cumhurbaşkanlığı seçimi', yer: 'Çankaya',
       metin: 'Ahmet Necdet Sezer\'in görev süresi doluyor. Cumhurbaşkanını Meclis seçecek. Muhalefet "ilk turda 367 milletvekili toplantıda olmalı" diyor. Tandoğan\'da yüz binlerce kişi Cumhuriyet Mitingi\'nde.',
       tarih: 'AK Parti, Abdullah Gül\'ü aday gösterdi. 27 Nisan\'da ilk tur yapıldı; Anayasa Mahkemesi 1 Mayıs\'ta 367 şartını kabul ederek turu iptal etti.',
       s: [
@@ -318,7 +318,7 @@ window.VERI = (function () {
         { ad: 'Parti dışından bir uzlaşı adayı', etki: { k: { muh: -4, laik: 4 }, i: { ordu: 5, yargi: 3 }, e: { guven: 4 }, b: { uzlasi: 1 } }, sonuc: 'Uzlaşı adayı ikinci turda seçildi. Gerginlik düştü, seçim Kasım\'daki olağan tarihinde yapılacak.' },
         { ad: 'Kendin aday ol', etki: { k: { muh: 4, laik: -8 }, i: { ordu: -8, yargi: -4 }, e: { guven: -4 }, b: { kendinAday: 1 } }, sonuc: 'Adaylığın açıklanınca miting meydanları daha da kalabalıklaştı.' }
       ] },
-    { id: 'muhtira', t: '2007-04-27', tur: 'karar', baslik: '27 Nisan bildirisi', yer: 'Genelkurmay', kosul: s => !s.b.uzlasi,
+    { id: 'muhtira', sure: 3, t: '2007-04-27', tur: 'karar', once: 'cb', baslik: '27 Nisan bildirisi', yer: 'Genelkurmay', kosul: s => !s.b.uzlasi,
       metin: 'Gece yarısına doğru Genelkurmay Başkanlığı\'nın internet sitesinde, cumhurbaşkanlığı tartışmaları ve laiklik hakkında sert bir bildiri yayımlandı. Basın buna "e-muhtıra" diyor. Piyasalar açılışta sert düşecek.',
       tarih: 'Hükümet Sözcüsü Cemil Çiçek ertesi gün "Genelkurmay Başkanlığı Başbakanlığa bağlı bir kurumdur" dedi. 1 Mayıs\'ta Anayasa Mahkemesi turu iptal etti; seçim 22 Temmuz\'a alındı.', e: { guven: -8, kur: 4 },
       s: [
@@ -326,8 +326,8 @@ window.VERI = (function () {
         { ad: 'Adayı geri çek, gerginliği düşür', etki: { k: { muh: -8, sag: -3, laik: 3 }, i: { ordu: 8 }, d: { ab: -4 }, e: { guven: 4 } }, sonuc: 'Kriz yatıştı ama tabanında büyük bir hayal kırıklığı var.' },
         { ad: 'Sessiz kal', etki: { k: { muh: -2 }, e: { guven: -5 }, b: { erkenSecim: 1 } }, sonuc: 'Belirsizlik sürdü; Anayasa Mahkemesi turu iptal etti, erken seçim 22 Temmuz\'da.' }
       ] },
-    { id: 'secim2007', t: '2007-07-22', tur: 'secim', secim: 'genel', baslik: 'Genel seçim', kosul: s => s.b.erkenSecim, gercek: { akp: 46.58, chp: 20.88, mhp: 14.27, sandalye: 341 } },
-    { id: 'secim2007k', t: '2007-11-04', tur: 'secim', secim: 'genel', baslik: 'Genel seçim', kosul: s => !s.b.erkenSecim, gercek: { akp: 46.58, chp: 20.88, mhp: 14.27, sandalye: 341 } },
+    { id: 'secim2007', t: '2007-07-22', tur: 'secim', once: 'cb', secim: 'genel', baslik: 'Genel seçim', kosul: s => s.b.erkenSecim, gercek: { akp: 46.58, chp: 20.88, mhp: 14.27, sandalye: 341 } },
+    { id: 'secim2007k', t: '2007-11-04', tur: 'secim', once: 'cb', secim: 'genel', baslik: 'Genel seçim', kosul: s => !s.b.erkenSecim, gercek: { akp: 46.58, chp: 20.88, mhp: 14.27, sandalye: 341 } },
     { id: 'son1', t: '2007-12-01', tur: 'son', baslik: 'Birinci dönem tamamlandı' }
   ];
   // olay olmayan günlere haber akışı
