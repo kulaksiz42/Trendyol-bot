@@ -22,6 +22,8 @@ window.Sim = (function () {
     };
   });
   const TOPLAM_SECMEN = Object.values(IL).reduce((a, i) => a + i.secmen, 0);
+  // 2002'de diğer partilerin kendi aralarındaki ulusal oranı
+  const TABAN_ORAN = (() => { const t = {}; PARTILER.forEach(k => t[k] = Object.values(IL).reduce((a, il) => a + il.taban[k] * il.secmen, 0) / TOPLAM_SECMEN); const o = PARTILER.filter(k => k !== 'akp').reduce((a, k) => a + t[k], 0); PARTILER.forEach(k => t[k] /= o); return t; })();
 
   /* ---------- tarih yardımcıları ---------- */
   const BAS = Date.UTC(2001, 7, 14);
@@ -65,6 +67,16 @@ window.Sim = (function () {
     p.akp += (S.ilEtki[il.ad] || 0) + (S.miting[il.ad] || 0);
     // muhalefette teşkilatı olmayan bölgede oy kaybı
     if (!S.iktidar && !S.teskilat[BOLGE_IL[il.ad]]) { const d = p.akp * 0.22; p.akp -= d; p.dig += d * 0.5; p.dyp += d * 0.3; p.mhp += d * 0.2; }
+    // 2007'den sonra diğer partilerin kendi aralarındaki oranı gerçek seçimlerin seyrini izler
+    if (V.DIGER_GERCEK && yil > 2007.6) {
+      const D = V.DIGER_GERCEK; let i = D.findIndex(d => d[0] > yil); if (i < 0) i = D.length - 1; if (i < 1) i = 1;
+      const [ya, a] = D[i - 1], [yb, b] = D[i];
+      const k = Math.max(0, Math.min(1, (yil - ya) / (yb - ya))), dig = PARTILER.filter(x => x !== 'akp');
+      const hedef = Object.fromEntries(dig.map(x => [x, a[x] + (b[x] - a[x]) * k])), th = dig.reduce((s, x) => s + hedef[x], 0);
+      const w = Object.fromEntries(dig.map(x => [x, Math.max(0.05, il.taban[x]) * (hedef[x] / th) / (TABAN_ORAN[x] || 0.01)]));
+      const tw = dig.reduce((s, x) => s + w[x], 0), O = dig.reduce((s, x) => s + p[x], 0);
+      dig.forEach(x => p[x] = O * w[x] / tw);
+    }
     // ilin tavanı: AK Parti'nin gerçekte ulaştığı zirvenin biraz üstü. Üstü zorlaşır.
     if (V.AKP_ZIRVE && V.AKP_ZIRVE[il.ad]) {
       const tavan = V.AKP_ZIRVE[il.ad] + 5;
@@ -84,11 +96,14 @@ window.Sim = (function () {
   }
   // d'Hondt, %10 ülke barajı; bağımsızlar (2007'den itibaren) DEHAP illerinde aday
   function sandalye(a) {
-    const bag = Sim_yil() > 2006.5, sonuc = Object.fromEntries(PARTILER.map(k => [k, 0])), ilSonuc = {};
-    const gecen = PARTILER.filter(k => k !== 'dig' && a.ulusal[k] >= 10);
+    const y = Sim_yil(), bag = y > 2006.5 && y < 2014.5, sonuc = Object.fromEntries(PARTILER.map(k => [k, 0])), ilSonuc = {};
+    const baraj = y > 2022.3 ? 7 : 10, ittifak = y > 2018 ? [['akp', 'mhp'], ['chp', 'dyp']] : [];
+    const blokOy = k => { const b = ittifak.find(x => x.includes(k)); return b ? b.reduce((s, x) => s + a.ulusal[x], 0) : a.ulusal[k]; };
+    const gecen = PARTILER.filter(k => (k !== 'dig' || y > 2014.5) && k !== 'gp' && blokOy(k) >= baraj && a.ulusal[k] >= 1);
+    const mvCarpan = y > 2017.5 ? 600 / 550 : 1;
     Object.values(IL).forEach(il => {
       const p = a.iller[il.ad], s = Object.fromEntries(PARTILER.map(k => [k, 0]));
-      let kalan = il.mv;
+      let kalan = Math.round(il.mv * mvCarpan);
       if (bag && il.dehap) { const n = Math.min(kalan, Math.floor(p.dig / (100 / (il.mv + 1)))); s.dig = n; kalan -= n; }
       for (let i = 0; i < kalan; i++) {
         let en = null, eb = -1;
@@ -115,14 +130,14 @@ window.Sim = (function () {
     const sok = k => S.soklar.filter(s => s.k === k).reduce((a, s) => a + s.v, 0);
     const risk = 50 - e.guven;
     const toparlanma = 4.2 * Math.exp(-(yil - 2002.8) / 2.0);
-    const dunya = yil < 2008.6 ? 1.2 : -2;
-    const enfHedef = 6.5 + 3 * p.h + 0.25 * Math.max(0, e.kurDeg) + (p.mb === 'baski' ? 6 : 0) - 0.05 * (e.guven - 50) + sok('enf');
-    e.enf += (Math.max(1, enfHedef) - e.enf) * 0.055;
-    const faizHedef = p.mb === 'baski' ? e.enf + 2 : e.enf + 8 + risk * 0.1;
+    const dunya = V.DUNYA ? V.DUNYA(yil) : yil < 2008.6 ? 1.2 : -2;
+    const enfHedef = (yil > 2008 ? 6 : 6.5) + 3 * p.h + (yil > 2008 ? 0.3 * Math.min(Math.max(0, e.kurDeg), 20) + 0.75 * Math.max(0, e.kurDeg - 20) : 0.25 * Math.max(0, e.kurDeg)) + (p.mb === 'baski' ? 6 : 0) - 0.05 * (e.guven - 50) + sok('enf');
+    e.enf += (Math.max(1, enfHedef) - e.enf) * (yil > 2008 ? 0.08 : 0.055);
+    const faizHedef = p.mb === 'baski' ? (yil > 2008 ? Math.max(8, e.enf * 0.35) : e.enf + 2) : p.mb === 'sikilastir' ? e.enf + 9 : e.enf + (yil > 2008 ? 3 : 8) + risk * 0.1;
     e.faiz += (faizHedef - e.faiz) * 0.14 + sok('faiz'); e.faiz = Math.max(4, e.faiz);
     const reel = e.faiz - e.enf;
-    e.kurDeg = 0.45 * e.enf - 1.4 * (reel - 4) + 0.3 * risk + sok('kurDeg');
-    e.kur *= Math.pow(1 + e.kurDeg / 100, 1 / 12);
+    e.kurDeg = (yil > 2008 ? 0.85 * e.enf - 3 - (reel > 3 ? 1.6 : 0.9) * (reel - 3) + Math.min(35, reel < 0 ? -1.6 * reel : 0) + (yil > 2014 ? 10 : 0) : 0.45 * e.enf - 1.4 * (reel - 4)) + 0.3 * risk + sok('kurDeg');
+    e.kurDeg = Math.max(-30, Math.min(150, e.kurDeg)); e.kur *= Math.pow(1 + e.kurDeg / 100, 1 / 12);
     const buyHedef = 2.6 + 1.6 * p.h - 0.6 * p.vergi + 0.11 * (e.guven - 50) - 0.1 * (reel - 6) + toparlanma + dunya + sok('buyume') + projeBuyume();
     e.buyume += (buyHedef - e.buyume) * 0.12;
     e.issizlik += ((10.4 - 0.32 * (e.buyume - 5)) - e.issizlik) * 0.05;
@@ -130,15 +145,15 @@ window.Sim = (function () {
     e.acik += (acikHedef - e.acik) * 0.1;
     e.borc = Math.max(5, e.borc + (e.acik - e.borc * (e.buyume + e.enf) / (100 + e.buyume + e.enf) * 0.95) / 12);
     const kurum = (S.kurum.ordu + S.kurum.yargi + S.kurum.isd) / 3;
-    const guvenHedef = 42 + (p.imf ? 10 : 0) + (S.dis.ab - 50) * 0.3 + (kurum - 40) * 0.25 - Math.max(0, e.acik - 3) * 1.2 - Math.max(0, e.enf - 10) * 0.3 + (p.mb === 'baski' ? -10 : 0);
+    const guvenHedef = 42 + (p.imf ? 10 : yil > 2008.3 ? 6 : 0) + (S.dis.ab - 50) * 0.3 + (kurum - 40) * 0.25 - Math.max(0, e.acik - 3) * 1.2 - Math.max(0, e.enf - 10) * 0.3 + (p.mb === 'baski' ? -10 : 0);
     e.guven += (guvenHedef - e.guven) * 0.06; e.guven = Math.max(0, Math.min(100, e.guven));
-    e.kisiBasi *= Math.pow(1 + (e.buyume + e.enf - e.kurDeg) / 100, 1 / 12);
+    e.kisiBasi *= Math.pow(Math.max(0.5, 1 + (e.buyume + e.enf - e.kurDeg) / 100), 1 / 12);
     e.nufus *= Math.pow(1.013, 1 / 12);
     S.soklar.forEach(s => s.ay--); S.soklar = S.soklar.filter(s => s.ay > 0);
   }
-  function refah() { const e = S.eko; return 0.6 * (e.buyume - 4) - 0.22 * (e.enf - 12) - 0.8 * (e.issizlik - 10); }
+  function refah() { const e = S.eko, enf = e.enf > 12 ? 12 + (Math.min(e.enf, 90) - 12) * 0.55 : e.enf; return Math.max(-4, Math.min(5, 0.6 * (e.buyume - 4) - 0.22 * (enf - 12) - 0.8 * (e.issizlik - 10))); }
   function kamuoyuAy() {
-    const r = refah(), yil = Sim_yil(), yip = Math.max(0, yil - 2009) * 0.01;
+    const r = refah(), yil = Sim_yil(), yip = Math.min(0.1, Math.max(0, yil - 2007) * 0.006);
     if (!S.iktidar) { muhalefetKamuoyu(); Object.keys(S.miting).forEach(k => { S.miting[k] *= 0.82; if (S.miting[k] < 0.1) delete S.miting[k]; }); const a = anketHesap(); S.anket = a.ulusal.akp; S.kasa += 0.18 + S.anket * 0.012; return a; }
     Object.entries(S.kesim).forEach(([k, s]) => {
       const K = V.KESIM[k];
@@ -249,7 +264,7 @@ window.Sim = (function () {
     const simdi = gunTarih(S.gun), olay = { ay: false, biten: [], yil: false };
     if (simdi.getUTCMonth() !== once.getUTCMonth()) {
       olay.ay = true;
-      if (S.pol.mb === 'baski' && !S.soklar.some(s => s.k === 'mbBaski')) S.pol.mb = 'bagimsiz';
+      if (Sim_yil() < 2008 && S.pol.mb === 'baski' && !S.soklar.some(s => s.k === 'mbBaski')) S.pol.mb = 'bagimsiz';
       ekonomiAy(); olay.anket = kamuoyuAy(); olay.biten = projeAy();
       S.gecmis.push({ g: S.gun, anket: +S.anket.toFixed(1), enf: +S.eko.enf.toFixed(1), buyume: +S.eko.buyume.toFixed(1), kur: +S.eko.kur.toFixed(3) });
       if (simdi.getUTCMonth() === 0 && S.iktidar) { olay.yil = true; S.odenek += 10 + 4 * S.pol.h + S.eko.kisiBasi / 1500; }
@@ -259,8 +274,17 @@ window.Sim = (function () {
   function secimYap(o) {
     const a = anketHesap(), r = { id: o.id, tur: o.secim, t: iso(gunTarih(S.gun)), ulusal: a.ulusal, iller: a.iller, gercek: o.gercek };
     if (o.secim === 'genel') { const s = sandalye(a); r.sandalye = s.sonuc; r.gecen = s.gecen; }
+    const y = Sim_yil(), U = a.ulusal;
+    // cumhurbaşkanlığı: 2018'den sonra ittifak ortağının oyu da gelir
+    if (o.secim === 'cb' || (o.secim === 'genel' && y > 2018)) {
+      const tur1 = Math.min(97, U.akp + (y > 2018 ? U.mhp * 0.85 : U.mhp * 0.15) + 5 + U.gp * 0.15);
+      const rakip = U.chp + U.dyp * (y > 2018 ? 0.9 : 0.6) + U.dig * (y > 2022 ? 0.8 : 0.3);
+      const tur2 = tur1 >= 50 ? null : tur1 / (tur1 + rakip) * 100;
+      r.cb = { tur1, tur2, kazandi: tur1 >= 50 || tur2 >= 50 };
+    }
+    if (o.secim === 'ref') { const evet = Math.min(90, U.akp + ({ ref2010: 12, ref2017: 9 }[o.id] || 8) + (o.id === 'ref2017' ? U.mhp * 0.15 : 0)); r.ref = { evet, kabul: evet >= 50 }; }
     r.kazanan = Object.fromEntries(Object.entries(a.iller).map(([il, p]) => [il, PARTILER.reduce((en, k) => p[k] > p[en] ? k : en, 'akp')]));
-    S.secimler.push({ id: r.id, tur: r.tur, t: r.t, ulusal: r.ulusal, sandalye: r.sandalye, kazanan: r.kazanan });
+    S.secimler.push({ id: r.id, tur: r.tur, t: r.t, ulusal: r.ulusal, sandalye: r.sandalye, kazanan: r.kazanan, cb: r.cb, ref: r.ref });
     return r;
   }
 

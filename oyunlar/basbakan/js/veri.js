@@ -12,7 +12,7 @@ window.VERI = (function () {
   };
   // seçmen kesimleri: w = seçmen içindeki pay (%), v0 = 2002'de bize oy oranı, duyarlılık = ekonomiye tepki
   const KESIM = {
-    muh: { ad: 'Muhafazakâr', ikon: '🕌', w: 30, v0: 0.80, duy: 2 },
+    muh: { ad: 'Muhafazakâr', ikon: '🕌', w: 30, v0: 0.80, duy: 1.2 },
     sag: { ad: 'Merkez sağ', ikon: '🏪', w: 24, v0: 0.27, duy: 5 },
     mil: { ad: 'Milliyetçi', ikon: '⭐', w: 12, v0: 0.08, duy: 3 },
     laik: { ad: 'Laik / kentli', ikon: '🏙️', w: 23, v0: 0.05, duy: 1.5 },
