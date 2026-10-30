@@ -8,7 +8,8 @@ window.Harita = (function () {
   let sahne, kamera, renderer, kontrol, kok, ray = new THREE.Raycaster(), etiketKat, secCb = null;
   const iller = {}; // ad -> { mesh, mat, merkez, h, hedefH, renk, hedefRenk }
   const etiketler = [];
-  let projeKat, secili = null, golge = null;
+  let projeKat, secili = null, golge = null, hemi = null, kar = 0;
+  const KAR = new THREE.Color('#eef3f7'), GECE = new THREE.Color('#04090f'), GUNDUZ = new THREE.Color('#123251');
 
   function kur(kap, cb) {
     secCb = cb;
@@ -24,12 +25,12 @@ window.Harita = (function () {
     kontrol.enableDamping = true; kontrol.dampingFactor = 0.08; kontrol.screenSpacePanning = false;
     kontrol.minDistance = 18; kontrol.maxDistance = 260; kontrol.maxPolarAngle = 1.12; kontrol.minPolarAngle = 0.15;
     kontrol.rotateSpeed = 0.5;
-    sahne.add(new THREE.HemisphereLight('#cfe3ff', '#1a2433', 0.75));
+    hemi = new THREE.HemisphereLight('#cfe3ff', '#1a2433', 0.75); sahne.add(hemi);
     const gun = new THREE.DirectionalLight('#fff4e0', 0.85); gun.position.set(-40, 90, 50); gun.castShadow = true;
     gun.shadow.mapSize.set(2048, 2048); Object.assign(gun.shadow.camera, { left: -90, right: 90, top: 60, bottom: -60, near: 10, far: 250 });
     sahne.add(gun); golge = gun;
     kok = new THREE.Group(); sahne.add(kok);
-    denizKur(); komsuKur(); illeriKur(); projeKat = new THREE.Group(); kok.add(projeKat);
+    denizKur(); komsuKur(); illeriKur(); siluetKur(); bulutKur(); projeKat = new THREE.Group(); kok.add(projeKat);
     boyut(); window.addEventListener('resize', boyut);
     dokunma(renderer.domElement);
     kameraAyarla(true);
@@ -127,6 +128,46 @@ window.Harita = (function () {
     if (secili && iller[secili]) iller[secili].mat.emissive.set('#000000');
     secili = ad; if (ad && iller[ad]) iller[ad].mat.emissive.set('#3a2a00');
   }
+
+  /* ---------- şehir silüetleri ve geceleri ışıklar ---------- */
+  const BINA_MAT = new THREE.MeshStandardMaterial({ color: '#e6e1d6', roughness: 0.7, flatShading: true });
+  const GOKDELEN_MAT = new THREE.MeshStandardMaterial({ color: '#9fb6c8', roughness: 0.25, metalness: 0.4, flatShading: true });
+  const ISIK_MAT = new THREE.MeshBasicMaterial({ color: '#ffcf6a', transparent: true, opacity: 0 });
+  const KUTU = new THREE.BoxGeometry(1, 1, 1); KUTU.translate(0, 0.5, 0);
+  const ISIK = new THREE.BoxGeometry(0.09, 0.09, 0.09);
+  const siluetler = [];
+  function siluetKur() {
+    let tohum = 11; const r = () => { tohum = (tohum * 16807) % 2147483647; return (tohum - 1) / 2147483646; };
+    const m = new THREE.Matrix4(), q = new THREE.Quaternion(), sv = new THREE.Vector3(), pv = new THREE.Vector3();
+    Object.entries(iller).forEach(([ad, il]) => {
+      const sec = il.secmen || 100000, n = Math.round(Math.max(4, Math.min(90, sec / 55000))), metro = sec > 1500000;
+      const g = new THREE.Group(); g.position.copy(il.merkez); g.userData.il = ad;
+      const bina = new THREE.InstancedMesh(KUTU, BINA_MAT, n), gok = metro ? new THREE.InstancedMesh(KUTU, GOKDELEN_MAT, 14) : null, isik = new THREE.InstancedMesh(ISIK, ISIK_MAT, n * 2);
+      const yaricap = 0.45 + Math.sqrt(n) * 0.2;
+      for (let i = 0; i < n; i++) {
+        const a = r() * Math.PI * 2, d = Math.sqrt(r()) * yaricap, w = 0.2 + r() * 0.18;
+        const h = (0.3 + r() * 0.55) * (1 + (1 - d / yaricap) * (metro ? 1.8 : 0.9));
+        pv.set(Math.cos(a) * d, 0, Math.sin(a) * d); sv.set(w, h, w); m.compose(pv, q, sv); bina.setMatrixAt(i, m);
+        for (let j = 0; j < 2; j++) { m.makeTranslation(pv.x + (r() - 0.5) * w, h * (0.3 + r() * 0.6), pv.z + w / 2 + 0.01); isik.setMatrixAt(i * 2 + j, m); }
+      }
+      if (gok) for (let i = 0; i < 14; i++) { const a = r() * 6.28, d = r() * 0.45; pv.set(Math.cos(a) * d + 0.2, 0, Math.sin(a) * d - 0.1); sv.set(0.22, 1.4 + r() * 2.2, 0.22); m.compose(pv, q, sv); gok.setMatrixAt(i, m); }
+      bina.castShadow = true; g.add(bina); if (gok) { gok.castShadow = true; g.add(gok); } g.add(isik);
+      kok.add(g); siluetler.push({ g, il });
+    });
+  }
+  // bulutlar: yavaşça doğuya süzülür
+  const bulutlar = [];
+  function bulutKur() {
+    const mat = new THREE.MeshLambertMaterial({ color: '#ffffff', transparent: true, opacity: 0.55 });
+    for (let i = 0; i < 9; i++) {
+      const g = new THREE.Group();
+      for (let j = 0; j < 4; j++) { const s = new THREE.Mesh(new THREE.SphereGeometry(2.4 + Math.random() * 2, 10, 8), mat); s.position.set(j * 2.6 - 4, Math.random(), Math.random() * 2); s.scale.y = 0.45; g.add(s); }
+      g.position.set(-90 + Math.random() * 170, 16 + Math.random() * 6, -45 + Math.random() * 80); g.userData.hiz = 0.6 + Math.random() * 0.8;
+      kok.add(g); bulutlar.push(g);
+    }
+  }
+  // mevsim: kışın Doğu ve yüksek iller karlı
+  function mevsim(ay) { kar = ay === 11 || ay <= 1 ? 1 : ay === 2 || ay === 10 ? 0.45 : 0; }
 
   /* ---------- etiketler (HTML) ---------- */
   function etiket(poz, metin, sinif) {
@@ -262,7 +303,7 @@ window.Harita = (function () {
   }
 
   /* ---------- döngü ---------- */
-  let son = performance.now(), dondur = 0;
+  let son = performance.now(), dondur = 0, saatOfs = 0;
   function kare(t) {
     const dt = Math.min(0.05, (t - son) / 1000); son = t;
     if (kamAnim) {
@@ -273,10 +314,18 @@ window.Harita = (function () {
     kontrol.update();
     const tx = Math.max(-70, Math.min(80, kontrol.target.x)), tz = Math.max(-45, Math.min(45, kontrol.target.z));
     if (tx !== kontrol.target.x || tz !== kontrol.target.z) { const d = new THREE.Vector3(tx - kontrol.target.x, 0, tz - kontrol.target.z); kontrol.target.add(d); kamera.position.add(d); }
+    // gece-gündüz: 4 dakikalık döngü
+    const aci = ((t + saatOfs) / 240000) * Math.PI * 2, gunes = Math.sin(aci), gece = Math.max(0, Math.min(1, (0.15 - gunes) / 0.5));
+    golge.position.set(Math.cos(aci) * 90, Math.max(12, gunes * 90 + 20), 45); golge.intensity = 0.25 + Math.max(0, gunes) * 0.75;
+    golge.color.setHSL(0.1, 0.5 + 0.3 * (1 - Math.abs(gunes)), 0.85); hemi.intensity = 0.35 + 0.45 * (1 - gece);
+    sahne.background.copy(GUNDUZ).lerp(GECE, gece); sahne.fog.color.copy(sahne.background); ISIK_MAT.opacity = gece * 0.95;
     Object.values(iller).forEach(il => {
       if (Math.abs(il.h - il.hedefH) > 0.002) { il.h += (il.hedefH - il.h) * Math.min(1, dt * 4); il.grup.scale.y = il.h; }
       il.renk.lerp(il.hedefRenk, Math.min(1, dt * 4)); il.mat.color.copy(il.renk);
+      if (kar) { const e = Math.max(0, Math.min(1, (il.lon - 31) / 12)) * 0.75 + Math.max(0, (il.lat - 39.5) / 3) * 0.3; if (e > 0.05) il.mat.color.lerp(KAR, Math.min(0.85, kar * e)); }
     });
+    siluetler.forEach(s => { s.g.position.y = s.il.h; });
+    bulutlar.forEach(b => { b.position.x += b.userData.hiz * dt; if (b.position.x > 100) b.position.x = -100; });
     dondur += dt;
     projeKat.children.forEach(g => {
       const il = iller[g.userData.il]; if (il) g.userData.model.position.y = il.h;
@@ -286,5 +335,5 @@ window.Harita = (function () {
     etiketGuncelle();
   }
 
-  return { kur, ilAyarla, iller, seciliYap, odakla, genel, projeleriCiz, mitingCiz, boyut };
+  return { kur, ilAyarla, iller, seciliYap, odakla, genel, projeleriCiz, mitingCiz, boyut, mevsim, _saat: ms => { saatOfs = ms; } };
 })();

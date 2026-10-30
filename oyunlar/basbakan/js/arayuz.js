@@ -45,7 +45,7 @@
       ${varK ? '<button class="btn ikincil" id="devam" style="margin-top:8px">Kayıtlı oyuna devam et</button>' : ''}
       <div class="uyari">Oyundaki lider kurgusal bir karakterdir. Tarihî olaylar kaynaklara göre özetlenmiştir; tartışmalı konular tarafsız biçimde aktarılır.</div></div></div>`;
     ui.querySelector('#basla').onclick = () => { S = Sim.yeni(ui.querySelector('#ad').value.trim() || 'Lider'); anaEkran(); modal = false; haritaRenk(); const ol = Sim.bekleyenOlay(); if (ol) olayIsle(ol); };
-    if (varK) ui.querySelector('#devam').onclick = () => { S = Sim.yukle(); anaEkran(); modal = false; haritaRenk(true); Harita.projeleriCiz(S.projeler); Harita.mitingCiz(S.miting || {}); setTimeout(() => haftaEkrani(false), 300); };
+    if (varK) ui.querySelector('#devam').onclick = () => { S = Sim.yukle(); anaEkran(); modal = false; haritaRenk(true); Harita.projeleriCiz(S.projeler); Harita.mitingCiz(S.miting || {}); Harita.mevsim(Sim.gunTarih(S.gun).getUTCMonth()); bildirim('▶ 1× ile zamanı başlat', 3000); };
     Object.keys(Harita.iller).forEach(ad => Harita.ilAyarla(ad, '#4a5a6c', 0.5, true));
     document.body.classList.add('basta');
   }
@@ -53,19 +53,18 @@
   /* ---------- ana ekran ---------- */
   function anaEkran() {
     ui.innerHTML = `<div class="ust"><div class="bar">${BAYRAK}<div class="tarih"><b id="trh"></b><span id="unvan"></span></div>
-      <div class="hiz"><button id="btnAjanda" aria-label="Ajanda">📅</button><button id="btnHafta" class="hafta">▶ Hafta</button></div></div>
+      <div class="hiz"><button data-h="0" aria-label="Duraklat">❚❚</button><button data-h="1">1×</button><button data-h="2">2×</button><button data-h="4">4×</button></div></div>
       <div class="gostergeler" id="gos"></div><div class="serit"><em>GÜNDEM</em><div><span id="hbr"></span></div></div></div>
       <div class="lejant" id="lej"></div><button class="gundem-btn" id="gundem">📨 Gündem <b>0</b></button>
       <nav class="alt"><button data-p="ekonomi"><span>📊</span>Ekonomi</button><button data-p="yatirim" id="btnYat"><span>🏗️</span>Yatırım</button><button data-p="halk"><span>👥</span>Halk</button><button data-p="dunya"><span>🌍</span>Dünya</button><button data-p="gorunum"><span>🗺️</span>Harita</button></nav>`;
-    ui.querySelector('#btnAjanda').onclick = () => haftaEkrani(false);
-    ui.querySelector('#btnHafta').onclick = () => { if (S.hiz > 0) { hiz(0); return; } haftaBaslat(); };
-    Ajanda.durum(S);
+    ui.querySelectorAll('[data-h]').forEach(b => b.onclick = () => hiz(+b.dataset.h));
+    Ajanda.durum(S); S.yilSn = S.yilSn || 360;
     ui.querySelectorAll('[data-p]').forEach(b => b.onclick = () => panelAc(b.dataset.p));
     S.masa = S.masa || []; S.log = S.log || [];
     ui.querySelector('#gundem').onclick = () => panelAc('gundem');
     hiz(0); hud(); haberEkle(null); lejant(); gundemRozet();
   }
-  function hiz(h) { S.hiz = h; const b = ui.querySelector('#btnHafta'); if (b) { b.textContent = h > 0 ? '❚❚' : '▶ Hafta'; b.classList.toggle('akiyor', h > 0); } }
+  function hiz(h) { S.hiz = h; ui.querySelectorAll('[data-h]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.h === h)); }
 
   /* ---------- haftalık akış ---------- */
   function haftaBaslat() {
@@ -168,11 +167,13 @@
     const dt = Math.min(0.2, (t - sonT) / 1000); sonT = t;
     if (S && !modal && !panel && S.hiz > 0) {
       acc += dt * S.hiz;
-      while (acc >= GUN_SURE && !modal) {
-        acc -= GUN_SURE;
+      const gs = (S.yilSn || 360) / 365;
+      while (acc >= gs && !modal) {
+        acc -= gs;
         const o = Sim.gunGec();
         if (o.ay) {
           if (V.PARTI_AD) Object.entries(V.PARTI_AD(Sim.yil())).forEach(([k, ad]) => { V.PARTI[k].ad = ad; });
+          Harita.mevsim(Sim.gunTarih(S.gun).getUTCMonth());
           Ajanda.sozKontrol().forEach(m => { bildirim(m, 3000); logla(m); });
           haritaRenk(false, o.anket); hud(); aylikHud(); Harita.projeleriCiz(S.projeler); Harita.mitingCiz(S.iktidar ? {} : S.miting); Sim.kaydet();
           o.biten.forEach(p => { const P = V.PROJE[p.tip]; bildirim(`${P.ikon} ${P.ad} ${p.il}'de hizmete açıldı`); haberEkle(`${p.il}: ${P.ad} açıldı`); logla(`${P.ikon} ${p.il}: ${P.ad} açıldı`); });
@@ -257,7 +258,7 @@
   }
   function kapatVeDevam(el, o) {
     el.remove(); Sim.olayBitti(o); modal = false; haritaRenk(); hud(); gundemRozet(); Sim.kaydet();
-    if (o.id === 'kurulus') setTimeout(() => haftaEkrani(false), 300);
+    if (o.id === 'kurulus') { hiz(1); setTimeout(() => bildirim('⏱️ Zaman akıyor. ❚❚ ile durdur, 2× ve 4× ile hızlandır. Kampanya menüsünden teşkilat kur.', 5000), 300); }
   }
   function kararKart(o, z) {
     const el = kartAc(`<div class="ust-serit"><span>${S.iktidar ? 'Başbakanlık' : 'Genel Merkez'} · Karar</span><span class="yer">${esc(o.yer || '')} · ${tarihYazi(o.t)}</span></div>${kisiSerit(o.kisi)}
@@ -337,7 +338,7 @@
     modal = true; panelKapat();
     const r = Sim.secimYap(o), P = Sim.PARTILER, sira = Object.keys(r.iller).sort(() => Math.random() - 0.5);
     const kat = document.createElement('div');
-    kat.innerHTML = `<div class="secim-ekran"><div class="secim-kutu"><div class="bas"><span>${tarihYazi(r.t)} · ${{ yerel: 'Yerel seçim', genel: o.baslik || 'Genel seçim', cb: 'Cumhurbaşkanlığı seçimi', ref: 'Referandum' }[o.secim]}</span><b>● CANLI</b></div>
+    kat.innerHTML = `<div class="tv-logo">GÜNDEM<b>TV</b><i>● CANLI</i></div><div class="tv-alt"><span class="tv-etiket">SEÇİM ÖZEL</span><span id="tvBant">Sandıklar açılıyor…</span><span class="tv-saat" id="tvSaat">21:00</span></div><div class="secim-ekran"><div class="secim-kutu"><div class="bas"><span>${tarihYazi(r.t)} · ${{ yerel: 'Yerel seçim', genel: o.baslik || 'Genel seçim', cb: 'Cumhurbaşkanlığı seçimi', ref: 'Referandum' }[o.secim]}</span><b>● CANLI</b></div>
       <div class="sandik" id="sk">Açılan sandık %0</div><div id="prt"></div><div id="mc"></div></div></div><div class="secim-alt"><button class="btn ikincil" id="atla">Sonuca geç</button></div>`;
     document.body.appendChild(kat); document.body.classList.add('secimde'); Harita.genel();
     let i = 0, bitti = false;
@@ -355,9 +356,11 @@
       }
       kat.querySelector('#prt').innerHTML = P.map(k => `<div class="prt"><span class="amb">${amblem(k)}</span><span class="nm">${V.PARTI[k].ad}</span><span class="cb"><i style="width:${r.ulusal[k] * Math.min(1, oran * 1.4) * 2}%;background:${V.PARTI[k].renk}"></i></span><span class="yz">${yz(r.ulusal[k] * (bitti ? 1 : 0.92 + 0.08 * oran))}</span><span class="gr">${bitti && g[k] ? 'gerçek ' + String(g[k]).replace('.', ',') : ''}</span></div>`).join('');
     }
-    const zam = setInterval(() => { if (i < sira.length) { ac(sira[i++]); if (sira[i]) ac(sira[i++]); ciz(i / sira.length); } else son(); }, 150);
+    const bant = il => { const b = kat.querySelector('#tvBant'); if (b && r.kazanan[il]) b.textContent = `${il}'de sandıklar açıldı: ${V.PARTI[r.kazanan[il]].ad} önde · %${r.iller[il][r.kazanan[il]].toFixed(1).replace('.', ',')}`; const sa = kat.querySelector('#tvSaat'); if (sa) { const dk = 21 * 60 + Math.round(i / sira.length * 180); sa.textContent = String(Math.floor(dk / 60) % 24).padStart(2, '0') + ':' + String(dk % 60).padStart(2, '0'); } };
+    const zam = setInterval(() => { if (i < sira.length) { ac(sira[i]); bant(sira[i]); i++; if (sira[i]) ac(sira[i++]); ciz(i / sira.length); } else son(); }, 170);
     function son() {
       if (bitti) return; bitti = true; clearInterval(zam); sira.forEach(ac); ciz(1);
+      const tb = kat.querySelector('#tvBant'); if (tb) tb.textContent = 'Sonuçlar kesinleşti · ' + V.PARTI.akp.ad + ' %' + r.ulusal.akp.toFixed(1).replace('.', ',');
       let mesaj, kayip = false;
       let ortaklar = [];
       if (o.secim === 'ref') {
@@ -519,6 +522,8 @@
       return ['Harita', `<div class="secim3"><button data-mod="destek" aria-pressed="${mod === 'destek'}">Bize destek</button><button data-mod="kazanan" aria-pressed="${mod === 'kazanan'}">Önde giden parti</button></div>
         <p class="not">İllerin yüksekliği oy oranını gösterir. Bir ile dokunarak ayrıntısını gör; iki parmakla yakınlaş, çevir.</p>
         <button class="btn ikincil" id="tr">Türkiye'nin tamamına dön</button>
+        <div class="baslik2">Zaman</div><p class="kucuk" style="margin:0 0 6px">Oyunda bir yıl 1× hızda ne kadar sürsün? 6 dakikada bütün oyun yaklaşık 2,5 saat.</p>
+        <div class="secim3">${[[180, '3 dk'], [360, '6 dk'], [720, '12 dk']].map(([v, a]) => `<button data-yil="${v}" aria-pressed="${(S.yilSn || 360) === v}">${a}</button>`).join('')}</div>
         ${S.secimler.length ? '<div class="baslik2">Geçmiş seçimler</div>' + S.secimler.map(s => `<div class="satir"><span class="ad">${tarihYazi(s.t)} · ${s.tur === 'genel' ? 'Genel' : 'Yerel'}</span><b>${yz(s.ulusal.akp)}${s.sandalye ? ' · ' + s.sandalye.akp + ' MV' : ''}</b></div>`).join('') : ''}`];
     },
     il(ad) {
@@ -526,7 +531,7 @@
       const son = S.secimler.length ? S.secimler[S.secimler.length - 1] : null;
       return [esc(ad), `<p class="not">${sayi(il.secmen)} geçerli oy (2002) · ${il.mv} milletvekili · 2002'de birinci: ${V.PARTI[Object.keys(il.taban).reduce((e, k) => il.taban[k] > il.taban[e] ? k : e, 'akp')].ad}${son ? ` · ${tarihYazi(son.t)}: ${V.PARTI[son.kazanan[ad]].ad}` : ''}</p>
         ${V.AKP_ZIRVE[ad] ? `<p class="tavan">Gerçekte AK Parti bu ilde en fazla <b>%${String(V.AKP_ZIRVE[ad]).replace('.', ',')}</b> civarı aldı (2011). Bu ilde bunun çok üstüne çıkmak çok zor.</p>` : ''}
-        <button class="btn ikincil" data-ajanda="${esc(ad)}" style="margin:6px 0">📅 Bu şehri ajandaya ekle</button>
+        <button class="btn ikincil" data-sehre="${esc(ad)}" style="margin:6px 0">🏙️ Şehre in</button>
         <div class="baslik2" style="margin-top:4px">Bugünkü anket</div>${Sim.PARTILER.map(k => `<div class="prt"><span class="amb">${amblem(k, 22)}</span><span class="nm">${V.PARTI[k].ad}</span><span class="cb"><i style="width:${a[k] * 1.6}%;background:${V.PARTI[k].renk}"></i></span><span class="yz">${yz(a[k])}</span><span class="gr">${yz(il.taban[k], 0)}</span></div>`).join('')}
         <p class="kucuk" style="text-align:right;margin:0">sağdaki: 2002</p>
         ${!S.iktidar ? `<div class="baslik2">Kampanya</div><p class="not">${V.BOLGE[b].ad} teşkilatı: ${S.teskilat[b] !== undefined ? '<b style="color:var(--yesil)">kuruldu</b>' : '<b style="color:var(--kotu)">yok</b>'}${S.miting[ad] ? ' · Miting etkisi sürüyor' : ''}</p>
@@ -580,11 +585,12 @@
     gorunum(el, v, ciz) {
       el.querySelectorAll('[data-mod]').forEach(b => b.onclick = () => { mod = b.dataset.mod; haritaRenk(); lejant(); ciz(); });
       el.querySelector('#tr').onclick = () => { Harita.genel(); panelKapat(); };
+      el.querySelectorAll('[data-yil]').forEach(b => b.onclick = () => { S.yilSn = +b.dataset.yil; ciz(); bildirim('Bir yıl ' + b.textContent + ' sürecek'); });
     },
     il(el, ad, ciz) {
       Harita.seciliYap(ad);
       el.querySelectorAll('[data-kur]').forEach(b => b.onclick = () => { if (projeKur(b.dataset.kur, ad)) ciz(); });
-      const aj = el.querySelector('[data-ajanda]'); if (aj) aj.onclick = () => { const g = Ajanda.ileEkle(ad); bildirim(`📅 ${ad} ${Ajanda.GUNLER[g]} gününe eklendi`); };
+      const sh = el.querySelector('[data-sehre]'); if (sh) sh.onclick = () => { panelKapat(); modal = true; const once = S.hiz; hiz(0); Sehir.ac(S, ad, 'gezi', () => { modal = false; hiz(once); Harita.genel(); }, { yurume: false }); };
       const m = el.querySelector('[data-mitil]'); if (m) m.onclick = () => { miting(ad); ciz(); };
     }
   };

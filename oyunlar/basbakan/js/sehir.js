@@ -185,13 +185,14 @@ window.Sehir = (function () {
   }
 
   /* ---------- arayüz ---------- */
-  function ac(Sd, ilAdi, aktivite, cb) {
-    S = Sd; il = ilAdi; akt = aktivite; bitis = cb; mod = 'maket'; konusuldu = 0; npcler = [];
+  let yurumeVar = true;
+  function ac(Sd, ilAdi, aktivite, cb, ops) {
+    S = Sd; il = ilAdi; akt = aktivite; bitis = cb; yurumeVar = !(ops && ops.yurume === false); mod = 'maket'; konusuldu = 0; npcler = [];
     Object.keys(POI).filter(k => k.startsWith('proje')).forEach(k => delete POI[k]);
     el = document.createElement('div'); el.className = 'sehir';
     const t = window.Sim.gunTarih(S.gun);
     el.innerHTML = `<div class="sh-sahne"></div><div class="sh-etiket"></div>
-      <div class="sh-ust"><div><b>${il}</b><span>${t.getUTCDate()} ${V.AYLAR[t.getUTCMonth()]} ${t.getUTCFullYear()} · ${window.Ajanda.SEHIR_ETK[akt] ? window.Ajanda.SEHIR_ETK[akt].ad : 'Ziyaret'}</span></div>
+      <div class="sh-ust"><div><b>${il}</b><span>${t.getUTCDate()} ${V.AYLAR[t.getUTCMonth()]} ${t.getUTCFullYear()} · ${window.Ajanda.SEHIR_ETK[akt] ? window.Ajanda.SEHIR_ETK[akt].ad : 'Şehir maketi'}</span></div>
         <button id="shMaket" style="display:none">🗺️ Maket</button><button id="shAyril">✈️ Ayrıl</button></div>
       <div class="sh-ipucu" id="shIpucu">Şehrin maketine bakıyorsun. Bir noktaya dokun ve oraya git.</div>
       <div class="joy" id="joy"><i></i></div><button class="sh-konus" id="shKonus">💬 Konuş</button>
@@ -218,7 +219,14 @@ window.Sehir = (function () {
     son = performance.now(); anim = requestAnimationFrame(kare);
     // gelinen etkinliğe göre ilk nokta
     const ilk = { miting: 'meydan', carsi: 'carsi', fabrika: 'fabrika', univ: 'univ', acilis: Object.keys(POI).find(k => k.startsWith('proje')) || 'meydan' }[akt];
+    if (!yurumeVar) { const pr = S.projeler.filter(p => p.il === il), a = window.Sim.anketHesap().iller[il]; el.querySelector('#shIpucu').innerHTML = `<b>${il}</b> · Bize destek %${a.akp.toFixed(1).replace('.', ',')} · ${pr.length ? pr.length + ' yatırım (' + pr.filter(p => p.bitti).length + ' açıldı)' : 'henüz yatırım yok'}. Maketi parmağınla döndür ve yakınlaştır.`; return; }
     setTimeout(() => { if (el) el.querySelector('#shIpucu').innerHTML = `Bugünkü programın: <b>${POI[ilk] ? POI[ilk].ikon + ' ' + POI[ilk].ad : ''}</b>. Dokun ve git, ya da maketi gez.`; }, 50);
+  }
+  function bilgi(k) {
+    const p = POI[k], a = window.Sim.anketHesap().iller[il], e = S.eko;
+    const metin = { meydan: `Meydanda bugün kalabalık ${a.akp > 45 ? 'seni seviyor' : a.akp > 30 ? 'kararsız' : 'mesafeli'}.`, carsi: `Esnafın en büyük derdi ${e.enf > 20 ? 'fiyatlar ve kira' : 'kredi ve vergi'}.`, fabrika: `Sanayide ${e.buyume > 4 ? 'siparişler iyi' : 'işler durgun'}; işsizlik %${e.issizlik.toFixed(1).replace('.', ',')}.`, univ: `Öğrenciler ${a.akp > 40 ? 'bölünmüş durumda' : 'çoğunlukla muhalif'}.` }[k] || `${p.ad}.`;
+    el.querySelector('#shIpucu').innerHTML = `${p.ikon} <b>${p.ad}</b> · ${metin}`;
+    kontrol.target.set(p.x, 0, p.z); kamera.position.set(p.x, 30, p.z + 35);
   }
   function boyut() { if (!el) return; const w = innerWidth, h = innerHeight; R.setSize(w, h); kamera.aspect = w / h; kamera.updateProjectionMatrix(); }
   function etiketler() {
@@ -226,7 +234,7 @@ window.Sehir = (function () {
     if (mod !== 'maket') return;
     Object.entries(POI).forEach(([k, p]) => {
       const b = document.createElement('button'); b.className = 'sh-poi'; b.innerHTML = `${p.ikon} ${p.ad}`; b.dataset.k = k; b._p = new THREE.Vector3(p.x, 6, p.z);
-      b.onclick = () => yuru(k); kat.appendChild(b);
+      b.onclick = () => yurumeVar ? yuru(k) : bilgi(k); kat.appendChild(b);
     });
   }
   function etiketGuncelle() {
