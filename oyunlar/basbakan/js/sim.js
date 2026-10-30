@@ -24,15 +24,19 @@ window.Sim = (function () {
   const TOPLAM_SECMEN = Object.values(IL).reduce((a, i) => a + i.secmen, 0);
 
   /* ---------- tarih yardımcıları ---------- */
-  const gunTarih = g => { const d = new Date(Date.UTC(2002, 10, 3)); d.setUTCDate(d.getUTCDate() + g); return d; };
+  const BAS = Date.UTC(2001, 7, 14);
+  const gunTarih = g => new Date(BAS + g * 864e5);
   const iso = d => d.toISOString().slice(0, 10);
-  const tarihGun = s => Math.round((Date.parse(s + 'T00:00:00Z') - Date.UTC(2002, 10, 3)) / 864e5);
+  const tarihGun = s => Math.round((Date.parse(s + 'T00:00:00Z') - BAS) / 864e5);
+  const Sim_yil = () => 2001 + (BAS - Date.UTC(2001, 0, 1)) / 864e5 / 365 + S.gun / 365;
+  const BOLGE_IL = {}; Object.entries(V.BOLGE).forEach(([b, x]) => x.iller.forEach(il => BOLGE_IL[il] = b));
 
   function yeni(ad) {
     S = {
-      ad: ad || 'Başbakan', gun: 0, eko: Object.assign({ kurDeg: 0 }, V.EKO),
+      ad: ad || 'Başbakan', gun: 0, eko: Object.assign({ kurDeg: 0, nufus: 65 }, V.EKO_GECMIS[0][1]),
+      iktidar: false, teskilat: {}, kasa: 2.0, miting: {}, mitingSon: -99,
       pol: { h: 0, vergi: 0, imf: true, mb: 'bagimsiz' },
-      kesim: Object.fromEntries(Object.entries(V.KESIM).map(([k, s]) => [k, { v: s.v0, m: 0 }])),
+      kesim: Object.fromEntries(Object.entries(V.KESIM).map(([k, s]) => [k, { v: V.VSTART[k], m: 0 }])),
       kurum: Object.fromEntries(Object.entries(V.KURUM).map(([k, s]) => [k, s.v])),
       dis: Object.fromEntries(Object.entries(V.DIS).map(([k, s]) => [k, s.v])),
       b: {}, bitti: [], projeler: [], ilEtki: {}, secimler: [], soklar: [], odenek: 8, asgari: 226,
@@ -44,7 +48,9 @@ window.Sim = (function () {
 
   /* ---------- kamuoyu ---------- */
   function ilPaylari(il) {
-    const p = Object.assign({}, il.taban), yil = 2002.85 + S.gun / 365;
+    const p = Object.assign({}, il.taban), yil = Sim_yil();
+    // Genç Parti Temmuz 2002'de kuruldu; öncesinde bu oylar başka partilerde
+    if (yil < 2002.85) { const k = Math.max(0, Math.min(1, (2002.85 - yil) / 0.3)) * p.gp; p.gp -= k; p.dyp += k * 0.5; p.dig += k * 0.5; }
     // Genç Parti'nin zamanla erimesi (gerçekte 2007'de %3)
     const erime = Math.max(0, Math.min(0.6, (yil - 2003.5) * 0.17)) * p.gp;
     p.gp -= erime; p.mhp += erime * 0.55; p.dyp += erime * 0.1; p.chp += erime * 0.1; p.akp += erime * 0.25;
@@ -56,7 +62,9 @@ window.Sim = (function () {
       const d = (s.v - V.KESIM[k].v0) * il.kesim[k];
       p.akp += d; Object.entries(ALT[k]).forEach(([pa, o]) => p[pa] -= d * o);
     });
-    p.akp += S.ilEtki[il.ad] || 0;
+    p.akp += (S.ilEtki[il.ad] || 0) + (S.miting[il.ad] || 0);
+    // muhalefette teşkilatı olmayan bölgede oy kaybı
+    if (!S.iktidar && !S.teskilat[BOLGE_IL[il.ad]]) { const d = p.akp * 0.22; p.akp -= d; p.dig += d * 0.5; p.dyp += d * 0.3; p.mhp += d * 0.2; }
     PARTILER.forEach(k => p[k] = Math.max(0.3, p[k]));
     const t = PARTILER.reduce((a, k) => a + p[k], 0); PARTILER.forEach(k => p[k] = p[k] / t * 100);
     return p;
@@ -71,7 +79,7 @@ window.Sim = (function () {
   }
   // d'Hondt, %10 ülke barajı; bağımsızlar (2007'den itibaren) DEHAP illerinde aday
   function sandalye(a) {
-    const bag = 2002.85 + S.gun / 365 > 2006.5, sonuc = Object.fromEntries(PARTILER.map(k => [k, 0])), ilSonuc = {};
+    const bag = Sim_yil() > 2006.5, sonuc = Object.fromEntries(PARTILER.map(k => [k, 0])), ilSonuc = {};
     const gecen = PARTILER.filter(k => k !== 'dig' && a.ulusal[k] >= 10);
     Object.values(IL).forEach(il => {
       const p = a.iller[il.ad], s = Object.fromEntries(PARTILER.map(k => [k, 0]));
@@ -88,8 +96,17 @@ window.Sim = (function () {
   }
 
   /* ---------- ekonomi (aylık) ---------- */
+  // muhalefet döneminde ekonomi koalisyonun elinde: gerçek seyir
+  function gecmisEkonomi() {
+    const bugun = iso(gunTarih(S.gun)), G = V.EKO_GECMIS;
+    let i = G.findIndex(([t]) => t > bugun); if (i < 0) i = G.length - 1; if (i === 0) i = 1;
+    const [ta, a] = G[i - 1], [tb, b] = G[i], k = Math.max(0, Math.min(1, (tarihGun(bugun) - tarihGun(ta)) / (tarihGun(tb) - tarihGun(ta))));
+    Object.keys(b).forEach(x => S.eko[x] = a[x] + (b[x] - a[x]) * k);
+    S.eko.nufus = 65 + S.gun / 365 * 0.85;
+  }
   function ekonomiAy() {
-    const e = S.eko, p = S.pol, yil = 2002.85 + S.gun / 365;
+    if (!S.iktidar) return gecmisEkonomi();
+    const e = S.eko, p = S.pol, yil = Sim_yil();
     const sok = k => S.soklar.filter(s => s.k === k).reduce((a, s) => a + s.v, 0);
     const risk = 50 - e.guven;
     const toparlanma = 4.2 * Math.exp(-(yil - 2002.8) / 2.0);
@@ -116,7 +133,8 @@ window.Sim = (function () {
   }
   function refah() { const e = S.eko; return 0.6 * (e.buyume - 4) - 0.22 * (e.enf - 12) - 0.8 * (e.issizlik - 10); }
   function kamuoyuAy() {
-    const r = refah(), yil = 2002.85 + S.gun / 365, yip = Math.max(0, yil - 2009) * 0.01;
+    const r = refah(), yil = Sim_yil(), yip = Math.max(0, yil - 2009) * 0.01;
+    if (!S.iktidar) { muhalefetKamuoyu(); Object.keys(S.miting).forEach(k => { S.miting[k] *= 0.82; if (S.miting[k] < 0.1) delete S.miting[k]; }); const a = anketHesap(); S.anket = a.ulusal.akp; S.kasa += 0.18 + S.anket * 0.012; return a; }
     Object.entries(S.kesim).forEach(([k, s]) => {
       const K = V.KESIM[k];
       const balayi = 0.12 * Math.max(0, 1 - (yil - 2002.85) / 3.5) * K.duy / 4;
@@ -128,10 +146,42 @@ window.Sim = (function () {
     return a;
   }
 
+  /* ---------- muhalefet: teşkilat ve kampanya ---------- */
+  function teskilatOrani() { return Object.values(IL).reduce((a, il) => a + (S.teskilat[BOLGE_IL[il.ad]] ? il.secmen : 0), 0) / TOPLAM_SECMEN; }
+  function muhalefetKamuoyu() {
+    const T = teskilatOrani(), kriz = Math.min(1, S.gun / 300);
+    Object.entries(S.kesim).forEach(([k, s]) => {
+      const K = V.KESIM[k], v0 = V.VSTART[k];
+      // teşkilat seçmene ulaşmayı sağlar; ekonomik kriz yeni partilere yöneltir
+      const hedef = Math.max(0.01, Math.min(0.97, v0 + (K.v0 - v0) * (0.3 + 0.55 * T) + s.m / 100 + 0.025 * K.duy / 3 * kriz));
+      s.v += (hedef - s.v) * 0.12; s.m *= 0.99;
+    });
+  }
+  const TESKILAT_MALIYET = 0.6, MITING_MALIYET = 0.15;
+  function teskilatKur(b) {
+    if (S.teskilat[b]) return 'var'; if (S.kasa < TESKILAT_MALIYET) return 'para';
+    S.kasa -= TESKILAT_MALIYET; S.teskilat[b] = S.gun; return 'tamam';
+  }
+  function mitingYap(il) {
+    if (S.gun - S.mitingSon < 7) return 'yorgun'; if (S.kasa < MITING_MALIYET) return 'para';
+    S.kasa -= MITING_MALIYET; S.mitingSon = S.gun;
+    const buyuk = IL[il].secmen / TOPLAM_SECMEN;
+    S.miting[il] = Math.min(9, (S.miting[il] || 0) + (S.teskilat[BOLGE_IL[il]] ? 5 : 2.5));
+    // büyük şehir mitingleri ulusal yayına çıkar
+    S.kesim.sag.m += 0.25 + buyuk * 8; S.kesim.muh.m += 0.15;
+    return 'tamam';
+  }
+  // seçim zaferi: iktidara geçiş
+  function iktidaraGec() {
+    S.iktidar = true; S.iktidarGun = S.gun;
+    S.eko = Object.assign({ kurDeg: 0 }, V.EKO, { nufus: S.eko.nufus });
+    Object.entries(S.kesim).forEach(([k, s]) => { s.m += (s.v - V.KESIM[k].v0) * 100 * 0.3; });
+  }
+
   /* ---------- projeler ---------- */
   function projeBuyume() { return S.projeler.filter(p => p.bitti).reduce((a, p) => a + V.PROJE[p.tip].buyume * Math.max(0, 1 - (S.gun - p.bitis) / 1500), 0); }
   function projeKur(tip, il) {
-    const P = V.PROJE[tip], yil = 2002.85 + S.gun / 365;
+    const P = V.PROJE[tip], yil = Sim_yil();
     if (yil < P.yil) return 'erken';
     if (P.tekil && S.projeler.some(p => p.tip === tip)) return 'var';
     if (S.projeler.some(p => p.tip === tip && p.il === il)) return 'ilde';
@@ -172,6 +222,7 @@ window.Sim = (function () {
     if (e.imf !== undefined) S.pol.imf = e.imf;
     if (e.mb) { S.pol.mb = e.mb; if (e.mb === 'baski') S.soklar.push({ k: 'mbBaski', v: 0, ay: 10 }); }
     if (e.odenek) S.odenek += e.odenek;
+    if (e.kasa) S.kasa += e.kasa;
   }
   const clamp = v => Math.max(0, Math.min(100, v));
   function bekleyenOlay() {
@@ -190,7 +241,7 @@ window.Sim = (function () {
       if (S.pol.mb === 'baski' && !S.soklar.some(s => s.k === 'mbBaski')) S.pol.mb = 'bagimsiz';
       ekonomiAy(); olay.anket = kamuoyuAy(); olay.biten = projeAy();
       S.gecmis.push({ g: S.gun, anket: +S.anket.toFixed(1), enf: +S.eko.enf.toFixed(1), buyume: +S.eko.buyume.toFixed(1), kur: +S.eko.kur.toFixed(3) });
-      if (simdi.getUTCMonth() === 0) { olay.yil = true; S.odenek += 10 + 4 * S.pol.h + S.eko.kisiBasi / 1500; }
+      if (simdi.getUTCMonth() === 0 && S.iktidar) { olay.yil = true; S.odenek += 10 + 4 * S.pol.h + S.eko.kisiBasi / 1500; }
     }
     return olay;
   }
@@ -199,8 +250,6 @@ window.Sim = (function () {
     if (o.secim === 'genel') { const s = sandalye(a); r.sandalye = s.sonuc; r.gecen = s.gecen; }
     r.kazanan = Object.fromEntries(Object.entries(a.iller).map(([il, p]) => [il, PARTILER.reduce((en, k) => p[k] > p[en] ? k : en, 'akp')]));
     S.secimler.push({ id: r.id, tur: r.tur, t: r.t, ulusal: r.ulusal, sandalye: r.sandalye, kazanan: r.kazanan });
-    // seçim sonrası: tabanın moral etkisi
-    if (o.secim === 'genel' && r.sandalye && r.sandalye.akp < 276) S.b.iktidarKayip = 1;
     return r;
   }
 
@@ -211,6 +260,7 @@ window.Sim = (function () {
 
   return {
     yeni, yukle, kaydet, kayitVar, sil, durum: () => S, IL, PARTILER, gunTarih, iso, tarihGun,
-    gunGec, anketHesap, sandalye, secimYap, etkiUygula, bekleyenOlay, olayBitti, projeKur, refah
+    gunGec, anketHesap, sandalye, secimYap, etkiUygula, bekleyenOlay, olayBitti, projeKur, refah,
+    yil: () => Sim_yil(), BOLGE_IL, teskilatKur, mitingYap, teskilatOrani, iktidaraGec, TESKILAT_MALIYET, MITING_MALIYET
   };
 })();

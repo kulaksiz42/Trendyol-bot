@@ -37,45 +37,16 @@
   /* ---------- açılış ---------- */
   function acilis() {
     const varK = Sim.kayitVar();
-    ui.innerHTML = `<div class="acilis"><div class="k">${ARMA}<h1>BAŞBAKAN</h1><div class="alt-b">Türkiye · 2002'den bugüne</div>
-      <p>3 Kasım 2002. Seçim gecesi. Ülke 2001 krizinin yaralarını sarıyor. Bu gece kazanan partinin genel başkanı sensin. Olaylar gerçek, kararlar senin.</p>
+    ui.innerHTML = `<div class="acilis"><div class="k">${ARMA}<h1>BAŞBAKAN</h1><div class="alt-b">Türkiye · 2001'den bugüne</div>
+      <p>14 Ağustos 2001, Ankara. Ülke Şubat krizinin enkazında. Bugün yeni bir parti kuruyorsun. Önünde bir seçim, sonra yirmi yıl var. Olaylar gerçek; kararlar senin. Sen başka yapsaydın Türkiye bugün nerede olurdu?</p>
       <input id="ad" maxlength="24" placeholder="Adın (ör. Ahmet Yılmaz)" autocomplete="off">
-      <button class="btn" id="basla">Seçim gecesi başlasın</button>
+      <button class="btn" id="basla">Partiyi kur</button>
       ${varK ? '<button class="btn ikincil" id="devam" style="margin-top:8px">Kayıtlı oyuna devam et</button>' : ''}
-      <div class="uyari">Oyundaki başbakan kurgusal bir karakterdir. Tarihî olaylar kaynaklara göre özetlenmiştir; tartışmalı konular tarafsız biçimde aktarılır.</div></div></div>`;
-    ui.querySelector('#basla').onclick = () => { S = Sim.yeni(ui.querySelector('#ad').value.trim() || 'Başbakan'); secimGecesi(); };
-    if (varK) ui.querySelector('#devam').onclick = () => { S = Sim.yukle(); anaEkran(); modal = false; haritaRenk(true); Harita.projeleriCiz(S.projeler); };
+      <div class="uyari">Oyundaki lider kurgusal bir karakterdir. Tarihî olaylar kaynaklara göre özetlenmiştir; tartışmalı konular tarafsız biçimde aktarılır.</div></div></div>`;
+    ui.querySelector('#basla').onclick = () => { S = Sim.yeni(ui.querySelector('#ad').value.trim() || 'Lider'); anaEkran(); modal = false; haritaRenk(); };
+    if (varK) ui.querySelector('#devam').onclick = () => { S = Sim.yukle(); anaEkran(); modal = false; haritaRenk(true); Harita.projeleriCiz(S.projeler); Harita.mitingCiz(S.miting || {}); };
     Object.keys(Harita.iller).forEach(ad => Harita.ilAyarla(ad, '#4a5a6c', 0.5, true));
-  }
-
-  /* ---------- seçim gecesi (2002, gerçek sonuçlar) ---------- */
-  function secimGecesi() {
-    const sira = Object.keys(SEC).sort(() => Math.random() - 0.5), P = Sim.PARTILER;
-    const acik = {}; let i = 0, bitti = false;
-    ui.innerHTML = `<div class="secim-ekran"><div class="secim-kutu"><div class="bas"><span>3 Kasım 2002 · Genel seçim</span><b>● CANLI</b></div>
-      <div class="sandik" id="sk">Açılan sandık %0</div><div id="prt"></div><div id="mc"></div></div></div>
-      <div class="secim-alt"><button class="btn ikincil" id="atla">Sonuca geç</button></div>`;
-    Harita.genel();
-    function ciz() {
-      const top = Object.fromEntries(P.map(k => [k, 0])); let n = 0;
-      Object.keys(acik).forEach(il => { P.forEach(k => top[k] += SEC[il].oy[k]); n += SEC[il].top; });
-      const T = P.reduce((a, k) => a + top[k], 0) || 1, toplam = Object.values(SEC).reduce((a, r) => a + r.top, 0);
-      ui.querySelector('#sk').textContent = bitti ? 'Sonuçlar kesinleşti' : 'Açılan sandık ' + yz(n / toplam * 100, 0);
-      ui.querySelector('#prt').innerHTML = P.map(k => `<div class="prt"><span class="amb">${amblem(k)}</span><span class="nm">${V.PARTI[k].ad}</span><span class="cb"><i style="width:${top[k] / T * 100 * 2}%;background:${V.PARTI[k].renk}"></i></span><span class="yz">${yz(top[k] / T * 100)}</span></div>`).join('');
-    }
-    function ac(il) {
-      acik[il] = 1; const r = SEC[il]; let en = 'akp'; P.forEach(k => { if (r.oy[k] > r.oy[en]) en = k; });
-      Harita.ilAyarla(il, V.PARTI[en].renk, 0.6 + r.oy[en] / r.top * 7);
-    }
-    const zam = setInterval(() => { if (i < sira.length) { ac(sira[i++]); ac(sira[i] ? sira[i++] : sira[0]); ciz(); } else son(); }, 170);
-    function son() {
-      if (bitti) return; bitti = true; clearInterval(zam); sira.forEach(ac); ciz();
-      ui.querySelector('#mc').innerHTML = meclis({ akp: 363, chp: 178, dig: 9 }) + `<p class="not" style="text-align:center;margin:4px 0 0">Yalnızca iki parti %10 barajını geçti. Partin <b style="color:var(--altin)">363 sandalyeyle</b> tek başına iktidar. Geçerli oyların yaklaşık %45'i Meclis'e yansımadı.</p>`;
-      const b = ui.querySelector('#atla'); b.className = 'btn'; b.textContent = 'Göreve başla';
-      b.onclick = () => { anaEkran(); modal = false; haritaRenk(); bildirim('Hükümeti kurmak için Çankaya\'dan haber bekleniyor…'); };
-    }
-    ui.querySelector('#atla').onclick = son;
-    ciz();
+    document.body.classList.add('basta');
   }
 
   /* ---------- ana ekran ---------- */
@@ -84,7 +55,7 @@
       <div class="hiz"><button data-h="0" aria-label="Duraklat">❚❚</button><button data-h="1">1×</button><button data-h="2">2×</button><button data-h="4">4×</button></div></div>
       <div class="gostergeler" id="gos"></div><div class="serit"><em>GÜNDEM</em><div><span id="hbr"></span></div></div></div>
       <div class="lejant" id="lej"></div>
-      <nav class="alt"><button data-p="ekonomi"><span>📊</span>Ekonomi</button><button data-p="yatirim"><span>🏗️</span>Yatırım</button><button data-p="halk"><span>👥</span>Halk</button><button data-p="dunya"><span>🌍</span>Dünya</button><button data-p="gorunum"><span>🗺️</span>Harita</button></nav>`;
+      <nav class="alt"><button data-p="ekonomi"><span>📊</span>Ekonomi</button><button data-p="yatirim" id="btnYat"><span>🏗️</span>Yatırım</button><button data-p="halk"><span>👥</span>Halk</button><button data-p="dunya"><span>🌍</span>Dünya</button><button data-p="gorunum"><span>🗺️</span>Harita</button></nav>`;
     ui.querySelectorAll('[data-h]').forEach(b => b.onclick = () => hiz(+b.dataset.h));
     ui.querySelectorAll('[data-p]').forEach(b => b.onclick = () => panelAc(b.dataset.p));
     hiz(S.hiz || 1); hud(); haberEkle(null); lejant();
@@ -95,12 +66,16 @@
     const t = Sim.gunTarih(S.gun), e = S.eko;
     const trh = ui.querySelector('#trh'); if (!trh) return;
     trh.textContent = `${t.getUTCDate()} ${V.AYLAR[t.getUTCMonth()]} ${t.getUTCFullYear()}`;
-    ui.querySelector('#unvan').textContent = (S.b.basbakan ? 'Başbakan ' : 'Genel Başkan ') + S.ad;
+    ui.querySelector('#unvan').textContent = S.iktidar ? (S.b.basbakan ? 'Başbakan ' : 'Genel Başkan ') + S.ad + (S.b.koalisyon ? ' · Koalisyon' : '') : 'Genel Başkan ' + S.ad + ' · Muhalefet';
+    const by = ui.querySelector('#btnYat'); if (by) by.innerHTML = S.iktidar ? '<span>🏗️</span>Yatırım' : '<span>📣</span>Kampanya';
     const o = onceki || {};
+    document.body.classList.remove('basta');
     const ok = (v, a, iyiArtis) => a === undefined || Math.abs(v - a) < 0.05 ? '' : (v > a) === iyiArtis ? `<i class="iyi">▲</i>` : `<i class="kotu">▼</i>`;
     const kur = S.b.ytl ? e.kur.toFixed(2).replace('.', ',') : sayi(e.kur * 1e6);
+    const kasa = ['anket', 'Parti kasası', '$' + S.kasa.toFixed(1).replace('.', ',') + ' mn', ''];
     ui.querySelector('#gos').innerHTML = [
       ['anket', 'Anket', yz(S.anket), ok(S.anket, o.anket, true)],
+      ...(S.iktidar ? [] : [kasa]),
       ['', 'Enflasyon', yz(e.enf), ok(e.enf, o.enf, false)],
       ['', 'Büyüme', yz(e.buyume), ok(e.buyume, o.buyume, true)],
       ['', S.b.ytl ? 'Dolar (YTL)' : 'Dolar (TL)', kur, ok(e.kur, o.kur, false)],
@@ -122,6 +97,7 @@
     el.innerHTML = mod === 'destek' ? `Bize destek <i style="background:linear-gradient(90deg,#2f4257,#c9b48a,#e8590c)"></i>` : 'Önde giden parti: ' + ['akp', 'chp', 'mhp', 'dyp', 'dig'].map(k => `<span style="color:${V.PARTI[k].renk}">■</span>`).join('');
   }
   function bildirim(m, sure = 2600) {
+    document.querySelectorAll('.bildirim').forEach(x => x.remove());
     const el = document.createElement('div'); el.className = 'bildirim'; el.textContent = m; document.body.appendChild(el);
     setTimeout(() => el.remove(), sure);
   }
@@ -151,7 +127,7 @@
         acc -= GUN_SURE;
         const o = Sim.gunGec();
         if (o.ay) {
-          haritaRenk(false, o.anket); hud(); aylikHud(); Harita.projeleriCiz(S.projeler); Sim.kaydet();
+          haritaRenk(false, o.anket); hud(); aylikHud(); Harita.projeleriCiz(S.projeler); Harita.mitingCiz(S.iktidar ? {} : S.miting); Sim.kaydet();
           o.biten.forEach(p => { const P = V.PROJE[p.tip]; bildirim(`${P.ikon} ${P.ad} ${p.il}'de hizmete açıldı`); haberEkle(`${p.il}: ${P.ad} açıldı`); });
           if (o.yil) bildirim(`Yeni yıl: yatırım ödeneği ${S.odenek.toFixed(1).replace('.', ',')} milyar`);
         }
@@ -189,7 +165,10 @@
     if (o.tur === 'secim') return secimEkrani(o);
     if (o.tur === 'son') return sonKart(o);
   }
-  function kapatVeDevam(el, o) { el.remove(); Sim.olayBitti(o); modal = false; haritaRenk(); hud(); Sim.kaydet(); }
+  function kapatVeDevam(el, o) {
+    el.remove(); Sim.olayBitti(o); modal = false; haritaRenk(); hud(); Sim.kaydet();
+    if (o.id === 'kurulus') setTimeout(() => bildirim('📣 Kampanya menüsünden bölgelerde teşkilat kur, illerde miting yap', 5000), 400);
+  }
   function kararKart(o) {
     const el = kartAc(`<div class="ust-serit"><span>Başbakanlık · Karar</span><span class="yer">${esc(o.yer || '')} · ${tarihYazi(o.t)}</span></div>
       <div class="govde"><h2>${esc(o.baslik)}</h2><p>${esc(o.metin)}</p>
@@ -251,7 +230,7 @@
   function sonKart(o) {
     const e = S.eko, g = V.GERCEK[2007], c = (ad, sen, ger, d = 1) => `<div class="satir"><span class="ad">${ad}</span><b style="width:70px;text-align:right">${sen}</b><span class="kucuk" style="width:70px;text-align:right">${ger}</span></div>`;
     const el = kartAc(`<div class="ust-serit"><span>Birinci dönem</span><span class="yer">Aralık 2007</span></div><div class="govde"><h2>Beş yılın karnesi</h2>
-      <p>${esc(S.ad)}, partini 2002'deki %34'ten bugün ${yz(S.anket)} desteğe taşıdın. ${S.kararlar || 0} kararın ${S.tarihle || 0} tanesi tarihteki kararla aynıydı.</p>
+      <p>${esc(S.ad)}, partini kuruluştan bugüne ${yz(S.anket)} desteğe taşıdın; 2002'de ${S.secimler[0] ? yz(S.secimler[0].ulusal.akp) : '-'} almıştın (gerçekte %34,3). ${S.kararlar || 0} kararın ${S.tarihle || 0} tanesi tarihteki kararla aynıydı.</p>
       <div class="satir kucuk"><span class="ad"></span><span style="width:70px;text-align:right">Sen</span><span style="width:70px;text-align:right">Gerçek</span></div>
       ${c('Enflasyon', yz(e.enf), yz(g.enf))}${c('Büyüme', yz(e.buyume), yz(g.buyume))}${c('Dolar', e.kur.toFixed(2).replace('.', ','), String(g.kur).replace('.', ','))}${c('İşsizlik', yz(e.issizlik), yz(g.issizlik))}${c('Borç/GSYH', yz(e.borc, 0), yz(g.borc, 0))}
       <div class="tarihte"><b>Sırada</b>2008 küresel krizi, Ergenekon davaları, 2010 referandumu, YHT'nin açılışı, "çözüm süreci" ve 2011 seçimi. Bir sonraki adımda geliyor.</div>
@@ -280,9 +259,13 @@
     function son() {
       if (bitti) return; bitti = true; clearInterval(zam); sira.forEach(ac); ciz(1);
       let mesaj, kayip = false;
+      let ortaklar = [];
       if (o.secim === 'genel') {
-        const s = r.sandalye; kayip = s.akp < 276;
-        kat.querySelector('#mc').innerHTML = meclis(s) + `<p class="not" style="text-align:center;margin:4px 0 0">${kayip ? `<b style="color:var(--kotu)">Tek başına iktidar kaybedildi.</b> ${s.akp} sandalye.` : `<b style="color:var(--altin)">${s.akp} sandalyeyle tek başına iktidar.</b>`} Barajı geçen: ${r.gecen.map(k => V.PARTI[k].ad).join(', ')}${s.dig ? `; ${s.dig} bağımsız` : ''}. Gerçekte: AK Parti 341 sandalye.</p>`;
+        const s = r.sandalye, g = o.gercek || {}, birinci = Sim.PARTILER.every(k => s[k] <= s.akp);
+        ortaklar = s.akp >= 276 ? [] : r.gecen.filter(k => k !== 'akp' && s.akp + s[k] >= 276);
+        kayip = s.akp < 276 && !(birinci && ortaklar.length);
+        const durum = s.akp >= 276 ? `<b style="color:var(--altin)">${s.akp} sandalyeyle tek başına iktidar.</b>` : kayip ? `<b style="color:var(--kotu)">Hükümet kuracak çoğunluk yok.</b> ${s.akp} sandalye.` : `<b style="color:var(--altin)">Birinci partisin ama çoğunluk yok (${s.akp}).</b> Koalisyon gerekiyor.`;
+        kat.querySelector('#mc').innerHTML = meclis(s) + `<p class="not" style="text-align:center;margin:4px 0 0">${durum} Barajı geçen: ${r.gecen.map(k => V.PARTI[k].ad).join(', ') || 'yok'}${s.dig ? `; ${s.dig} bağımsız` : ''}.${g.sandalye ? ` Gerçekte: AK Parti ${g.sandalye} sandalye.` : ''}</p>`;
         mesaj = `Seçim: ${yz(r.ulusal.akp)} oy, ${s.akp} sandalye`;
       } else {
         const n = Object.values(r.kazanan).filter(k => k === 'akp').length;
@@ -293,18 +276,38 @@
       const b = kat.querySelector('#atla'); b.className = 'btn'; b.textContent = kayip ? 'Sonucu gör' : 'Devam';
       b.onclick = () => {
         kat.remove(); document.body.classList.remove('secimde'); Sim.olayBitti(o);
-        if (kayip) return kaybettin(r);
+        if (kayip) return kaybettin(r, o);
+        if (o.secim === 'genel' && !S.iktidar) { Sim.iktidaraGec(); Harita.mitingCiz({}); }
+        if (ortaklar.length) return koalisyonKart(ortaklar, r);
+        if (o.secim === 'genel') S.b.koalisyon = 0;
         modal = false; haritaRenk(); hud(); Sim.kaydet();
       };
     }
     kat.querySelector('#atla').onclick = son; ciz(0);
   }
-  function kaybettin(r) {
-    const el = kartAc(`<div class="ust-serit son"><span>Seçim sonucu</span><span class="yer" style="color:#fff">${tarihYazi(r.t)}</span></div><div class="govde"><h2>Muhalefete düştün</h2>
-      <p>Partin ${yz(r.ulusal.akp)} oyla ${r.sandalye.akp} sandalyede kaldı. Meclis'te çoğunluk yok; yeni hükümeti başkaları kuracak. Gerçekte AK Parti 2007'de %46,6 oyla 341 sandalye kazanmıştı.</p>
+  function kaybettin(r, o) {
+    const g = (o && o.gercek) || {}, ilk = !S.iktidar;
+    const el = kartAc(`<div class="ust-serit son"><span>Seçim sonucu</span><span class="yer" style="color:#fff">${tarihYazi(r.t)}</span></div><div class="govde"><h2>${ilk ? 'İktidar yolu kapandı' : 'Muhalefete düştün'}</h2>
+      <p>Partin ${yz(r.ulusal.akp)} oyla ${r.sandalye.akp} sandalyede kaldı. Meclis'te sana çoğunluk yok; hükümeti başkaları kuracak.${g.sandalye ? ` Gerçekte AK Parti bu seçimde %${String(g.akp).replace('.', ',')} oyla ${g.sandalye} sandalye kazanmıştı.` : ''}</p>
       <button class="btn" id="yb">Baştan başla</button><button class="btn ikincil" id="dv" style="margin-top:8px">Haritaya bak</button></div>`);
     el.querySelector('#yb').onclick = () => { Sim.sil(); location.reload(); };
     el.querySelector('#dv').onclick = () => { el.remove(); hiz(0); modal = false; };
+  }
+  const KOALISYON = {
+    chp: { k: { laik: 3, muh: -4 }, i: { ordu: 4, yargi: 3 }, d: { ab: 2 }, e: { guven: -3 } },
+    mhp: { k: { mil: 4, kurt: -3, laik: -1 }, d: { ab: -3 }, e: { guven: -3 } },
+    dyp: { k: { sag: 3, muh: -1 }, i: { isd: 2 }, e: { guven: -4 } },
+    gp: { k: { sag: 1, laik: -1 }, i: { isd: -4, medya: -2 }, e: { guven: -6 } }
+  };
+  function koalisyonKart(ortaklar, r) {
+    const el = kartAc(`<div class="ust-serit"><span>Çankaya · Hükümet kurma</span><span class="yer">${tarihYazi(r.t)}</span></div><div class="govde"><h2>Koalisyon</h2>
+      <p>Partin birinci ama ${r.sandalye.akp} sandalye tek başına yetmiyor. Cumhurbaşkanı hükümeti kurma görevini sana verdi. Kiminle?</p>
+      ${ortaklar.map(k => `<button class="secenek" data-k="${k}"><span style="display:inline-flex;vertical-align:middle;margin-right:8px">${amblem(k, 22)}</span>${V.PARTI[k].uzun} ile (${r.sandalye.akp + r.sandalye[k]} sandalye)<div class="ip">${ipuclari(KOALISYON[k] || {})}</div></button>`).join('')}
+      <div class="tarihte"><b>Gerçekte</b>AK Parti 2002'den 2015 Haziran'ına kadar hep tek başına iktidar oldu.</div></div>`);
+    el.querySelectorAll('[data-k]').forEach(b => b.onclick = () => {
+      const k = b.dataset.k; Sim.etkiUygula(KOALISYON[k]); S.b.koalisyon = k;
+      haberEkle(`${V.PARTI.akp.ad}–${V.PARTI[k].ad} koalisyonu kuruldu`); el.remove(); modal = false; haritaRenk(); hud(); Sim.kaydet();
+    });
   }
 
   /* ---------- paneller ---------- */
@@ -313,8 +316,10 @@
     const ayni = panel && panel.dataset.ad === ad && !veri; panelKapat(); if (ayni) return;
     const b = ui.querySelector(`[data-p="${ad}"]`); if (b) b.setAttribute('aria-pressed', 'true');
     panel = document.createElement('div'); panel.className = 'panel'; panel.dataset.ad = ad; document.body.appendChild(panel);
+    const bu = panel;
     ciz();
     function ciz() {
+      if (panel !== bu) return;
       const [baslik, ic] = PANEL[ad](veri, ciz);
       panel.innerHTML = `<header><h3>${baslik}</h3><button aria-label="Kapat">✕</button></header><div class="ic">${ic}</div>`;
       panel.querySelector('header button').onclick = panelKapat;
@@ -336,6 +341,12 @@
   const PANEL = {
     ekonomi() {
       const e = S.eko;
+      if (!S.iktidar) return ['Ekonomi', `<p class="not">Ekonomiyi Başbakan Bülent Ecevit'in DSP–MHP–ANAP koalisyonu yönetiyor; programı Kemal Derviş yürütüyor. Sen muhalefettesin: kriz ne kadar derinse, değişim isteyen seçmen o kadar çok.</p>
+        <div class="satir"><span class="ad">Enflasyon${grafik('enf', '#ff8a5b')}</span><b>${yz(e.enf)}</b></div>
+        <div class="satir"><span class="ad">Büyüme${grafik('buyume', '#3ecf8e')}</span><b>${yz(e.buyume)}</b></div>
+        <div class="satir"><span class="ad">İşsizlik</span><b>${yz(e.issizlik)}</b></div>
+        <div class="satir"><span class="ad">Faiz</span><b>${yz(e.faiz, 0)}</b></div>
+        <p class="kucuk">2001'de ekonomi %5,7 küçüldü; yıllık enflasyon %68'e çıktı.</p>`];
       return ['Ekonomi', `<div class="satir"><span class="ad">Enflasyon<small>Yıllık TÜFE</small>${grafik('enf', '#ff8a5b')}</span><b>${yz(e.enf)}</b></div>
         <div class="satir"><span class="ad">Büyüme<small>Yıllık GSYH</small>${grafik('buyume', '#3ecf8e')}</span><b>${yz(e.buyume)}</b></div>
         <div class="satir"><span class="ad">Dolar kuru${grafik('kur', '#7fb6e6')}</span><b>${e.kur.toFixed(2).replace('.', ',')}</b></div>
@@ -358,11 +369,24 @@
         <div class="baslik2">AB süreci</div><p class="not">${ab}</p><p class="not">Dünya haritası ve diplomasi ziyaretleri bir sonraki adımda geliyor.</p>`];
     },
     yatirim() {
-      const yil = 2002.85 + S.gun / 365;
+      if (!S.iktidar) return PANEL.kampanya();
+      const yil = Sim.yil();
       const liste = S.projeler.slice().reverse().slice(0, 12).map(p => { const P = V.PROJE[p.tip], k = Math.min(1, (S.gun - p.bas) / (p.bitis - p.bas)); return `<div class="satir"><span style="font-size:20px">${P.ikon}</span><span class="ad">${P.ad} · ${p.il}${cubuk(k * 100, p.bitti ? '#3ecf8e' : '#ffb703')}</span><span class="kucuk">${p.bitti ? 'Açıldı' : Math.round(k * 100) + '%'}</span></div>`; }).join('');
       return ['Yatırımlar', `<p class="not">Yatırım ödeneği: <b style="color:${S.odenek < 0 ? 'var(--kotu)' : 'var(--altin)'}">${S.odenek.toFixed(1).replace('.', ',')} milyar YTL</b>. Ödeneği aşarsan bütçe açığı büyür.</p>
         ${Object.entries(V.PROJE).map(([k, P]) => { const erken = yil < P.yil, var_ = P.tekil && S.projeler.some(p => p.tip === k); return `<div class="proje"><span class="em">${P.ikon}</span><span class="ad"><b>${P.ad}</b><span class="kucuk">${P.maliyet.toString().replace('.', ',')} milyar · ${P.sure} ay${P.il ? ' · ' + P.il : ''}</span><br><span class="kucuk">${esc(P.bilgi)}</span></span><button data-proje="${k}" ${erken || var_ ? 'disabled' : ''}>${erken ? P.yil : var_ ? 'Var' : 'Kur'}</button></div>`; }).join('')}
         ${liste ? '<div class="baslik2">Projelerin</div>' + liste : ''}`];
+    },
+    kampanya() {
+      const T = Sim.teskilatOrani(), tarih = S.b.secimTarihi ? Math.max(0, Sim.tarihGun('2002-11-03') - S.gun) + ' gün kaldı (3 Kasım 2002)' : 'Seçim tarihi belli değil; olağan seçim 2004\'te';
+      const bekle = Math.max(0, 7 - (S.gun - S.mitingSon));
+      return ['Kampanya', `<p class="not">Parti kasası: <b style="color:var(--altin)">$${S.kasa.toFixed(2).replace('.', ',')} milyon</b> · Seçim: ${tarih}</p>
+        <div class="baslik2" style="margin-top:4px">Teşkilat · seçmenin ${yz(T * 100, 0)}'ine ulaşıyorsun</div>
+        <p class="kucuk" style="margin:0 0 4px">Teşkilatın olmayan bölgede oyunun beşte birini kaybedersin.</p>
+        <div class="tes">${Object.entries(V.BOLGE).map(([k, B]) => { const v = S.teskilat[k] !== undefined; return `<button data-tes="${k}" class="${v ? 'var' : ''}"><b>${v ? '🏢' : '➕'} ${B.ad}</b><span>${v ? 'Teşkilat kuruldu' : B.iller.length + ' il · $' + String(Sim.TESKILAT_MALIYET).replace('.', ',') + ' mn'}</span></button>`; }).join('')}</div>
+        <div class="baslik2">Miting</div>
+        <p class="kucuk" style="margin:0 0 6px">Haftada bir miting yapabilirsin ($${String(Sim.MITING_MALIYET).replace('.', ',')} mn). Büyük şehirler ulusal yayına çıkar; etkisi birkaç ayda söner.${bekle ? ` Sonraki miting için ${bekle} gün.` : ''}</p>
+        <button class="btn" id="mitingSec" ${bekle ? 'disabled style="opacity:.5"' : ''}>📣 Haritadan il seç</button>
+        <div class="secim3" style="flex-wrap:wrap">${['İstanbul', 'Ankara', 'İzmir', 'Bursa', 'Konya', 'Adana', 'Diyarbakır', 'Trabzon'].map(il => `<button data-mit="${il}" ${bekle ? 'disabled' : ''}>${il}${S.miting[il] ? ' ✓' : ''}</button>`).join('')}</div>`];
     },
     gorunum() {
       return ['Harita', `<div class="secim3"><button data-mod="destek" aria-pressed="${mod === 'destek'}">Bize destek</button><button data-mod="kazanan" aria-pressed="${mod === 'kazanan'}">Önde giden parti</button></div>
@@ -371,13 +395,14 @@
         ${S.secimler.length ? '<div class="baslik2">Geçmiş seçimler</div>' + S.secimler.map(s => `<div class="satir"><span class="ad">${tarihYazi(s.t)} · ${s.tur === 'genel' ? 'Genel' : 'Yerel'}</span><b>${yz(s.ulusal.akp)}${s.sandalye ? ' · ' + s.sandalye.akp + ' MV' : ''}</b></div>`).join('') : ''}`];
     },
     il(ad) {
-      const a = Sim.anketHesap().iller[ad], il = Sim.IL[ad], pr = S.projeler.filter(p => p.il === ad), yil = 2002.85 + S.gun / 365;
+      const a = Sim.anketHesap().iller[ad], il = Sim.IL[ad], pr = S.projeler.filter(p => p.il === ad), yil = Sim.yil(), b = Sim.BOLGE_IL[ad];
       const son = S.secimler.length ? S.secimler[S.secimler.length - 1] : null;
       return [esc(ad), `<p class="not">${sayi(il.secmen)} geçerli oy (2002) · ${il.mv} milletvekili · 2002'de birinci: ${V.PARTI[Object.keys(il.taban).reduce((e, k) => il.taban[k] > il.taban[e] ? k : e, 'akp')].ad}${son ? ` · ${tarihYazi(son.t)}: ${V.PARTI[son.kazanan[ad]].ad}` : ''}</p>
         <div class="baslik2" style="margin-top:4px">Bugünkü anket</div>${Sim.PARTILER.map(k => `<div class="prt"><span class="amb">${amblem(k, 22)}</span><span class="nm">${V.PARTI[k].ad}</span><span class="cb"><i style="width:${a[k] * 1.6}%;background:${V.PARTI[k].renk}"></i></span><span class="yz">${yz(a[k])}</span><span class="gr">${yz(il.taban[k], 0)}</span></div>`).join('')}
         <p class="kucuk" style="text-align:right;margin:0">sağdaki: 2002</p>
-        <div class="baslik2">Bu ile yatırım</div>
-        ${Object.entries(V.PROJE).filter(([, P]) => !P.il || P.il === ad).map(([k, P]) => { const erken = yil < P.yil, var_ = pr.some(p => p.tip === k) || (P.tekil && S.projeler.some(p => p.tip === k)); return `<div class="proje"><span class="em">${P.ikon}</span><span class="ad"><b>${P.ad}</b><span class="kucuk">${String(P.maliyet).replace('.', ',')} milyar · ${P.sure} ay</span></span><button data-kur="${k}" ${erken || var_ ? 'disabled' : ''}>${erken ? P.yil : var_ ? 'Var' : 'Kur'}</button></div>`; }).join('')}`];
+        ${!S.iktidar ? `<div class="baslik2">Kampanya</div><p class="not">${V.BOLGE[b].ad} teşkilatı: ${S.teskilat[b] !== undefined ? '<b style="color:var(--yesil)">kuruldu</b>' : '<b style="color:var(--kotu)">yok</b>'}${S.miting[ad] ? ' · Miting etkisi sürüyor' : ''}</p>
+          <button class="btn" data-mitil="${esc(ad)}" ${S.gun - S.mitingSon < 7 ? 'disabled style="opacity:.5"' : ''}>📣 ${esc(ad)}'da miting yap ($${String(Sim.MITING_MALIYET).replace('.', ',')} mn)</button>` : `<div class="baslik2">Bu ile yatırım</div>
+        ${Object.entries(V.PROJE).filter(([, P]) => !P.il || P.il === ad).map(([k, P]) => { const erken = yil < P.yil, var_ = pr.some(p => p.tip === k) || (P.tekil && S.projeler.some(p => p.tip === k)); return `<div class="proje"><span class="em">${P.ikon}</span><span class="ad"><b>${P.ad}</b><span class="kucuk">${String(P.maliyet).replace('.', ',')} milyar · ${P.sure} ay</span></span><button data-kur="${k}" ${erken || var_ ? 'disabled' : ''}>${erken ? P.yil : var_ ? 'Var' : 'Kur'}</button></div>`; }).join('')}`}`];
     }
   };
   const PANEL_KUR = {
@@ -394,7 +419,18 @@
         Sim.etkiUygula(et); hud(); ciz(); bildirim(POL[k].ad + ': ' + b.textContent);
       });
     },
-    yatirim(el) {
+    yatirim(el, v, ciz) {
+      el.querySelectorAll('[data-tes]').forEach(b => b.onclick = () => {
+        const r = Sim.teskilatKur(b.dataset.tes); if (r === 'var') return; if (r === 'para') return bildirim('Kasada yeterli para yok');
+        bildirim(`🏢 ${V.BOLGE[b.dataset.tes].ad} teşkilatı kuruldu`); haberEkle(`${V.BOLGE[b.dataset.tes].ad} il başkanlıkları açıldı`); haritaRenk(); hud(); ciz(); Sim.kaydet();
+      });
+      el.querySelectorAll('[data-mit]').forEach(b => b.onclick = () => { miting(b.dataset.mit); ciz(); });
+      const ms = el.querySelector('#mitingSec');
+      if (ms) ms.onclick = () => {
+        panelKapat(); ilSecimi = 'miting';
+        const ban = document.createElement('div'); ban.className = 'ilsec'; ban.id = 'ilsec'; ban.innerHTML = `📣 Miting için il seç <button>Vazgeç</button>`;
+        document.body.appendChild(ban); ban.querySelector('button').onclick = () => { ilSecimi = null; ban.remove(); };
+      };
       el.querySelectorAll('[data-proje]').forEach(b => b.onclick = () => {
         const k = b.dataset.proje, P = V.PROJE[k];
         if (P.il) return projeKur(k, P.il);
@@ -410,6 +446,7 @@
     il(el, ad, ciz) {
       Harita.seciliYap(ad);
       el.querySelectorAll('[data-kur]').forEach(b => b.onclick = () => { if (projeKur(b.dataset.kur, ad)) ciz(); });
+      const m = el.querySelector('[data-mitil]'); if (m) m.onclick = () => { miting(ad); ciz(); };
     }
   };
   function projeKur(tip, il) {
@@ -418,11 +455,19 @@
     Harita.projeleriCiz(S.projeler); haritaRenk(); bildirim(`${P.ikon} ${P.il || il}: ${P.ad} için temel atıldı`); haberEkle(`${P.il || il}'de ${P.ad} için temel atıldı`);
     Sim.kaydet(); return true;
   }
+  function miting(il) {
+    const r = Sim.mitingYap(il);
+    if (r === 'yorgun') return bildirim(`Sonraki miting için ${7 - (S.gun - S.mitingSon)} gün bekle`);
+    if (r === 'para') return bildirim('Kasada yeterli para yok');
+    panelKapat(); Harita.mitingCiz(S.miting); haritaRenk(); hud(); Sim.kaydet();
+    bildirim(`📣 ${il} mitingi: meydan doldu`); haberEkle(`${S.ad}, ${il}'da on binlere seslendi`);
+    Harita.odakla(il, 40);
+  }
   function ilSecildi(ad) {
     if (modal) return;
     if (ilSecimi) {
       if (!ad) return; const k = ilSecimi; ilSecimi = null; const b = document.getElementById('ilsec'); if (b) b.remove();
-      projeKur(k, ad); return;
+      if (k === 'miting') miting(ad); else projeKur(k, ad); return;
     }
     if (!ad) { if (panel && panel.dataset.ad === 'il') panelKapat(); return; }
     panelAc('il', ad);

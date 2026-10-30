@@ -28,6 +28,26 @@ window.VERI = (function () {
     ab: { ad: 'Avrupa Birliği', ikon: '🇪🇺', v: 50 }, abd: { ad: 'ABD', ikon: '🇺🇸', v: 60 },
     rus: { ad: 'Rusya', ikon: '🇷🇺', v: 50 }, ort: { ad: 'Orta Doğu', ikon: '🕋', v: 55 }
   };
+
+  // 7 coğrafi bölge (teşkilat bölge bölge kurulur)
+  const BOLGE = {
+    marmara: { ad: 'Marmara', iller: ['Edirne', 'Kırklareli', 'Tekirdağ', 'İstanbul', 'Kocaeli', 'Yalova', 'Sakarya', 'Bilecik', 'Bursa', 'Balıkesir', 'Çanakkale'] },
+    ege: { ad: 'Ege', iller: ['İzmir', 'Manisa', 'Aydın', 'Denizli', 'Kütahya', 'Afyon', 'Uşak', 'Muğla'] },
+    akdeniz: { ad: 'Akdeniz', iller: ['Antalya', 'Isparta', 'Burdur', 'Adana', 'Mersin', 'Hatay', 'Osmaniye', 'Kahramanmaraş'] },
+    ic: { ad: 'İç Anadolu', iller: ['Ankara', 'Konya', 'Kayseri', 'Eskişehir', 'Sivas', 'Kırıkkale', 'Aksaray', 'Karaman', 'Kırşehir', 'Niğde', 'Nevşehir', 'Yozgat', 'Çankırı'] },
+    karadeniz: { ad: 'Karadeniz', iller: ['Zonguldak', 'Bartın', 'Karabük', 'Düzce', 'Bolu', 'Kastamonu', 'Sinop', 'Samsun', 'Amasya', 'Tokat', 'Çorum', 'Ordu', 'Giresun', 'Trabzon', 'Rize', 'Artvin', 'Gümüşhane', 'Bayburt'] },
+    dogu: { ad: 'Doğu Anadolu', iller: ['Erzurum', 'Erzincan', 'Kars', 'Ardahan', 'Iğdır', 'Ağrı', 'Van', 'Muş', 'Bitlis', 'Bingöl', 'Tunceli', 'Elazığ', 'Malatya', 'Hakkâri'] },
+    gdogu: { ad: 'Güneydoğu', iller: ['Gaziantep', 'Kilis', 'Adıyaman', 'Şanlıurfa', 'Diyarbakır', 'Mardin', 'Batman', 'Siirt', 'Şırnak'] }
+  };
+  // kuruluş günü: yeni partiye oy oranı (kesim içinde)
+  const VSTART = { muh: 0.5, sag: 0.08, mil: 0.03, laik: 0.02, kurt: 0.1 };
+  // muhalefet dönemi: ekonomiyi koalisyon hükümeti yönetir (yaklaşık gerçek değerler)
+  const EKO_GECMIS = [
+    ['2001-08-14', { enf: 57, buyume: -7, kur: 1.38, issizlik: 8.4, faiz: 60, borc: 78, acik: 16, guven: 22, kisiBasi: 2900 }],
+    ['2001-12-31', { enf: 68.5, buyume: -8.5, kur: 1.44, issizlik: 10.4, faiz: 59, borc: 78, acik: 16, guven: 28, kisiBasi: 2950 }],
+    ['2002-06-30', { enf: 42.6, buyume: 5, kur: 1.56, issizlik: 10.5, faiz: 48, borc: 76, acik: 13, guven: 32, kisiBasi: 3300 }],
+    ['2002-11-03', { enf: 31.8, buyume: 6.2, kur: 1.60, issizlik: 10.3, faiz: 44, borc: 74, acik: 11.5, guven: 40, kisiBasi: 3600 }]
+  ];
   // Kasım 2002 başlangıç ekonomisi
   const EKO = { enf: 31.8, faiz: 44, kur: 1.60, buyume: 6.2, issizlik: 10.3, borc: 74, acik: 11.5, guven: 40, kisiBasi: 3600, nufus: 66.4 };
   // yıl sonu gerçekleşmeleri (karşılaştırma için)
@@ -61,8 +81,91 @@ window.VERI = (function () {
   /* Olay kartları. t = tarih (YYYY-AA-GG). etki: k (kesim, puan), i (kurum), d (dış), e (ekonomi şoku), b (bayrak)
      e: guven, enf (şok, puan), kur (% sıçrama), buyume (şok), acik (bir yıllık ek açık), borc (tek sefer), h/v/imf/mb kalıcı politika */
   const OLAY = [
-    { id: 'yasak', t: '2002-11-16', tur: 'karar', baslik: 'Siyasi yasak', yer: 'Ankara',
-      metin: 'Partin seçimi açık farkla kazandı ama sen Meclis\'e giremedin: eski bir siyasi mahkûmiyet nedeniyle milletvekili adayı olamamıştın. Hükümeti kim kuracak?',
+    { id: 'kurulus', t: '2001-08-14', tur: 'karar', baslik: 'Parti kuruldu', yer: 'Ankara',
+      metin: 'Bugün Ankara\'da partini kurdun. Kurucular arasında Milli Görüş geleneğinden ayrılan "yenilikçiler" de var, merkez sağdan gelen isimler de. Ülke Şubat 2001 krizinin enkazında: enflasyon %50\'nin üstünde, yüz binlerce kişi işini kaybetti. Partinin kimliği ne olacak?',
+      tarih: 'AK Parti kendini "muhafazakâr demokrat" olarak tanımladı ve Milli Görüş\'ten ayrıldığını açıkladı. Merkez sağ partilerden çok sayıda isim de katıldı.',
+      s: [
+        { ad: 'Muhafazakâr demokrat: merkeze açıl', etki: { k: { sag: 4, laik: 1, muh: -1 }, i: { ordu: 2, yargi: 2, medya: 3 } }, tarih: true },
+        { ad: 'Milli Görüş çizgisini sürdür', etki: { k: { muh: 4, sag: -3, laik: -3 }, i: { ordu: -6, yargi: -6, medya: -3 }, b: { milliGorus: 1 } } },
+        { ad: 'Ekonomi odaklı merkez sağ parti', etki: { k: { sag: 5, muh: -3, mil: 1 }, i: { isd: 5 } } }
+      ] },
+    { id: '11eylul', t: '2001-09-12', tur: 'karar', baslik: '11 Eylül', yer: 'Ankara',
+      metin: 'New York ve Washington\'da kaçırılan uçaklarla düzenlenen saldırılarda yaklaşık 3.000 kişi öldü. ABD, El Kaide\'yi sorumlu tutuyor ve Afganistan\'a müdahaleye hazırlanıyor. Dünya basını yeni partinin tavrını merak ediyor.',
+      tarih: 'Türkiye\'de iktidar ve muhalefet partileri saldırıyı kınadı. Türkiye NATO müttefiki olarak ABD\'ye destek verdi.',
+      s: [
+        { ad: 'Saldırıyı kına, terörün dini olmadığını vurgula', etki: { k: { laik: 1, sag: 1 }, d: { abd: 5, ab: 2 }, i: { medya: 2 } }, tarih: true },
+        { ad: 'Kına ama ABD\'nin bölge politikalarını eleştir', etki: { k: { muh: 2, mil: 1 }, d: { abd: -6, ort: 4 } } },
+        { ad: 'Yorum yapma, iç meselelere odaklan', etki: { k: { sag: 1 }, i: { medya: -2 } } }
+      ] },
+    { id: 'anayasa2001', t: '2001-10-03', tur: 'karar', baslik: '34 maddelik anayasa değişikliği', yer: 'TBMM',
+      metin: 'Meclis\'te AB yolunda büyük bir anayasa paketi oylanıyor: düşünce özgürlüğü genişliyor, idam cezası sınırlanıyor, MGK\'da sivil üye sayısı artıyor.',
+      tarih: 'Paket 3 Ekim 2001\'de geniş bir çoğunlukla kabul edildi.',
+      s: [
+        { ad: 'Destekle', etki: { k: { laik: 1, kurt: 1 }, d: { ab: 4 } } },
+        { ad: 'Destekle ama "yetersiz" de, daha fazlasını iste', etki: { k: { kurt: 2, muh: 1 }, d: { ab: 3 }, i: { ordu: -2 } } },
+        { ad: 'Karşı çık', etki: { k: { mil: 2, laik: -1 }, d: { ab: -4 } } }
+      ] },
+    { id: 'dervis', t: '2001-12-10', tur: 'karar', baslik: 'Derviş programı', yer: 'Ankara',
+      metin: 'Ekonomiyi Dünya Bankası\'ndan gelen Kemal Derviş\'in programı yönetiyor: bankalarda temizlik, dalgalı kur, IMF kredileri. Esnaf kepenk kapatıyor, işsizlik artıyor. Muhalefet lideri olarak tavrın ne?',
+      tarih: 'AK Parti programın sosyal maliyetini eleştirdi ama iktidara gelirse IMF ile çalışmayı sürdüreceğini açıkladı.',
+      s: [
+        { ad: 'Sosyal maliyeti eleştir, IMF ile çalışılacağını söyle', etki: { k: { sag: 2 }, i: { isd: 5 } }, tarih: true },
+        { ad: 'IMF\'ye karşı çık: "ekonomik bağımsızlık"', etki: { k: { muh: 2, mil: 2, sag: 1 }, i: { isd: -8 } } },
+        { ad: 'Programı açıkça destekle', etki: { k: { sag: -3, muh: -1 }, i: { isd: 8 } } }
+      ] },
+    { id: 'aday', t: '2002-03-12', tur: 'karar', baslik: 'Aday listeleri', yer: 'Ankara',
+      metin: 'Seçim olağan takvimde 2004\'te ama erken seçim konuşuluyor. Milletvekili adaylarını nasıl belirleyeceksin?',
+      tarih: 'AK Parti teşkilatta temayül yoklaması yaptı; son sözü genel merkez söyledi.',
+      s: [
+        { ad: 'Temayül yoklaması, son söz genel merkezde', etki: { k: { sag: 1, muh: 1 }, e: { kasa: 0.4 } }, tarih: true },
+        { ad: 'Tam ön seçim: üyeler seçsin', etki: { k: { muh: 1, laik: 1 }, i: { medya: 4 } } },
+        { ad: 'Tanınmış isimleri listeye al', etki: { k: { sag: 2, muh: -1 }, i: { medya: 3 }, e: { kasa: 0.6 } } }
+      ] },
+    { id: 'ecevit', t: '2002-05-06', tur: 'karar', baslik: 'Başbakan hastanede', yer: 'Ankara',
+      metin: 'Başbakan Bülent Ecevit 4 Mayıs\'ta rahatsızlanarak hastaneye kaldırıldı. 77 yaşındaki başbakanın görevi sürdürüp sürdüremeyeceği tartışılıyor; piyasalar gergin.',
+      tarih: 'Tartışmalar DSP\'ye sıçradı. Temmuz\'da Hüsamettin Özkan ve İsmail Cem başta olmak üzere çok sayıda milletvekili istifa etti.',
+      s: [
+        { ad: 'Geçmiş olsun de, siyasi tartışmaya girme', etki: { k: { laik: 1, sag: 1 }, i: { medya: 2 } } },
+        { ad: 'Erken seçim çağrısı yap', etki: { k: { sag: 2, muh: 1, laik: -1 } } },
+        { ad: '"İktidara hazırız" mesajı ver, ekonomi ekibini tanıt', etki: { k: { sag: 1 }, i: { isd: 5 } } }
+      ] },
+    { id: 'gencparti', t: '2002-07-15', tur: 'karar', baslik: 'Genç Parti yükseliyor', yer: 'İstanbul',
+      metin: 'İş insanı Cem Uzan\'ın kurduğu Genç Parti, güçlü televizyon kanalları ve büyük vaatlerle meydanları dolduruyor. Seçmenin bir kısmı yeni yüzlere yöneliyor.',
+      tarih: 'Genç Parti 2002 seçiminde %7,2 oy aldı ve barajı geçemedi.',
+      s: [
+        { ad: 'Görmezden gel, kendi kampanyana bak', etki: { k: { muh: 1 } } },
+        { ad: 'Vaatlerin gerçekçi olmadığını anlat', etki: { k: { sag: 2 }, i: { isd: 3 } } },
+        { ad: 'Sen de büyük vaatler ver', etki: { k: { sag: 3, mil: 1 }, i: { isd: -5 } } }
+      ] },
+    { id: 'erkensecim', t: '2002-07-31', tur: 'haber', baslik: 'Erken seçim: 3 Kasım',
+      metin: 'Koalisyondaki çözülmenin ardından Meclis 3 Kasım 2002\'de erken seçime karar verdi (449 kabul). Seçime üç ay var. Teşkilatını ve mitinglerini hızlandırmanın tam zamanı.', etki: { b: { secimTarihi: 1 } } },
+    { id: 'uyum3', t: '2002-08-02', tur: 'karar', baslik: 'AB uyum paketi', yer: 'TBMM',
+      metin: 'Meclis\'te büyük bir AB uyum paketi var: barış zamanında idam cezası kaldırılıyor, Kürtçe yayın ve kursların önü açılıyor. MHP karşı. Oylamada tavrın ne?',
+      tarih: 'Paket 3 Ağustos 2002\'de kabul edildi; koalisyon ortağı MHP karşı oy verdi.',
+      s: [
+        { ad: 'Destekle', etki: { k: { kurt: 4, laik: 1, mil: -3 }, d: { ab: 6 }, i: { ordu: -2 } } },
+        { ad: 'Karşı çık', etki: { k: { mil: 3, kurt: -3 }, d: { ab: -6 } } },
+        { ad: 'Çekimser kal', etki: { k: { kurt: 1 }, d: { ab: 1 } } }
+      ] },
+    { id: 'ysk', t: '2002-09-20', tur: 'karar', baslik: 'Adaylık engeli', yer: 'Ankara',
+      metin: 'Yüksek Seçim Kurulu, geçmişteki siyasi mahkûmiyetin nedeniyle milletvekili adaylığını kabul etmedi. Partin seçime genel başkanı aday olmadan girecek.',
+      tarih: 'AK Parti Genel Başkanı da Eylül 2002\'de aynı nedenle aday gösterilemedi. Kampanyayı aday olmadan sürdürdü; yasak kampanyanın ana temalarından biri oldu.',
+      s: [
+        { ad: 'Yaşadığın haksızlığı meydanlarda anlat', etki: { k: { muh: 3, sag: 2 }, i: { yargi: -3 } }, tarih: true },
+        { ad: 'Karara saygı göster, ekibini öne çıkar', etki: { k: { laik: 2, sag: 1 }, i: { yargi: 4, medya: 2 } } },
+        { ad: 'Seçimi boykot etmekle tehdit et', etki: { k: { muh: 1, sag: -4, laik: -2 }, i: { yargi: -6 } } }
+      ] },
+    { id: 'beyanname', t: '2002-10-01', tur: 'karar', baslik: 'Seçim beyannamesi', yer: 'Ankara',
+      metin: 'Son ay. Kampanyanın ana mesajı ne olsun?',
+      tarih: 'AK Parti kampanyada "yoksulluk, yolsuzluk ve yasaklarla mücadele" vurgusunu öne çıkardı.',
+      s: [
+        { ad: 'Yoksulluk, yolsuzluk, yasaklar', etki: { k: { sag: 3, muh: 1, kurt: 1 } }, tarih: true },
+        { ad: 'Ekonomik istikrar ve AB üyeliği', etki: { k: { sag: 1, laik: 2 }, i: { isd: 4 }, d: { ab: 3 } } },
+        { ad: 'Din ve vicdan özgürlüğü', etki: { k: { muh: 4, laik: -5 }, i: { ordu: -4, yargi: -3 } } }
+      ] },
+    { id: 'secim2002', t: '2002-11-03', tur: 'secim', secim: 'genel', baslik: 'Genel seçim', gercek: { akp: 34.28, chp: 19.39, mhp: 8.36, dyp: 9.54, gp: 7.25, sandalye: 363 } },
+    { id: 'yasak', t: '2002-11-16', tur: 'karar', baslik: 'Hükümeti kim kuracak?', yer: 'Ankara', kosul: s => s.iktidar,
+      metin: 'Partin seçimden birinci çıktı ama sen Meclis\'te değilsin: YSK adaylığını kabul etmemişti. Cumhurbaşkanı Sezer hükümeti kurma görevini kime verecek?',
       tarih: 'Gerçekte AK Parti Genel Başkanı da aynı yasak nedeniyle aday olamadı. 58. hükümeti Abdullah Gül kurdu (18 Kasım 2002). CHP\'nin desteğiyle anayasa değiştirildi; yasak kalktı.',
       s: [
         { ad: 'Abdullah Gül başbakan olsun, yasak için CHP ile uzlaş', etki: { k: { laik: 1, sag: 1 }, i: { medya: 3 }, e: { guven: 3 } }, tarih: true, sonuc: 'Gül hükümeti kuruldu. CHP, yasağı kaldıracak anayasa değişikliğine destek verdi.' },
@@ -229,6 +332,7 @@ window.VERI = (function () {
   ];
   // olay olmayan günlere haber akışı
   const HABER = [
+    ['2001-10-07', 'ABD ve İngiltere Afganistan\'a hava saldırılarına başladı'], ['2002-01-01', 'Euro banknotları tedavüle girdi'], ['2002-06-29', 'Millî Takım Dünya Kupası\'nı üçüncü bitirdi'], ['2002-07-22', 'İsmail Cem, Yeni Türkiye Partisi\'ni kurdu'],
     ['2002-11-20', 'Borsa seçim sonrası rekor yükselişle haftayı kapattı'], ['2003-03-20', 'ABD öncülüğündeki koalisyon Irak\'a girdi'],
     ['2003-08-12', 'Bölünmüş yol seferberliği başladı'], ['2004-05-01', 'AB 10 yeni üyeyle genişledi; Kıbrıs Rum Kesimi de üye oldu'],
     ['2004-06-29', 'NATO Zirvesi İstanbul\'da toplandı'], ['2005-03-06', 'Kadınlar Günü yürüyüşüne müdahale AB\'den tepki aldı'],
@@ -237,5 +341,5 @@ window.VERI = (function () {
     ['2007-04-14', 'Tandoğan\'da Cumhuriyet Mitingi: yüz binler toplandı'], ['2007-08-28', 'Cumhurbaşkanı Meclis\'te seçildi']
   ];
   const AYLAR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
-  return { PARTI, KESIM, DEHAP_IL, KURUM, DIS, EKO, GERCEK, ULKE_AD, ULKE_ETIKET, DENIZ, PROJE, OLAY, HABER, AYLAR, BASLANGIC: '2002-11-03' };
+  return { BOLGE, VSTART, EKO_GECMIS, PARTI, KESIM, DEHAP_IL, KURUM, DIS, EKO, GERCEK, ULKE_AD, ULKE_ETIKET, DENIZ, PROJE, OLAY, HABER, AYLAR, BASLANGIC: '2001-08-14' };
 })();

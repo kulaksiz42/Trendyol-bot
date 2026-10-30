@@ -113,7 +113,9 @@ button{font:inherit;color:inherit;cursor:pointer}
 .meclis{display:block;margin:6px auto 0;max-width:340px;width:100%}
 .secim-alt{position:fixed;left:0;right:0;bottom:0;z-index:36;padding:0 12px calc(12px + env(safe-area-inset-bottom));max-width:560px;margin:0 auto}
 /* açılış */
-.acilis{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at center,rgba(11,26,43,.55),rgba(5,12,20,.92))}
+.acilis{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at center,rgba(11,26,43,.82),rgba(5,12,20,.95));backdrop-filter:blur(3px)}
+.tes{display:grid;grid-template-columns:1fr 1fr;gap:6px}.tes button{display:flex;flex-direction:column;align-items:flex-start;padding:9px 10px;border-radius:11px;border:1px solid var(--cizgi);background:var(--lac);text-align:left}.tes button b{font-size:14px}.tes button span{font-size:11.5px;color:var(--soluk)}.tes button.var{border-color:rgba(62,207,142,.5);background:rgba(62,207,142,.1)}.tes button.var span{color:var(--yesil)}
+body.basta .etiketler{display:none}
 .acilis .k{width:min(420px,100%);text-align:center}
 .armasi{width:74px;height:74px;margin:0 auto 10px;display:block}
 .acilis h1{margin:0;font:800 46px/1 var(--fb);letter-spacing:.04em}

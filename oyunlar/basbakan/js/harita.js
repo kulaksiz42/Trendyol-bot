@@ -212,6 +212,33 @@ window.Harita = (function () {
     Object.keys(projeler).forEach(k => { if (!var_.has(k)) { projeKat.remove(projeler[k]); delete projeler[k]; } });
   }
 
+  /* ---------- mitingler: sahne, kalabalık, bayraklar ---------- */
+  const mitingler = {};
+  const INSAN = new THREE.CylinderGeometry(0.07, 0.09, 0.32, 5); INSAN.translate(0, 0.16, 0);
+  const KALABALIK_RENK = ['#f2f2f2', '#e30a17', '#f2a516', '#2b4c7e', '#3b3b3b', '#c9b48a'].map(c => new THREE.Color(c));
+  function mitingModel(guc) {
+    const g = new THREE.Group(), n = Math.round(60 + guc * 25);
+    const im = new THREE.InstancedMesh(INSAN, new THREE.MeshStandardMaterial({ roughness: 0.8 }), n), m = new THREE.Matrix4();
+    for (let i = 0; i < n; i++) {
+      const r = 0.5 + Math.sqrt(Math.random()) * (1.1 + guc * 0.12), a = -Math.PI * 0.15 + Math.random() * Math.PI * 1.3;
+      m.makeTranslation(Math.cos(a) * r, 0, Math.sin(a) * r + 0.2); im.setMatrixAt(i, m); im.setColorAt(i, KALABALIK_RENK[(Math.random() * KALABALIK_RENK.length) | 0]);
+    }
+    im.castShadow = true; g.add(im);
+    g.add(kutu(1.4, 0.35, 0.5, MAT.beyaz, 0, 0, -0.55)); g.add(kutu(1.4, 0.5, 0.06, new THREE.MeshStandardMaterial({ color: '#f2a516', emissive: '#6b4300' }), 0, 0.35, -0.78));
+    [-0.9, 0.9].forEach(x => { g.add(kutu(0.04, 1.2, 0.04, MAT.gri, x, 0, -0.6)); g.add(kutu(0.4, 0.26, 0.02, MAT.kirmizi, x + 0.2, 0.92, -0.6)); });
+    return g;
+  }
+  function mitingCiz(liste) {
+    Object.keys(mitingler).forEach(il => { if (!liste[il] || liste[il] < 0.6) { projeKat.remove(mitingler[il]); delete mitingler[il]; } });
+    Object.entries(liste).forEach(([il, guc]) => {
+      if (guc < 0.6 || !iller[il]) return;
+      const eski = mitingler[il]; if (eski && Math.abs(eski.userData.guc - guc) < 1.5) return;
+      if (eski) projeKat.remove(eski);
+      const g = new THREE.Group(), model = mitingModel(guc); model.position.copy(iller[il].merkez).add(new THREE.Vector3(0.6, 0, 0.8));
+      g.add(model); g.userData = { il, model, guc }; projeKat.add(g); mitingler[il] = g;
+    });
+  }
+
   /* ---------- dokunma ---------- */
   function dokunma(el) {
     let bas = null;
@@ -252,5 +279,5 @@ window.Harita = (function () {
     etiketGuncelle();
   }
 
-  return { kur, ilAyarla, iller, seciliYap, odakla, genel, projeleriCiz, boyut };
+  return { kur, ilAyarla, iller, seciliYap, odakla, genel, projeleriCiz, mitingCiz, boyut };
 })();
