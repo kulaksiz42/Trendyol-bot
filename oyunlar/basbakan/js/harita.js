@@ -176,6 +176,13 @@ window.Harita = (function () {
     marmaray() { const g = new THREE.Group(); g.add(kutu(0.7, 0.9, 0.7, MAT.cam)); g.add(kutu(0.9, 0.12, 0.9, MAT.ray, 0, 0.9, 0)); return g; },
     yht() { const g = new THREE.Group(); g.add(kutu(1.4, 0.35, 0.35, MAT.beyaz)); g.add(kutu(1.4, 0.06, 0.37, MAT.kirmizi, 0, 0.18, 0)); return g; },
     yol() { const g = new THREE.Group(); g.add(kutu(0.6, 0.3, 0.6, MAT.yol)); return g; },
+    okul() { return MODEL.univ(); }, terminal() { return MODEL.havalimani(); }, esenboga() { return MODEL.havalimani(); }, antalya() { return MODEL.havalimani(); },
+    metrobus() { const g = new THREE.Group(); g.add(kutu(2.4, 0.05, 0.4, MAT.asfalt)); g.add(kutu(0.9, 0.35, 0.3, MAT.kirmizi, 0.3, 0.05, 0)); return g; },
+    kartal() { return MODEL.marmaray(); }, izban() { return MODEL.yht(); }, yhtkonya() { return MODEL.yht(); }, sahilyolu() { return MODEL.yol(); },
+    osb() { const g = new THREE.Group(); [[-0.5, 0.6], [0.4, 0.8]].forEach(([x, h]) => g.add(kutu(0.8, h, 0.7, MAT.gri, x, 0, 0))); g.add(kutu(0.15, 1.6, 0.15, MAT.tugla, 0.75, 0, -0.2)); return g; },
+    gap() { const g = new THREE.Group(); g.add(kutu(2.6, 0.06, 0.25, MAT.cam)); g.add(kutu(0.25, 0.06, 1.8, MAT.cam, 0.8, 0, 0)); return g; },
+    ilisu() { const g = new THREE.Group(); g.add(kutu(2.2, 0.9, 0.4, MAT.gri)); g.add(kutu(2.2, 0.05, 1.4, MAT.cam, 0, 0, -0.9)); return g; },
+    universiade() { const g = new THREE.Group(); g.add(kutu(0.4, 1.8, 0.4, MAT.beyaz)); g.add(kutu(0.3, 0.08, 1.6, MAT.beyaz, 0, 1.4, 0.7)); return g; },
     insaat() {
       const g = new THREE.Group(); g.add(kutu(0.12, 2.4, 0.12, MAT.insaat)); g.add(kutu(1.8, 0.1, 0.1, MAT.insaat, 0.6, 2.4, 0));
       const ip = kutu(0.03, 0.8, 0.03, MAT.gri, 1.3, 1.6, 0); g.add(ip); g.add(kutu(0.9, 0.6, 0.9, MAT.gri, 0.3, 0, 0.4)); return g;
@@ -204,7 +211,7 @@ window.Harita = (function () {
       const yerel = il.merkez.clone().add(off);
       const model = p.bitti ? MODEL[p.tip]() : MODEL.insaat(); model.position.copy(yerel); model.userData.il = p.il; g.add(model);
       if (p.bitti && P.bag) enYakin(p.il, 2).forEach(k => g.add(hat(il.merkez, iller[k].merkez, MAT.yol, 0.4, 0.18)));
-      if (p.bitti && p.tip === 'yht') g.add(hat(il.merkez, iller[P.bagIl].merkez, MAT.ray, 3, 0.28));
+      if (p.bitti && P.bagIl && iller[P.bagIl]) g.add(hat(il.merkez, iller[P.bagIl].merkez, p.tip === 'sahilyolu' ? MAT.yol : MAT.ray, p.tip === 'sahilyolu' ? 0.5 : 3, 0.28));
       if (p.bitti && p.tip === 'marmaray') g.add(hat(dunya(28.9, 41.0), dunya(29.06, 41.0), MAT.ray, -0.6, 0.25));
       g.userData = { il: p.il, model };
       projeKat.add(g); projeler[anahtar] = g;

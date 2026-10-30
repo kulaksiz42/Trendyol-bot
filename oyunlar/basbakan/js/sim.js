@@ -65,6 +65,11 @@ window.Sim = (function () {
     p.akp += (S.ilEtki[il.ad] || 0) + (S.miting[il.ad] || 0);
     // muhalefette teşkilatı olmayan bölgede oy kaybı
     if (!S.iktidar && !S.teskilat[BOLGE_IL[il.ad]]) { const d = p.akp * 0.22; p.akp -= d; p.dig += d * 0.5; p.dyp += d * 0.3; p.mhp += d * 0.2; }
+    // ilin tavanı: AK Parti'nin gerçekte ulaştığı zirvenin biraz üstü. Üstü zorlaşır.
+    if (V.AKP_ZIRVE && V.AKP_ZIRVE[il.ad]) {
+      const tavan = V.AKP_ZIRVE[il.ad] + 5;
+      if (p.akp > tavan) { const f = (p.akp - tavan) * 0.75, dig = PARTILER.filter(k => k !== 'akp'), td = dig.reduce((a, k) => a + Math.max(0.1, il.taban[k]), 0); p.akp -= f; dig.forEach(k => p[k] += f * Math.max(0.1, il.taban[k]) / td); }
+    }
     PARTILER.forEach(k => p[k] = Math.max(0.3, p[k]));
     const t = PARTILER.reduce((a, k) => a + p[k], 0); PARTILER.forEach(k => p[k] = p[k] / t * 100);
     return p;
@@ -137,7 +142,7 @@ window.Sim = (function () {
     if (!S.iktidar) { muhalefetKamuoyu(); Object.keys(S.miting).forEach(k => { S.miting[k] *= 0.82; if (S.miting[k] < 0.1) delete S.miting[k]; }); const a = anketHesap(); S.anket = a.ulusal.akp; S.kasa += 0.18 + S.anket * 0.012; return a; }
     Object.entries(S.kesim).forEach(([k, s]) => {
       const K = V.KESIM[k];
-      const balayi = 0.12 * Math.max(0, 1 - (yil - 2002.85) / 3.5) * K.duy / 4;
+      const balayi = 0.08 * Math.max(0, 1 - (yil - 2002.85) / 3.5) * K.duy / 4;
       const hedef = Math.max(0.01, Math.min(0.97, K.v0 + s.m / 100 + K.duy * r / 100 + balayi - yip));
       s.v += (hedef - s.v) * 0.1; s.m *= 0.985;
     });
@@ -175,7 +180,7 @@ window.Sim = (function () {
   function iktidaraGec() {
     S.iktidar = true; S.iktidarGun = S.gun;
     S.eko = Object.assign({ kurDeg: 0 }, V.EKO, { nufus: S.eko.nufus });
-    Object.entries(S.kesim).forEach(([k, s]) => { s.m += (s.v - V.KESIM[k].v0) * 100 * 0.3; });
+    Object.entries(S.kesim).forEach(([k, s]) => { s.m += (s.v - V.KESIM[k].v0) * 100 * 0.2; });
   }
 
   /* ---------- projeler ---------- */
@@ -184,19 +189,24 @@ window.Sim = (function () {
     const P = V.PROJE[tip], yil = Sim_yil();
     if (yil < P.yil) return 'erken';
     if (P.tekil && S.projeler.some(p => p.tip === tip)) return 'var';
+    if (P.iller && !P.iller.includes(il)) return 'yer';
     if (S.projeler.some(p => p.tip === tip && p.il === il)) return 'ilde';
     S.odenek -= P.maliyet;
     S.projeler.push({ tip, il: P.il || il, bas: S.gun, bitis: S.gun + Math.round(P.sure * 30.4), bitti: false });
-    S.ilEtki[P.il || il] = (S.ilEtki[P.il || il] || 0) + P.yerel * 0.3;
+    S.ilEtki[P.il || il] = (S.ilEtki[P.il || il] || 0) + P.yerel * 0.15 / (1 + projeSay(P.il || il) * 0.7);
     return 'tamam';
   }
+  function projeSay(il) { return S.projeler.filter(p => p.il === il).length; }
   function projeAy() {
     const biten = [];
     S.projeler.forEach(p => {
       if (!p.bitti && S.gun >= p.bitis) {
         p.bitti = true; biten.push(p); const P = V.PROJE[p.tip];
-        S.ilEtki[p.il] = (S.ilEtki[p.il] || 0) + P.yerel;
-        Object.entries(P.etki).forEach(([k, v]) => S.kesim[k].m += v);
+        // aynı ilde her yeni yatırımın etkisi azalır
+        const azal = 1 / (1 + (projeSay(p.il) - 1) * 0.7);
+        S.ilEtki[p.il] = (S.ilEtki[p.il] || 0) + P.yerel * azal;
+        (P.bolgeIller || []).forEach(il => { if (il !== p.il) S.ilEtki[il] = (S.ilEtki[il] || 0) + P.yerel * 0.5; });
+        Object.entries(P.etki).forEach(([k, v]) => S.kesim[k].m += v * azal);
       }
     });
     return biten;
@@ -205,7 +215,7 @@ window.Sim = (function () {
   /* ---------- kararlar ---------- */
   function etkiUygula(et) {
     if (!et) return;
-    Object.entries(et.k || {}).forEach(([k, v]) => S.kesim[k].m += v);
+    Object.entries(et.k || {}).forEach(([k, v]) => S.kesim[k].m += v * (V.KARAR_CARPAN || 1));
     Object.entries(et.i || {}).forEach(([k, v]) => S.kurum[k] = clamp(S.kurum[k] + v));
     Object.entries(et.d || {}).forEach(([k, v]) => S.dis[k] = clamp(S.dis[k] + v));
     Object.entries(et.b || {}).forEach(([k, v]) => S.b[k] = typeof v === 'string' ? v : (S.b[k] || 0) + v);

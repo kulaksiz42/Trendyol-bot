@@ -136,6 +136,18 @@ body.basta .etiketler{display:none}
 .log{padding:7px 0;border-bottom:1px solid var(--cizgi);font-size:13px}.log small{color:var(--soluk);margin-right:6px}
 .sonra{float:right;margin:-4px 0 6px 10px;padding:6px 10px;border-radius:9px;border:1px solid #d9cfb9;background:transparent;color:#5a4d33;font-size:12.5px;font-weight:700}
 .zorunlu{display:inline-block;margin-bottom:6px;padding:3px 8px;border-radius:6px;background:#fde3e3;color:#b42323;font-size:12px;font-weight:700}
+.kisiler{display:flex;gap:10px;overflow-x:auto;padding:12px 18px 2px;scrollbar-width:none}
+.kisi{flex:none;display:flex;align-items:center;gap:8px;max-width:240px}
+.kisi .yuz{width:46px;height:46px;border-radius:50%;object-fit:cover;flex:none;border:2px solid #d9cfb9;background:#c9bfa8;display:flex;align-items:center;justify-content:center;font:800 15px var(--f);color:#fff}
+.kisi b{display:block;font-size:13px;line-height:1.2}.kisi small{display:block;font-size:11px;color:#6b6250;line-height:1.25}
+.panel .kisi .yuz{border-color:var(--cizgi);background:#33465a}.panel .kisi small{color:var(--soluk)}
+.yuzler{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0}
+details.nedir{margin:4px 0 10px;padding:9px 12px;border-radius:10px;background:#eef3f8;border:1px solid #cfdbe8;font-size:13.5px;color:#2a3a4c}
+details.nedir summary{cursor:pointer;font-weight:700;color:#2a5a8a;list-style:none}details.nedir summary::-webkit-details-marker{display:none}
+details.nedir p{margin:6px 0 0;font-size:13.5px}
+.tavan{font-size:12px;color:var(--soluk);margin:4px 0}.tavan b{color:var(--metin)}
+.ilsec-liste{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}.ilsec-liste button{padding:6px 9px;border-radius:8px;border:1px solid var(--cizgi);background:var(--lac2);font-size:12px;font-weight:600}
+.foto-kaynak{font-size:10.5px;color:var(--soluk);margin-top:10px}.foto-kaynak a{color:var(--soluk)}
 .grafik{width:100%;height:46px;display:block}
 </style>
 </head>
@@ -145,6 +157,7 @@ body.basta .etiketler{display:none}
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
 <script src="js/geo.js"></script>
+<script src="js/foto.js"></script>
 <script src="js/veri.js"></script>
 <script src="js/sim.js"></script>
 <script src="js/harita.js"></script>

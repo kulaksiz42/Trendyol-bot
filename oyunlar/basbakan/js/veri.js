@@ -13,7 +13,7 @@ window.VERI = (function () {
   // seçmen kesimleri: w = seçmen içindeki pay (%), v0 = 2002'de bize oy oranı, duyarlılık = ekonomiye tepki
   const KESIM = {
     muh: { ad: 'Muhafazakâr', ikon: '🕌', w: 30, v0: 0.80, duy: 2 },
-    sag: { ad: 'Merkez sağ', ikon: '🏪', w: 24, v0: 0.27, duy: 6 },
+    sag: { ad: 'Merkez sağ', ikon: '🏪', w: 24, v0: 0.27, duy: 5 },
     mil: { ad: 'Milliyetçi', ikon: '⭐', w: 12, v0: 0.08, duy: 3 },
     laik: { ad: 'Laik / kentli', ikon: '🏙️', w: 23, v0: 0.05, duy: 1.5 },
     kurt: { ad: 'Kürt seçmen', ikon: '🌄', w: 8, v0: 0.22, duy: 3 }
@@ -48,6 +48,30 @@ window.VERI = (function () {
     ['2002-06-30', { enf: 42.6, buyume: 5, kur: 1.56, issizlik: 10.5, faiz: 48, borc: 76, acik: 13, guven: 32, kisiBasi: 3300 }],
     ['2002-11-03', { enf: 31.8, buyume: 6.2, kur: 1.60, issizlik: 10.3, faiz: 44, borc: 74, acik: 11.5, guven: 40, kisiBasi: 3600 }]
   ];
+  // AK Parti'nin 2011'de illerde aldığı oy (gerçekte ulaştığı zirveye yakın): ilin "tavanı" buna göre
+  const AKP_ZIRVE = {"Adana": 37.4, "Adıyaman": 67.3, "Afyon": 60.4, "Ağrı": 47.6, "Aksaray": 66.1, "Amasya": 52.2, "Ankara": 49.2, "Antalya": 39.3, "Ardahan": 40.2, "Artvin": 46.4, "Aydın": 35.5, "Balıkesir": 46.5, "Bartın": 48.2, "Batman": 37.1, "Bayburt": 63.4, "Bilecik": 42.6, "Bingöl": 67.1, "Bitlis": 50.7, "Bolu": 58.5, "Burdur": 49.0, "Bursa": 53.0, "Çanakkale": 41.6, "Çankırı": 65.6, "Çorum": 61.2, "Denizli": 46.6, "Diyarbakır": 32.2, "Düzce": 66.0, "Edirne": 30.4, "Elazığ": 67.4, "Erzincan": 57.1, "Erzurum": 69.2, "Eskişehir": 44.1, "Gaziantep": 61.7, "Giresun": 59.4, "Gümüşhane": 65.0, "Hakkâri": 16.5, "Hatay": 44.4, "Iğdır": 28.3, "Isparta": 52.9, "İstanbul": 49.4, "İzmir": 36.8, "Kahramanmaraş": 69.6, "Karabük": 57.9, "Karaman": 57.3, "Kars": 42.6, "Kastamonu": 55.8, "Kayseri": 64.9, "Kırıkkale": 62.1, "Kırklareli": 27.4, "Kırşehir": 50.2, "Kilis": 59.5, "Kocaeli": 52.7, "Konya": 69.6, "Kütahya": 64.6, "Malatya": 68.0, "Manisa": 47.0, "Mardin": 32.2, "Mersin": 32.0, "Muğla": 32.7, "Muş": 42.8, "Nevşehir": 60.2, "Niğde": 54.2, "Ordu": 60.2, "Osmaniye": 43.1, "Rize": 68.9, "Sakarya": 61.6, "Samsun": 61.5, "Siirt": 48.0, "Sinop": 54.9, "Sivas": 63.3, "Şanlıurfa": 63.5, "Şırnak": 20.6, "Tekirdağ": 35.9, "Tokat": 55.9, "Trabzon": 58.6, "Tunceli": 15.8, "Uşak": 49.8, "Van": 40.2, "Yalova": 47.2, "Yozgat": 66.4, "Zonguldak": 47.2};
+  // dönemin siyasi yüzleri (fotoğraflar Wikimedia Commons'tan)
+  const KISI = {
+    gul: { ad: 'Abdullah Gül', rol: 'Parti kurucusu · Dışişleri Bakanı (2003–2007)', bas: '2001-08-14', son: '2007-08-28' },
+    babacan: { ad: 'Ali Babacan', rol: 'Ekonomi Bakanı (2002–2007)', bas: '2002-11-18', son: '2009-05-01' },
+    cicek: { ad: 'Cemil Çiçek', rol: 'Adalet Bakanı · Hükümet Sözcüsü', bas: '2002-11-18', son: '2011-06-01' },
+    arinc: { ad: 'Bülent Arınç', rol: 'TBMM Başkanı (2002–2007)', bas: '2002-11-19', son: '2007-08-04' },
+    sezer: { ad: 'Ahmet Necdet Sezer', rol: 'Cumhurbaşkanı (2000–2007)', bas: '2000-05-16', son: '2007-08-28' },
+    ecevit: { ad: 'Bülent Ecevit', rol: 'Başbakan (1999–2002), DSP Genel Başkanı', bas: '1999-01-01', son: '2002-11-18' },
+    dervis: { ad: 'Kemal Derviş', rol: 'Ekonomiden Sorumlu Devlet Bakanı (2001–2002)', bas: '2001-03-01', son: '2002-08-10' },
+    baykal: { ad: 'Deniz Baykal', rol: 'CHP Genel Başkanı · Ana muhalefet lideri', bas: '1992-09-09', son: '2010-05-10' },
+    bahceli: { ad: 'Devlet Bahçeli', rol: 'MHP Genel Başkanı', bas: '1997-07-06', son: '2099-01-01' },
+    ciller: { ad: 'Tansu Çiller', rol: 'DYP Genel Başkanı (2002\'ye kadar)', bas: '1993-06-13', son: '2002-12-14' },
+    agar: { ad: 'Mehmet Ağar', rol: 'DYP Genel Başkanı (2002–2008)', bas: '2002-12-14', son: '2008-05-01' },
+    yilmaz: { ad: 'Mesut Yılmaz', rol: 'ANAP Genel Başkanı (2002\'ye kadar)', bas: '1991-06-15', son: '2002-11-10' },
+    uzan: { ad: 'Cem Uzan', rol: 'Genç Parti Genel Başkanı', bas: '2002-07-01', son: '2008-01-01' },
+    ozkok: { ad: 'Hilmi Özkök', rol: 'Genelkurmay Başkanı (2002–2006)', bas: '2002-08-28', son: '2006-08-28' },
+    buyukanit: { ad: 'Yaşar Büyükanıt', rol: 'Genelkurmay Başkanı (2006–2008)', bas: '2006-08-28', son: '2008-08-28' },
+    bush: { ad: 'George W. Bush', rol: 'ABD Başkanı (2001–2009)', bas: '2001-01-20', son: '2009-01-20' },
+    annan: { ad: 'Kofi Annan', rol: 'BM Genel Sekreteri (1997–2006)', bas: '1997-01-01', son: '2006-12-31' },
+    denktas: { ad: 'Rauf Denktaş', rol: 'KKTC Cumhurbaşkanı (2005\'e kadar)', bas: '1983-11-15', son: '2005-04-24' },
+    dink: { ad: 'Hrant Dink', rol: 'Agos Genel Yayın Yönetmeni', bas: '1996-04-05', son: '2007-01-19' }
+  };
   // Kasım 2002 başlangıç ekonomisi
   const EKO = { enf: 31.8, faiz: 44, kur: 1.60, buyume: 6.2, issizlik: 10.3, borc: 74, acik: 11.5, guven: 40, kisiBasi: 3600, nufus: 66.4 };
   // yıl sonu gerçekleşmeleri (karşılaştırma için)
@@ -68,20 +92,34 @@ window.VERI = (function () {
   const DENIZ = [{ ad: 'Karadeniz', lon: 34.5, lat: 43.0 }, { ad: 'Akdeniz', lon: 31.5, lat: 34.9 }, { ad: 'Ege Denizi', lon: 25.2, lat: 38.6 }, { ad: 'Marmara', lon: 28.1, lat: 40.72 }];
 
   // projeler: haritada bir ile kurulur. maliyet milyar YTL, sure ay
+  // genel projeler her ilde yapılabilir ama aynı ile ikinci yatırımın etkisi azalır; özel projeler belirli şehirlerde ve yıllarda
+  const UNIV_IL = ['Kırşehir', 'Adıyaman', 'Amasya', 'Aksaray', 'Bartın', 'Bayburt', 'Bilecik', 'Bingöl', 'Bitlis', 'Çankırı', 'Düzce', 'Erzincan', 'Giresun', 'Hakkâri', 'Çorum', 'Iğdır', 'Kastamonu', 'Kilis', 'Mardin', 'Muş', 'Nevşehir', 'Ordu', 'Osmaniye', 'Rize', 'Siirt', 'Sinop', 'Şırnak', 'Tunceli', 'Uşak', 'Yalova', 'Karabük', 'Karaman', 'Kırklareli', 'Batman', 'Artvin', 'Ardahan', 'Gümüşhane', 'Yozgat'];
   const PROJE = {
-    toki: { ad: 'TOKİ konutları', ikon: '🏘️', maliyet: 1.2, sure: 14, yil: 2003, etki: { sag: 0.6, muh: 0.4 }, yerel: 3, buyume: 0.04, bilgi: 'Dar gelirliye uzun vadeli taksitle konut. 2003\'ten sonra TOKİ yüz binlerce konut üretti.' },
-    hastane: { ad: 'Devlet hastanesi', ikon: '🏥', maliyet: 0.7, sure: 18, yil: 2003, etki: { sag: 0.4, muh: 0.3, kurt: 0.3 }, yerel: 3, buyume: 0.02, bilgi: 'Sağlıkta Dönüşüm Programı (2003) ile hastane yatırımları hızlandı.' },
-    univ: { ad: 'Üniversite', ikon: '🎓', maliyet: 0.5, sure: 12, yil: 2006, etki: { laik: 0.3, sag: 0.2, kurt: 0.2 }, yerel: 2, buyume: 0.02, bilgi: '2006 ve 2007\'de çıkarılan yasalarla 40\'tan fazla ilde yeni devlet üniversitesi kuruldu.' },
-    havalimani: { ad: 'Bölgesel havalimanı', ikon: '✈️', maliyet: 1.5, sure: 24, yil: 2003, etki: { sag: 0.5, laik: 0.2 }, yerel: 2, buyume: 0.05, bilgi: '2003\'te iç hatlarda özel şirketlere izin verildi; yolcu sayısı birkaç yılda katlandı.' },
-    yol: { ad: 'Bölünmüş yol', ikon: '🛣️', maliyet: 1.0, sure: 10, yil: 2003, etki: { sag: 0.5, muh: 0.2 }, yerel: 2, buyume: 0.04, bilgi: '2003–2007 arasında yaklaşık 9.000 km bölünmüş yol yapıldı.', bag: true },
-    marmaray: { ad: 'Marmaray', ikon: '🚇', maliyet: 9, sure: 112, yil: 2004, il: 'İstanbul', tekil: true, etki: { sag: 1, laik: 0.6, muh: 0.5 }, yerel: 4, buyume: 0.15, bilgi: 'Boğaz\'ın altından geçen demiryolu tüneli. Kazılar Mayıs 2004\'te başladı, hat 29 Ekim 2013\'te açıldı.' },
-    yht: { ad: 'Ankara–Eskişehir YHT', ikon: '🚄', maliyet: 4, sure: 70, yil: 2003, il: 'Eskişehir', bagIl: 'Ankara', tekil: true, etki: { sag: 0.8, laik: 0.5 }, yerel: 4, buyume: 0.08, bilgi: 'Türkiye\'nin ilk yüksek hızlı tren hattı. 13 Mart 2009\'da sefere başladı.' }
+    toki: { ad: 'TOKİ konutları', ikon: '🏘️', maliyet: 1.2, sure: 14, yil: 2003, etki: { sag: 0.3, muh: 0.2 }, yerel: 1.2, buyume: 0.03, bilgi: 'Dar gelirliye uzun vadeli taksitle konut. 2003\'ten sonra TOKİ yüz binlerce konut üretti.' },
+    hastane: { ad: 'Devlet hastanesi', ikon: '🏥', maliyet: 0.7, sure: 18, yil: 2003, etki: { sag: 0.2, muh: 0.2, kurt: 0.2 }, yerel: 1.2, buyume: 0.01, bilgi: 'Sağlıkta Dönüşüm Programı (2003) ile hastane yatırımları hızlandı.' },
+    okul: { ad: 'Derslik ve okul', ikon: '🏫', maliyet: 0.3, sure: 10, yil: 2003, etki: { laik: 0.1, kurt: 0.1, muh: 0.1 }, yerel: 0.6, buyume: 0.01, bilgi: '2003\'te başlayan "Haydi Kızlar Okula" kampanyası ve derslik seferberliği.' },
+    yol: { ad: 'Bölünmüş yol', ikon: '🛣️', maliyet: 1.0, sure: 10, yil: 2003, etki: { sag: 0.3, muh: 0.1 }, yerel: 1, buyume: 0.03, bilgi: '2003–2007 arasında yaklaşık 9.000 km bölünmüş yol yapıldı.', bag: true },
+    univ: { ad: 'Devlet üniversitesi', ikon: '🎓', maliyet: 0.5, sure: 12, yil: 2006, iller: UNIV_IL, etki: { laik: 0.2, sag: 0.1, kurt: 0.1 }, yerel: 1.5, buyume: 0.02, bilgi: '2006–2008 yasalarıyla üniversitesi olmayan illerde yeni devlet üniversiteleri kuruldu.' },
+    osb: { ad: 'Organize sanayi bölgesi', ikon: '🏭', maliyet: 0.6, sure: 16, yil: 2003, iller: ['Kayseri', 'Gaziantep', 'Denizli', 'Konya', 'Bursa', 'Kocaeli', 'Manisa', 'Çorum', 'Kahramanmaraş', 'Eskişehir', 'Malatya', 'Adana', 'Tekirdağ'], etki: { sag: 0.4 }, yerel: 1.2, buyume: 0.05, bilgi: '"Anadolu kaplanları": Kayseri, Gaziantep, Denizli gibi şehirlerde ihracatçı sanayi hızla büyüdü.' },
+    terminal: { ad: 'Havalimanı terminali', ikon: '✈️', maliyet: 0.8, sure: 20, yil: 2003, iller: ['Antalya', 'Muğla', 'İzmir', 'Trabzon', 'Erzurum', 'Diyarbakır', 'Gaziantep', 'Kayseri', 'Adana', 'Van', 'Samsun', 'Malatya'], etki: { sag: 0.3, laik: 0.1 }, yerel: 1, buyume: 0.04, bilgi: '2003\'te iç hatlarda özel şirketlere izin verildi; yolcu sayısı birkaç yılda katlandı, terminaller yap-işlet-devret ile büyütüldü.' },
+    marmaray: { ad: 'Marmaray', ikon: '🚇', maliyet: 9, sure: 112, yil: 2004, il: 'İstanbul', tekil: true, etki: { sag: 0.6, laik: 0.4, muh: 0.3 }, yerel: 2, buyume: 0.12, bilgi: 'Boğaz\'ın altından geçen demiryolu tüneli. Kazılar Mayıs 2004\'te başladı, hat 29 Ekim 2013\'te açıldı.' },
+    metrobus: { ad: 'Metrobüs', ikon: '🚌', maliyet: 0.5, sure: 14, yil: 2006, il: 'İstanbul', tekil: true, etki: { laik: 0.3, sag: 0.3 }, yerel: 1.5, buyume: 0.03, bilgi: 'Özel yolda giden hızlı otobüs. İlk hat 17 Eylül 2007\'de açıldı.' },
+    kartal: { ad: 'Kadıköy–Kartal metrosu', ikon: '🚇', maliyet: 1.5, sure: 84, yil: 2005, il: 'İstanbul', tekil: true, etki: { laik: 0.4, sag: 0.3 }, yerel: 1.5, buyume: 0.04, bilgi: 'Anadolu yakasının ilk metrosu. 2005\'te başladı, 2012\'de açıldı.' },
+    yht: { ad: 'Ankara–Eskişehir YHT', ikon: '🚄', maliyet: 4, sure: 70, yil: 2003, il: 'Eskişehir', bagIl: 'Ankara', tekil: true, etki: { sag: 0.5, laik: 0.3 }, yerel: 2, buyume: 0.06, bilgi: 'Türkiye\'nin ilk yüksek hızlı tren hattı. 13 Mart 2009\'da sefere başladı.' },
+    yhtkonya: { ad: 'Ankara–Konya YHT', ikon: '🚄', maliyet: 2.5, sure: 60, yil: 2006, il: 'Konya', bagIl: 'Ankara', tekil: true, etki: { sag: 0.4, muh: 0.3 }, yerel: 2, buyume: 0.05, bilgi: 'İnşaatı 2006\'da başladı, Ağustos 2011\'de açıldı.' },
+    esenboga: { ad: 'Esenboğa yeni terminali', ikon: '✈️', maliyet: 0.4, sure: 24, yil: 2004, il: 'Ankara', tekil: true, etki: { sag: 0.2, laik: 0.2 }, yerel: 1, buyume: 0.02, bilgi: 'Yap-işlet-devret ile yapılan yeni iç ve dış hatlar terminali 2006\'da açıldı.' },
+    izban: { ad: 'İzmir banliyösü (İZBAN)', ikon: '🚆', maliyet: 0.6, sure: 48, yil: 2006, il: 'İzmir', tekil: true, etki: { laik: 0.4 }, yerel: 1.5, buyume: 0.03, bilgi: 'TCDD ile İzmir Büyükşehir ortaklığı. 2006\'da protokol imzalandı, 2010\'da açıldı. CHP\'li belediyeyle ortak proje.' },
+    sahilyolu: { ad: 'Karadeniz Sahil Yolu', ikon: '🌊', maliyet: 2, sure: 48, yil: 2003, il: 'Trabzon', tekil: true, bolgeIller: ['Samsun', 'Ordu', 'Giresun', 'Trabzon', 'Rize', 'Artvin'], bagIl: 'Samsun', etki: { sag: 0.4, mil: 0.2 }, yerel: 1.5, buyume: 0.05, bilgi: 'Samsun–Hopa arası 2007\'de tamamlandı. Ulaşımı kısalttı; doğaya ve sahile verdiği zarar eleştirildi.' },
+    gap: { ad: 'GAP sulama kanalları', ikon: '💧', maliyet: 1.5, sure: 40, yil: 2003, il: 'Şanlıurfa', tekil: true, bolgeIller: ['Şanlıurfa', 'Diyarbakır', 'Mardin', 'Adıyaman', 'Gaziantep', 'Batman'], etki: { kurt: 0.6, sag: 0.2 }, yerel: 1.5, buyume: 0.05, bilgi: 'Güneydoğu Anadolu Projesi\'nde barajlar bitmişti ama sulama kanalları yarım kalmıştı. GAP Eylem Planı 2008\'de açıklandı.' },
+    ilisu: { ad: 'Ilısu Barajı', ikon: '🏞️', maliyet: 1.8, sure: 96, yil: 2006, il: 'Mardin', tekil: true, etki: { kurt: -0.4, sag: 0.2 }, yerel: 0.5, buyume: 0.04, bilgi: 'Temeli 5 Ağustos 2006\'da atıldı. Elektrik üretecek ama tarihî Hasankeyf\'i su altında bırakacak; Avrupalı kredi kuruluşları 2009\'da çekildi.' },
+    universiade: { ad: 'Erzurum Universiade tesisleri', ikon: '⛷️', maliyet: 0.6, sure: 36, yil: 2007, il: 'Erzurum', tekil: true, etki: { sag: 0.2, mil: 0.2 }, yerel: 1.5, buyume: 0.02, bilgi: '2011 Kış Üniversite Oyunları Erzurum\'a verildi; kayak atlama kuleleri ve buz pistleri yapıldı.' },
+    antalya: { ad: 'Antalya 2. dış hatlar terminali', ikon: '🏖️', maliyet: 0.4, sure: 24, yil: 2003, il: 'Antalya', tekil: true, etki: { sag: 0.3 }, yerel: 1.2, buyume: 0.04, bilgi: 'Turizmin başkentinde ikinci dış hatlar terminali 2005\'te açıldı.' }
   };
 
   /* Olay kartları. t = tarih (YYYY-AA-GG). etki: k (kesim, puan), i (kurum), d (dış), e (ekonomi şoku), b (bayrak)
      e: guven, enf (şok, puan), kur (% sıçrama), buyume (şok), acik (bir yıllık ek açık), borc (tek sefer), h/v/imf/mb kalıcı politika */
   const OLAY = [
-    { id: 'kurulus', t: '2001-08-14', tur: 'karar', baslik: 'Parti kuruldu', yer: 'Ankara',
+    { id: 'kurulus', kisi: ['gul'], t: '2001-08-14', tur: 'karar', baslik: 'Parti kuruldu', yer: 'Ankara',
       metin: 'Bugün Ankara\'da partini kurdun. Kurucular arasında Milli Görüş geleneğinden ayrılan "yenilikçiler" de var, merkez sağdan gelen isimler de. Ülke Şubat 2001 krizinin enkazında: enflasyon %50\'nin üstünde, yüz binlerce kişi işini kaybetti. Partinin kimliği ne olacak?',
       tarih: 'AK Parti kendini "muhafazakâr demokrat" olarak tanımladı ve Milli Görüş\'ten ayrıldığını açıkladı. Merkez sağ partilerden çok sayıda isim de katıldı.',
       s: [
@@ -105,7 +143,7 @@ window.VERI = (function () {
         { ad: 'Destekle ama "yetersiz" de, daha fazlasını iste', etki: { k: { kurt: 2, muh: 1 }, d: { ab: 3 }, i: { ordu: -2 } } },
         { ad: 'Karşı çık', etki: { k: { mil: 2, laik: -1 }, d: { ab: -4 } } }
       ] },
-    { id: 'dervis', sure: 30, t: '2001-12-10', tur: 'karar', baslik: 'Derviş programı', yer: 'Ankara',
+    { id: 'dervis', kisi: ['dervis', 'ecevit'], nedir: 'IMF (Uluslararası Para Fonu), krizdeki ülkelere şartlı kredi veren uluslararası kuruluştur. Şartlar genelde harcamaları kısmak ve bankaları düzeltmektir.', sure: 30, t: '2001-12-10', tur: 'karar', baslik: 'Derviş programı', yer: 'Ankara',
       metin: 'Ekonomiyi Dünya Bankası\'ndan gelen Kemal Derviş\'in programı yönetiyor: bankalarda temizlik, dalgalı kur, IMF kredileri. Esnaf kepenk kapatıyor, işsizlik artıyor. Muhalefet lideri olarak tavrın ne?',
       tarih: 'AK Parti programın sosyal maliyetini eleştirdi ama iktidara gelirse IMF ile çalışmayı sürdüreceğini açıkladı.',
       s: [
@@ -121,7 +159,7 @@ window.VERI = (function () {
         { ad: 'Tam ön seçim: üyeler seçsin', etki: { k: { muh: 1, laik: 1 }, i: { medya: 4 } } },
         { ad: 'Tanınmış isimleri listeye al', etki: { k: { sag: 2, muh: -1 }, i: { medya: 3 }, e: { kasa: 0.6 } } }
       ] },
-    { id: 'ecevit', sure: 15, t: '2002-05-06', tur: 'karar', baslik: 'Başbakan hastanede', yer: 'Ankara',
+    { id: 'ecevit', kisi: ['ecevit', 'bahceli'], sure: 15, t: '2002-05-06', tur: 'karar', baslik: 'Başbakan hastanede', yer: 'Ankara',
       metin: 'Başbakan Bülent Ecevit 4 Mayıs\'ta rahatsızlanarak hastaneye kaldırıldı. 77 yaşındaki başbakanın görevi sürdürüp sürdüremeyeceği tartışılıyor; piyasalar gergin.',
       tarih: 'Tartışmalar DSP\'ye sıçradı. Temmuz\'da Hüsamettin Özkan ve İsmail Cem başta olmak üzere çok sayıda milletvekili istifa etti.',
       s: [
@@ -129,7 +167,7 @@ window.VERI = (function () {
         { ad: 'Erken seçim çağrısı yap', etki: { k: { sag: 2, muh: 1, laik: -1 } } },
         { ad: '"İktidara hazırız" mesajı ver, ekonomi ekibini tanıt', etki: { k: { sag: 1 }, i: { isd: 5 } } }
       ] },
-    { id: 'gencparti', sure: 20, t: '2002-07-15', tur: 'karar', baslik: 'Genç Parti yükseliyor', yer: 'İstanbul',
+    { id: 'gencparti', kisi: ['uzan'], sure: 20, t: '2002-07-15', tur: 'karar', baslik: 'Genç Parti yükseliyor', yer: 'İstanbul',
       metin: 'İş insanı Cem Uzan\'ın kurduğu Genç Parti, güçlü televizyon kanalları ve büyük vaatlerle meydanları dolduruyor. Seçmenin bir kısmı yeni yüzlere yöneliyor.',
       tarih: 'Genç Parti 2002 seçiminde %7,2 oy aldı ve barajı geçemedi.',
       s: [
@@ -137,9 +175,9 @@ window.VERI = (function () {
         { ad: 'Vaatlerin gerçekçi olmadığını anlat', etki: { k: { sag: 2 }, i: { isd: 3 } } },
         { ad: 'Sen de büyük vaatler ver', etki: { k: { sag: 3, mil: 1 }, i: { isd: -5 } } }
       ] },
-    { id: 'erkensecim', t: '2002-07-31', tur: 'haber', baslik: 'Erken seçim: 3 Kasım',
+    { id: 'erkensecim', kisi: ['bahceli', 'ecevit'], t: '2002-07-31', tur: 'haber', baslik: 'Erken seçim: 3 Kasım',
       metin: 'Koalisyondaki çözülmenin ardından Meclis 3 Kasım 2002\'de erken seçime karar verdi (449 kabul). Seçime üç ay var. Teşkilatını ve mitinglerini hızlandırmanın tam zamanı.', etki: { b: { secimTarihi: 1 } } },
-    { id: 'uyum3', sure: 1, t: '2002-08-02', tur: 'karar', baslik: 'AB uyum paketi', yer: 'TBMM',
+    { id: 'uyum3', kisi: ['bahceli'], nedir: 'Uyum paketi: Türkiye\'nin AB üyeliği için yasalarını Avrupa standartlarına uydurmak amacıyla çıkarılan yasa değişiklikleri.', sure: 1, t: '2002-08-02', tur: 'karar', baslik: 'AB uyum paketi', yer: 'TBMM',
       metin: 'Meclis\'te büyük bir AB uyum paketi var: barış zamanında idam cezası kaldırılıyor, Kürtçe yayın ve kursların önü açılıyor. MHP karşı. Oylamada tavrın ne?',
       tarih: 'Paket 3 Ağustos 2002\'de kabul edildi; koalisyon ortağı MHP karşı oy verdi.',
       s: [
@@ -147,7 +185,7 @@ window.VERI = (function () {
         { ad: 'Karşı çık', etki: { k: { mil: 3, kurt: -3 }, d: { ab: -6 } } },
         { ad: 'Çekimser kal', etki: { k: { kurt: 1 }, d: { ab: 1 } } }
       ] },
-    { id: 'ysk', sure: 10, t: '2002-09-20', tur: 'karar', baslik: 'Adaylık engeli', yer: 'Ankara',
+    { id: 'ysk', nedir: 'YSK: Yüksek Seçim Kurulu. Seçimleri yöneten ve adaylıklar hakkında son kararı veren yargı organı.', sure: 10, t: '2002-09-20', tur: 'karar', baslik: 'Adaylık engeli', yer: 'Ankara',
       metin: 'Yüksek Seçim Kurulu, geçmişteki siyasi mahkûmiyetin nedeniyle milletvekili adaylığını kabul etmedi. Partin seçime genel başkanı aday olmadan girecek.',
       tarih: 'AK Parti Genel Başkanı da Eylül 2002\'de aynı nedenle aday gösterilemedi. Kampanyayı aday olmadan sürdürdü; yasak kampanyanın ana temalarından biri oldu.',
       s: [
@@ -164,7 +202,7 @@ window.VERI = (function () {
         { ad: 'Din ve vicdan özgürlüğü', etki: { k: { muh: 4, laik: -5 }, i: { ordu: -4, yargi: -3 } } }
       ] },
     { id: 'secim2002', t: '2002-11-03', tur: 'secim', secim: 'genel', baslik: 'Genel seçim', gercek: { akp: 34.28, chp: 19.39, mhp: 8.36, dyp: 9.54, gp: 7.25, sandalye: 363 } },
-    { id: 'yasak', sure: 10, t: '2002-11-16', tur: 'karar', baslik: 'Hükümeti kim kuracak?', yer: 'Ankara', kosul: s => s.iktidar,
+    { id: 'yasak', kisi: ['gul', 'sezer', 'baykal'], sure: 10, t: '2002-11-16', tur: 'karar', baslik: 'Hükümeti kim kuracak?', yer: 'Ankara', kosul: s => s.iktidar,
       metin: 'Partin seçimden birinci çıktı ama sen Meclis\'te değilsin: YSK adaylığını kabul etmemişti. Cumhurbaşkanı Sezer hükümeti kurma görevini kime verecek?',
       tarih: 'Gerçekte AK Parti Genel Başkanı da aynı yasak nedeniyle aday olamadı. 58. hükümeti Abdullah Gül kurdu (18 Kasım 2002). CHP\'nin desteğiyle anayasa değiştirildi; yasak kalktı.',
       s: [
@@ -172,7 +210,7 @@ window.VERI = (function () {
         { ad: 'Kabineyi perde arkasından sen yönet', etki: { k: { muh: 1, laik: -2 }, i: { medya: -4, yargi: -3 }, e: { guven: -2 } }, sonuc: '"İki başlı hükümet" tartışması başladı ama değişiklik yine Meclis\'ten geçti.' },
         { ad: 'Yasak kalkana dek erken seçim iste', etki: { k: { muh: 2, laik: -2, sag: -2 }, i: { isd: -6 }, e: { guven: -8 } }, sonuc: 'Piyasalar belirsizlikten hoşlanmadı. Meclis yine de anayasa değişikliğini kabul etti.' }
       ] },
-    { id: 'kopenhag', sure: 20, t: '2002-12-13', tur: 'karar', baslik: 'Kopenhag Zirvesi', yer: 'Kopenhag',
+    { id: 'kopenhag', nedir: 'Kopenhag kriterleri: AB üyeliği için demokrasi, hukukun üstünlüğü, insan hakları ve işleyen piyasa ekonomisi şartları.', sure: 20, t: '2002-12-13', tur: 'karar', baslik: 'Kopenhag Zirvesi', yer: 'Kopenhag',
       metin: 'AB liderleri Türkiye\'ye müzakere tarihi vermedi; kararı Aralık 2004\'e bıraktı. "Kopenhag kriterlerini karşılarsanız müzakereler gecikmeden başlar" dediler. Reform hızını sen belirleyeceksin.',
       tarih: 'Hükümet uyum paketlerini hızlandırdı; 2003–2004 arasında birçok anayasa ve yasa değişikliği yapıldı.',
       s: [
@@ -180,7 +218,7 @@ window.VERI = (function () {
         { ad: 'Dengeli ilerle, ordu ile çatışma', etki: { d: { ab: 2 }, i: { ordu: 2 } } },
         { ad: 'AB\'yi geri plana at, ABD ve bölgeye odaklan', etki: { k: { mil: 2, laik: -1 }, d: { ab: -8, abd: 3, ort: 3 }, e: { guven: -3 } } }
       ] },
-    { id: 'imf', t: '2003-01-10', tur: 'karar', baslik: 'IMF programı', yer: 'Ankara',
+    { id: 'imf', kisi: ['babacan'], nedir: 'Faiz dışı fazla: Devletin faiz ödemeleri hariç gelirinin giderinden fazla olması. Borcu azaltmanın yolu; ama okul, yol, maaş için daha az para demek.', t: '2003-01-10', tur: 'karar', baslik: 'IMF programı', yer: 'Ankara',
       metin: '2001 krizinden sonra başlayan IMF stand-by programı sürüyor. Program, faiz ödemeleri hariç bütçede GSYH\'nin %6,5\'i kadar fazla istiyor. Bu, sosyal harcamalara az para kalması demek.',
       tarih: 'Hükümet programa bağlı kaldı. Faiz dışı fazla hedefi tutturuldu, enflasyon 2004\'te tek haneye indi.',
       s: [
@@ -188,7 +226,7 @@ window.VERI = (function () {
         { ad: 'Programı sürdür ama sosyal harcamayı artır', etki: { k: { muh: 1, sag: 1 }, e: { guven: 2, imf: true, h: 0 } } },
         { ad: 'IMF\'den ayrıl, kendi yolumuzu çizelim', etki: { k: { mil: 3, muh: 1 }, i: { isd: -10 }, e: { guven: -15, imf: false, h: 1, kur: 8 } } }
       ] },
-    { id: 'tezkere', sure: 1, t: '2003-03-01', tur: 'karar', baslik: '1 Mart tezkeresi', yer: 'TBMM',
+    { id: 'tezkere', kisi: ['bush', 'arinc'], nedir: 'Tezkere: Hükümetin yabancı askerin ülkeye gelmesi ya da Türk askerinin yurtdışına gitmesi için Meclis\'ten aldığı izin. Kabul için toplantıdakilerin salt çoğunluğu gerekir.', sure: 1, t: '2003-03-01', tur: 'karar', baslik: '1 Mart tezkeresi', yer: 'TBMM',
       metin: 'ABD, Irak\'a kuzeyden cephe açmak için on binlerce askerinin Türkiye\'de konuşlanmasını istiyor. Karşılığında milyarlarca dolarlık hibe ve kredi paketi var. Kamuoyunun büyük çoğunluğu savaşa karşı. Tezkere bugün Meclis\'te.',
       tarih: 'Parti grubu serbest bırakıldı. 264 kabul, 250 ret, 19 çekimser oy çıktı; salt çoğunluk sağlanamadığı için tezkere kabul edilmedi.',
       s: [
@@ -196,7 +234,7 @@ window.VERI = (function () {
         { ad: 'Grup kararıyla kabul ettir', etki: { k: { muh: -6, mil: -5, laik: -4 }, d: { abd: 12, ort: -8 }, e: { guven: 6 }, b: { kuzeyCephe: 1 } }, sonuc: 'Tezkere kabul edildi. Kuzeyden açılan cephe ve yardım paketi piyasayı rahatlattı ama sokakta öfke büyük.' },
         { ad: 'Hükümet olarak "hayır" de', etki: { k: { muh: 4, mil: 4, laik: 2 }, d: { abd: -18, ort: 6 }, e: { guven: -6 } }, sonuc: 'Tezkere Meclis\'e hiç gelmeden geri çekildi. Washington\'da hayal kırıklığı büyük.' }
       ] },
-    { id: 'siirt', sure: 5, t: '2003-03-10', tur: 'karar', baslik: 'Başbakanlık', yer: 'Siirt',
+    { id: 'siirt', kisi: ['gul', 'babacan'], sure: 5, t: '2003-03-10', tur: 'karar', baslik: 'Başbakanlık', yer: 'Siirt',
       metin: '9 Mart\'ta Siirt\'te yenilenen seçimi kazandın ve Meclis\'e girdin. Artık başbakansın. Kabinenin yüzü nasıl olsun?',
       tarih: '59. hükümet 14 Mart 2003\'te kuruldu. Ekonomiden Ali Babacan, maliyeden Kemal Unakıtan, dışişlerinden Abdullah Gül sorumlu oldu.',
       s: [
@@ -204,7 +242,7 @@ window.VERI = (function () {
         { ad: 'Parti tabanından güçlü isimler', etki: { k: { muh: 3, sag: 1 }, e: { guven: -2 } } },
         { ad: 'Farklı kesimlerden geniş bir kabine', etki: { k: { laik: 2, kurt: 1, mil: 1, muh: -1 }, i: { medya: 4 } } }
       ] },
-    { id: 'uyum7', sure: 10, t: '2003-07-30', tur: 'karar', baslik: '7. uyum paketi', yer: 'TBMM',
+    { id: 'uyum7', kisi: ['ozkok'], nedir: 'MGK: Milli Güvenlik Kurulu. Komutanlarla hükümetin güvenlik konularını görüştüğü kurul; uzun yıllar siyasette ağırlığı büyüktü.', sure: 10, t: '2003-07-30', tur: 'karar', baslik: '7. uyum paketi', yer: 'TBMM',
       metin: 'Pakette MGK Genel Sekreterliği\'nin sivilleşmesi, Kürtçe özel kurs ve yayınların önünün açılması ve askerî harcamaların denetimi var. Ordu rahatsız; AB bekliyor.',
       tarih: '6. ve 7. uyum paketleri 2003 yazında kabul edildi. MGK\'nın yapısı değişti, genel sekreterliğe ilk kez bir sivil atandı (2004).',
       s: [
@@ -222,7 +260,7 @@ window.VERI = (function () {
         { ad: 'Birlik çağrısı yap, ekonomiye güven ver', etki: { k: { sag: 1 }, e: { guven: -1 } } }
       ] },
     { id: 'asgari2004', t: '2003-12-20', tur: 'asgari', yil: 2004 },
-    { id: 'annan', sure: 45, t: '2004-02-12', tur: 'karar', baslik: 'Kıbrıs: Annan Planı', yer: 'Lefkoşa',
+    { id: 'annan', kisi: ['annan', 'denktas'], nedir: 'Annan Planı: Kıbrıs\'ı Türk ve Rum iki kurucu devletten oluşan bir federasyon olarak birleştirmeyi öneren BM planı.', sure: 45, t: '2004-02-12', tur: 'karar', baslik: 'Kıbrıs: Annan Planı', yer: 'Lefkoşa',
       metin: 'BM Genel Sekreteri Kofi Annan\'ın planı adanın iki toplumunda referanduma gidecek. Plan bir federasyon öngörüyor. KKTC Cumhurbaşkanı Denktaş plana karşı; Türkiye\'nin tutumu belirleyici.',
       tarih: 'Türkiye planı destekledi. 24 Nisan 2004\'te Kıbrıslı Türklerin yaklaşık %65\'i "evet", Rumların yaklaşık %76\'sı "hayır" dedi. Ada bölünmüş olarak 1 Mayıs 2004\'te AB\'ye girdi.',
       s: [
@@ -231,7 +269,7 @@ window.VERI = (function () {
         { ad: 'Plana karşı çık', etki: { k: { mil: 5 }, i: { ordu: 3 }, d: { ab: -10, abd: -4 }, e: { guven: -3 } }, sonuc: 'Plan iki tarafta da reddedildi. Brüksel\'de Türkiye eleştiriliyor.' }
       ] },
     { id: 'yerel2004', t: '2004-03-28', tur: 'secim', secim: 'yerel', baslik: 'Yerel seçimler', gercek: { akp: 41.7 } },
-    { id: 'anayasa2004', sure: 5, t: '2004-05-07', tur: 'karar', baslik: 'Anayasa değişikliği: DGM\'ler ve idam', yer: 'TBMM',
+    { id: 'anayasa2004', nedir: 'DGM: Devlet Güvenlik Mahkemeleri. Terör ve devlet güvenliği davalarına bakan, AB\'nin eleştirdiği özel mahkemeler.', sure: 5, t: '2004-05-07', tur: 'karar', baslik: 'Anayasa değişikliği: DGM\'ler ve idam', yer: 'TBMM',
       metin: 'Devlet Güvenlik Mahkemeleri\'ni kaldıran, idam cezasını her koşulda yasaklayan ve uluslararası insan hakları sözleşmelerini yasaların üstüne koyan paket önünde.',
       tarih: 'Paket 7 Mayıs 2004\'te kabul edildi. Haziran\'da TRT ilk kez Kürtçe dahil farklı dillerde yayına başladı.',
       s: [
@@ -247,7 +285,7 @@ window.VERI = (function () {
         { ad: 'Öneride ısrar et', etki: { k: { muh: 3, laik: -5 }, i: { medya: -4 }, d: { ab: -12 }, e: { guven: -4 } } }
       ] },
     { id: 'butce2005', t: '2004-10-15', tur: 'butce', yil: 2005 },
-    { id: 'brüksel', sure: 10, t: '2004-12-17', tur: 'karar', baslik: 'Brüksel Zirvesi', yer: 'Brüksel', kosul: s => s.dis.ab >= 45,
+    { id: 'brüksel', nedir: 'Müzakere: AB\'ye aday ülke ile birliğin 35 konu başlığında (fasıl) yaptığı uzun pazarlık süreci.', sure: 10, t: '2004-12-17', tur: 'karar', baslik: 'Brüksel Zirvesi', yer: 'Brüksel', kosul: s => s.dis.ab >= 45,
       metin: 'AB liderleri, katılım müzakerelerinin 3 Ekim 2005\'te başlamasına karar verdi. Bir şart var: Gümrük Birliği\'ni Kıbrıs dahil yeni üyelere genişleten Ankara Protokolü imzalanmalı.',
       tarih: 'Türkiye kararı kabul etti ve protokolü Temmuz 2005\'te imzaladı; ancak imzaya Kıbrıs\'ı tanımadığını belirten bir deklarasyon ekledi.',
       s: [
@@ -257,7 +295,7 @@ window.VERI = (function () {
     { id: 'brükselRet', t: '2004-12-17', tur: 'haber', baslik: 'Brüksel Zirvesi: tarih yok', kosul: s => s.dis.ab < 45,
       metin: 'Reformlar yetersiz bulundu; AB liderleri müzakere tarihi vermeyi erteledi. Piyasalar olumsuz tepki verdi.', etki: { e: { guven: -8 }, k: { mil: 1 } } },
     { id: 'asgari2005', t: '2004-12-20', tur: 'asgari', yil: 2005 },
-    { id: 'ytl', sure: 3, t: '2004-12-28', tur: 'karar', baslik: 'Altı sıfır', yer: 'Ankara',
+    { id: 'ytl', kisi: ['babacan'], sure: 3, t: '2004-12-28', tur: 'karar', baslik: 'Altı sıfır', yer: 'Ankara',
       metin: 'Bir dolar 1.350.000 lira, bir ekmek 400.000 lira. Paradan altı sıfır atıp Yeni Türk Lirası\'na geçmek için her şey hazır. 1 Ocak\'ta başlayalım mı?',
       tarih: '1 Ocak 2005\'te YTL tedavüle girdi. 2009\'da "Yeni" ibaresi kaldırıldı.',
       s: [
@@ -272,7 +310,7 @@ window.VERI = (function () {
         { ad: 'Kademeli geçiş', etki: { k: { sag: 1, muh: 1 }, e: { acik: 0.2 } } },
         { ad: 'Mevcut sistem kalsın', etki: { k: { sag: -1 } } }
       ] },
-    { id: 'ozel', t: '2005-06-20', tur: 'karar', baslik: 'Büyük özelleştirmeler', yer: 'İstanbul',
+    { id: 'ozel', kisi: ['babacan'], nedir: 'Özelleştirme: Devletin sahibi olduğu şirketleri özel sektöre satması.', t: '2005-06-20', tur: 'karar', baslik: 'Büyük özelleştirmeler', yer: 'İstanbul',
       metin: 'Türk Telekom\'un %55\'i, Tüpraş ve Erdemir için ihaleler hazır. Satış borcu azaltır ama sendikalar ve muhalefet "stratejik varlıklar satılmasın" diyor.',
       tarih: 'Türk Telekom 6,55 milyar dolara (2005), Tüpraş 4,1 milyar dolara (2005), Erdemir 2,77 milyar dolara (2006) satıldı.',
       s: [
@@ -292,7 +330,7 @@ window.VERI = (function () {
         { ad: 'Kınama yap, kutuplaşmaya karşı uyar', etki: { k: { laik: -2, muh: 1 }, i: { yargi: -2 } }, tarih: true },
         { ad: 'Güvenlik bürokrasisinde soruşturma başlat', etki: { k: { laik: 1 }, i: { ordu: -2, yargi: 2 }, d: { ab: 2 } } }
       ] },
-    { id: 'dalga', sure: 7, t: '2006-06-05', tur: 'karar', baslik: 'Piyasada dalgalanma', yer: 'İstanbul',
+    { id: 'dalga', kisi: ['babacan'], sure: 7, t: '2006-06-05', tur: 'karar', baslik: 'Piyasada dalgalanma', yer: 'İstanbul',
       metin: 'ABD\'de faizlerin yükselmesiyle yabancı yatırımcı gelişmekte olan ülkelerden çıkıyor. Lira birkaç haftada %20\'ye yakın değer kaybetti, borsa sert düştü.',
       tarih: 'Merkez Bankası Haziran 2006\'da faizi toplam 4,25 puan artırdı. Dalgalanma yaz sonunda yatıştı.', e: { kur: 16, guven: -10 },
       s: [
@@ -302,7 +340,7 @@ window.VERI = (function () {
       ] },
     { id: 'butce2007', t: '2006-10-15', tur: 'butce', yil: 2007 },
     { id: 'asgari2007', t: '2006-12-20', tur: 'asgari', yil: 2007 },
-    { id: 'dink', sure: 10, t: '2007-01-19', tur: 'karar', baslik: 'Hrant Dink suikastı', yer: 'İstanbul',
+    { id: 'dink', kisi: ['dink'], nedir: 'TCK 301: "Türklüğü aşağılama" suçunu düzenleyen madde. Gazeteci ve yazarlara açılan davalar nedeniyle tartışıldı.', sure: 10, t: '2007-01-19', tur: 'karar', baslik: 'Hrant Dink suikastı', yer: 'İstanbul',
       metin: 'Agos gazetesi Genel Yayın Yönetmeni Hrant Dink, gazetesinin önünde silahlı saldırıda öldürüldü. Cenazesinde on binler "Hepimiz Hrant\'ız" diye yürüdü.',
       tarih: 'Tetikçi kısa sürede yakalandı. Kamu görevlilerinin ihmalleri yıllarca yargılandı; TCK 301. madde 2008\'de değiştirildi.',
       s: [
@@ -310,7 +348,7 @@ window.VERI = (function () {
         { ad: 'Failleri yakala, 301. maddeyi tartışmaya aç', etki: { k: { laik: 1 }, d: { ab: 3 } }, tarih: true },
         { ad: 'Soruşturmayı yargıya bırak', etki: { d: { ab: -2 } } }
       ] },
-    { id: 'cb', sure: 10, t: '2007-04-10', tur: 'karar', baslik: 'Cumhurbaşkanlığı seçimi', yer: 'Çankaya',
+    { id: 'cb', kisi: ['sezer', 'gul', 'baykal'], nedir: '367 tartışması: Muhalefet, cumhurbaşkanı seçiminin ilk turunda Meclis\'te en az 367 milletvekilinin (üçte iki) hazır bulunması gerektiğini savundu.', sure: 10, t: '2007-04-10', tur: 'karar', baslik: 'Cumhurbaşkanlığı seçimi', yer: 'Çankaya',
       metin: 'Ahmet Necdet Sezer\'in görev süresi doluyor. Cumhurbaşkanını Meclis seçecek. Muhalefet "ilk turda 367 milletvekili toplantıda olmalı" diyor. Tandoğan\'da yüz binlerce kişi Cumhuriyet Mitingi\'nde.',
       tarih: 'AK Parti, Abdullah Gül\'ü aday gösterdi. 27 Nisan\'da ilk tur yapıldı; Anayasa Mahkemesi 1 Mayıs\'ta 367 şartını kabul ederek turu iptal etti.',
       s: [
@@ -318,7 +356,7 @@ window.VERI = (function () {
         { ad: 'Parti dışından bir uzlaşı adayı', etki: { k: { muh: -4, laik: 4 }, i: { ordu: 5, yargi: 3 }, e: { guven: 4 }, b: { uzlasi: 1 } }, sonuc: 'Uzlaşı adayı ikinci turda seçildi. Gerginlik düştü, seçim Kasım\'daki olağan tarihinde yapılacak.' },
         { ad: 'Kendin aday ol', etki: { k: { muh: 4, laik: -8 }, i: { ordu: -8, yargi: -4 }, e: { guven: -4 }, b: { kendinAday: 1 } }, sonuc: 'Adaylığın açıklanınca miting meydanları daha da kalabalıklaştı.' }
       ] },
-    { id: 'muhtira', sure: 3, t: '2007-04-27', tur: 'karar', once: 'cb', baslik: '27 Nisan bildirisi', yer: 'Genelkurmay', kosul: s => !s.b.uzlasi,
+    { id: 'muhtira', kisi: ['buyukanit', 'cicek'], nedir: 'Muhtıra: Ordunun hükümeti uyaran açıklaması. Türkiye\'de 1960, 1971, 1980 darbeleri ve 1997 sürecinin hafızası nedeniyle çok ağır bir anlam taşır.', sure: 3, t: '2007-04-27', tur: 'karar', once: 'cb', baslik: '27 Nisan bildirisi', yer: 'Genelkurmay', kosul: s => !s.b.uzlasi,
       metin: 'Gece yarısına doğru Genelkurmay Başkanlığı\'nın internet sitesinde, cumhurbaşkanlığı tartışmaları ve laiklik hakkında sert bir bildiri yayımlandı. Basın buna "e-muhtıra" diyor. Piyasalar açılışta sert düşecek.',
       tarih: 'Hükümet Sözcüsü Cemil Çiçek ertesi gün "Genelkurmay Başkanlığı Başbakanlığa bağlı bir kurumdur" dedi. 1 Mayıs\'ta Anayasa Mahkemesi turu iptal etti; seçim 22 Temmuz\'a alındı.', e: { guven: -8, kur: 4 },
       s: [
@@ -328,9 +366,96 @@ window.VERI = (function () {
       ] },
     { id: 'secim2007', t: '2007-07-22', tur: 'secim', once: 'cb', secim: 'genel', baslik: 'Genel seçim', kosul: s => s.b.erkenSecim, gercek: { akp: 46.58, chp: 20.88, mhp: 14.27, sandalye: 341 } },
     { id: 'secim2007k', t: '2007-11-04', tur: 'secim', once: 'cb', secim: 'genel', baslik: 'Genel seçim', kosul: s => !s.b.erkenSecim, gercek: { akp: 46.58, chp: 20.88, mhp: 14.27, sandalye: 341 } },
+    { id: 'liderler', t: '2002-11-05', tur: 'haber', baslik: 'Liderler istifa ediyor', kisi: ['ciller', 'yilmaz'],
+      metin: 'Barajın altında kalan DYP\'nin lideri Tansu Çiller ve ANAP\'ın lideri Mesut Yılmaz genel başkanlığı bırakacaklarını açıkladı. Eski siyasi kuşak sahneden çekiliyor.', etki: { k: { sag: 1 } } },
+    { id: 'cuval', sure: 7, t: '2003-07-05', tur: 'karar', baslik: 'Süleymaniye\'de çuval olayı', yer: 'Ankara', kisi: ['bush', 'ozkok'],
+      nedir: 'Kuzey Irak: 2003 savaşından sonra ABD\'nin kontrolündeki, Kürt yönetimindeki bölge. Türk askerleri burada PKK\'yı izlemek için bulunuyordu.',
+      metin: 'Kuzey Irak\'ın Süleymaniye kentinde ABD askerleri, görevli Türk özel kuvvet askerlerini gözaltına aldı ve başlarına çuval geçirdi. Kamuoyunda büyük öfke var.',
+      tarih: 'Hükümet sert tepki gösterdi; askerler yaklaşık 60 saat sonra serbest bırakıldı, olayı inceleyen ortak bir komisyon kuruldu. Olay iki ülke ilişkilerinde uzun süre iz bıraktı.',
+      s: [
+        { ad: 'Sert diplomatik tepki, askerler hemen serbest bırakılsın', etki: { k: { mil: 3, muh: 1 }, d: { abd: -6 }, i: { ordu: 3 } }, tarih: true },
+        { ad: 'Sessiz diplomasiyle çöz', etki: { k: { mil: -3 }, d: { abd: 2 }, i: { ordu: -3 } } },
+        { ad: 'ABD ile askerî işbirliğini askıya al', etki: { k: { mil: 5, muh: 2, laik: 1 }, d: { abd: -15 }, e: { guven: -4 } } }
+      ] },
+    { id: 'resepsiyon', sure: 5, t: '2003-10-25', tur: 'karar', baslik: 'Çankaya\'da resepsiyon krizi', yer: 'Çankaya', kisi: ['sezer'],
+      metin: 'Cumhurbaşkanı Sezer, 29 Ekim resepsiyonuna milletvekillerini eşsiz davet etti. Bu, başörtülü eşlerin Köşk\'e gelmemesi anlamına geliyor. Partinden boykot sesleri yükseliyor.',
+      tarih: 'AK Parti milletvekillerinin büyük kısmı resepsiyona katılmadı; başörtüsü tartışması yıllarca gündemde kaldı.',
+      s: [
+        { ad: 'Milletvekilleri resepsiyona katılmasın', etki: { k: { muh: 3, laik: -3 }, i: { yargi: -2, ordu: -2 } }, tarih: true },
+        { ad: 'Katıl, devletin zirvesiyle gerginlik çıkarma', etki: { k: { muh: -3, laik: 2 }, i: { ordu: 2 } } },
+        { ad: 'Sen git, isteyen gitmesin', etki: { k: { muh: 1 } } }
+      ] },
+    { id: 'katsayi', sure: 10, t: '2004-05-13', tur: 'karar', baslik: 'YÖK yasası ve katsayı', yer: 'TBMM', kisi: ['sezer', 'ozkok'],
+      nedir: 'Katsayı: Meslek lisesi ve imam hatip mezunlarının kendi alanları dışındaki bölümlere girerken puanlarının düşük katsayıyla çarpılması uygulaması (1999).',
+      metin: 'Meclis, meslek lisesi ve imam hatip mezunlarının üniversite girişindeki katsayı farkını kaldıran YÖK yasasını kabul etti. YÖK ve Genelkurmay karşı çıktı, Cumhurbaşkanı veto etti.',
+      tarih: 'Sezer yasayı 28 Mayıs 2004\'te veto etti; hükümet yasayı Meclis\'e yeniden getirmedi. Katsayı farkı 2011\'de kaldırıldı.',
+      s: [
+        { ad: 'Yasayı rafa kaldır', etki: { k: { muh: -2 }, i: { yargi: 2, ordu: 2 } }, tarih: true },
+        { ad: 'Aynen yeniden Meclis\'ten geçir', etki: { k: { muh: 4, laik: -4 }, i: { ordu: -6, yargi: -5 }, e: { guven: -3 } } },
+        { ad: 'YÖK ile uzlaşarak yeni metin hazırla', etki: { k: { muh: 1, laik: 1 }, i: { yargi: 1 } } }
+      ] },
+    { id: 'pkk2004', sure: 15, t: '2004-06-02', tur: 'karar', baslik: 'PKK ateşkesi bitirdi', yer: 'Ankara', kisi: ['ozkok'],
+      nedir: 'PKK: Türkiye, ABD ve AB tarafından terör örgütü olarak tanınan silahlı örgüt. 1984\'ten beri süren çatışmalarda on binlerce kişi hayatını kaybetti.',
+      metin: 'PKK, 1999\'dan beri sürdürdüğü tek taraflı ateşkesi bitirdiğini açıkladı. Güneydoğu\'da saldırılar yeniden başlıyor.',
+      tarih: 'Çatışmalar 2004\'ten sonra yeniden yoğunlaştı. Hükümet güvenlik önlemlerinin yanında AB reformları ve yatırım vurgusu yaptı.',
+      s: [
+        { ad: 'Güvenlik önlemleri ve reformlar birlikte', etki: { k: { mil: 1, kurt: 1 }, i: { ordu: 2 } }, tarih: true },
+        { ad: 'Askerî operasyon önceliği', etki: { k: { mil: 4, kurt: -4 }, i: { ordu: 6 }, d: { ab: -3 } } },
+        { ad: 'Bölgeye büyük sosyal ve ekonomik paket', etki: { k: { kurt: 4, mil: -2 }, e: { acik: 0.3 } } }
+      ] },
+    { id: 'diyarbakir', sure: 15, t: '2005-08-11', tur: 'karar', baslik: 'Diyarbakır konuşması', yer: 'Diyarbakır',
+      metin: 'Yarın Diyarbakır\'da halka konuşacaksın. Danışmanların ikiye bölündü: "Kürt sorunu" demek cesur ama milliyetçi tepki çeker.',
+      tarih: 'Başbakan 12 Ağustos 2005\'te Diyarbakır\'da "Kürt sorunu benim sorunumdur" diyerek sorunun varlığını kabul etti; konuşma geniş yankı uyandırdı.',
+      s: [
+        { ad: '"Kürt sorunu"nu adıyla an, demokratikleşme sözü ver', etki: { k: { kurt: 5, laik: 1, mil: -4 }, i: { ordu: -3 }, d: { ab: 4 } }, tarih: true },
+        { ad: 'Ekonomik kalkınmayı anlat', etki: { k: { kurt: 1, sag: 1 } } },
+        { ad: 'Terörle mücadeleyi öne çıkar', etki: { k: { mil: 3, kurt: -4 }, i: { ordu: 3 } } }
+      ] },
+    { id: 'pamuk', sure: 15, t: '2005-12-16', tur: 'karar', baslik: 'Orhan Pamuk davası', yer: 'İstanbul',
+      nedir: 'TCK 301: "Türklüğü aşağılama" suçunu düzenleyen madde. Yazar ve gazetecilere açılan davalar nedeniyle AB\'nin eleştirisini çekti.',
+      metin: 'Romancı Orhan Pamuk, İsviçre\'de bir gazeteye yaptığı açıklama nedeniyle TCK 301\'den yargılanıyor. Avrupa Parlamentosu üyeleri duruşmayı izlemeye geldi.',
+      tarih: 'Dava Ocak 2006\'da usul nedeniyle düştü. 301. madde 2008\'de değiştirildi; dava açılması Adalet Bakanı iznine bağlandı.',
+      s: [
+        { ad: '301. maddeyi değiştir', etki: { k: { laik: 2, mil: -3 }, d: { ab: 6 } } },
+        { ad: 'Yargıya müdahale etme', etki: { d: { ab: -3 } }, tarih: true },
+        { ad: 'Maddeyi savun', etki: { k: { mil: 3, laik: -2 }, d: { ab: -8 } } }
+      ] },
+    { id: 'hamas', sure: 7, t: '2006-02-15', tur: 'karar', baslik: 'Hamas heyeti', yer: 'Ankara', kisi: ['bush'],
+      metin: 'Filistin seçimlerini kazanan Hamas\'ın siyasi büro şefi Halid Meşal Ankara\'ya gelmek istiyor. ABD ve İsrail rahatsız; Arap dünyası Türkiye\'yi izliyor.',
+      tarih: 'Meşal 16 Şubat 2006\'da Ankara\'ya geldi ve parti merkezinde ağırlandı. ABD ve İsrail ziyareti eleştirdi.',
+      s: [
+        { ad: 'Kabul et, "barış için arabuluculuk" de', etki: { k: { muh: 2 }, d: { ort: 8, abd: -6, ab: -2 } }, tarih: true },
+        { ad: 'Görüşmeyi reddet', etki: { k: { muh: -2 }, d: { abd: 4, ort: -6 } } },
+        { ad: 'Dışişleri düzeyinde düşük profilli görüş', etki: { d: { ort: 3, abd: -2 } } }
+      ] },
+    { id: 'buyukanit', t: '2006-08-28', tur: 'haber', baslik: 'Genelkurmay\'da devir teslim', kisi: ['ozkok', 'buyukanit'],
+      metin: 'Orgeneral Hilmi Özkök görevini Orgeneral Yaşar Büyükanıt\'a devretti. Büyükanıt\'ın laiklik konusunda daha sert çizgisi biliniyor.', etki: { i: { ordu: -3 } } },
+    { id: 'unifil', sure: 5, t: '2006-09-04', tur: 'karar', baslik: 'Lübnan\'a asker', yer: 'TBMM', kisi: ['annan'],
+      metin: 'İsrail–Hizbullah savaşından sonra BM, Lübnan\'a barış gücü (UNIFIL) kuruyor ve Türkiye\'den katkı istiyor. Muhalefet "Türk askeri başkalarının savaşında ne arıyor" diyor.',
+      tarih: 'Tezkere 5 Eylül 2006\'da kabul edildi; Türkiye UNIFIL\'e deniz kuvvetleri ve istihkâm birliğiyle katıldı.',
+      s: [
+        { ad: 'Tezkereyi geçir', etki: { d: { ab: 4, abd: 3, ort: 2 }, k: { mil: -1 } }, tarih: true },
+        { ad: 'Sadece insani yardım gönder', etki: { d: { ort: 2, ab: -2 } } },
+        { ad: 'Katılma', etki: { k: { mil: 2 }, d: { ab: -4, abd: -2 } } }
+      ] },
+    { id: 'ecevitvefat', t: '2006-11-05', tur: 'haber', baslik: 'Bülent Ecevit hayatını kaybetti', kisi: ['ecevit'],
+      metin: 'Beş kez başbakanlık yapan Bülent Ecevit 81 yaşında hayatını kaybetti. Cenazesine on binler katıldı.', etki: {} },
+    { id: 'kuzeyirak', sure: 5, t: '2007-10-16', tur: 'karar', baslik: 'Sınır ötesi operasyon tezkeresi', yer: 'TBMM', kisi: ['buyukanit', 'bush'],
+      metin: 'PKK saldırıları arttı. Hükümet, ordunun Kuzey Irak\'taki kamplara sınır ötesi operasyon yapabilmesi için Meclis\'ten bir yıllık izin istiyor. ABD "bölgeyi istikrarsızlaştırmayın" diyor.',
+      tarih: 'Tezkere 17 Ekim 2007\'de 507\'ye karşı 19 oyla kabul edildi. Kasım\'da Bush ile anlaşılarak ABD istihbarat paylaşmaya başladı; Şubat 2008\'de kara harekâtı yapıldı.',
+      s: [
+        { ad: 'Tezkereyi çıkar, ABD ile istihbarat pazarlığı yap', etki: { k: { mil: 4 }, i: { ordu: 5 }, d: { abd: 2 } }, tarih: true },
+        { ad: 'Hemen geniş kara harekâtı', etki: { k: { mil: 6, kurt: -4 }, i: { ordu: 8 }, d: { abd: -8, ab: -4 }, e: { guven: -4 } } },
+        { ad: 'Diplomasi ve Irak Kürt yönetimiyle temas', etki: { k: { mil: -4, kurt: 3 }, i: { ordu: -5 }, d: { abd: 5, ab: 3 } } }
+      ] },
+    { id: 'daglica', t: '2007-10-21', tur: 'haber', baslik: 'Dağlıca saldırısı',
+      metin: 'Hakkâri Dağlıca\'da PKK saldırısında 12 asker hayatını kaybetti, 8 asker kaçırıldı. Ülkenin dört bir yanında protesto gösterileri yapılıyor.', etki: { k: { mil: 2 }, e: { guven: -3 } } },
+    { id: 'referandum2007', t: '2007-10-21', tur: 'haber', baslik: 'Referandum: cumhurbaşkanını halk seçecek',
+      metin: 'Cumhurbaşkanının halk tarafından seçilmesini öngören anayasa değişikliği referandumda %69 "evet" oyuyla kabul edildi.', etki: { k: { muh: 1, sag: 1 } } },
     { id: 'son1', t: '2007-12-01', tur: 'son', baslik: 'Birinci dönem tamamlandı' }
   ];
   // olay olmayan günlere haber akışı
+  OLAY.sort((a, b) => a.t < b.t ? -1 : a.t > b.t ? 1 : 0);
   const HABER = [
     ['2001-10-07', 'ABD ve İngiltere Afganistan\'a hava saldırılarına başladı'], ['2002-01-01', 'Euro banknotları tedavüle girdi'], ['2002-06-29', 'Millî Takım Dünya Kupası\'nı üçüncü bitirdi'], ['2002-07-22', 'İsmail Cem, Yeni Türkiye Partisi\'ni kurdu'],
     ['2002-11-20', 'Borsa seçim sonrası rekor yükselişle haftayı kapattı'], ['2003-03-20', 'ABD öncülüğündeki koalisyon Irak\'a girdi'],
@@ -341,5 +466,5 @@ window.VERI = (function () {
     ['2007-04-14', 'Tandoğan\'da Cumhuriyet Mitingi: yüz binler toplandı'], ['2007-08-28', 'Cumhurbaşkanı Meclis\'te seçildi']
   ];
   const AYLAR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
-  return { BOLGE, VSTART, EKO_GECMIS, PARTI, KESIM, DEHAP_IL, KURUM, DIS, EKO, GERCEK, ULKE_AD, ULKE_ETIKET, DENIZ, PROJE, OLAY, HABER, AYLAR, BASLANGIC: '2001-08-14' };
+  return { KARAR_CARPAN: 0.6, YIPRANMA: 2005, AKP_ZIRVE, KISI, BOLGE, VSTART, EKO_GECMIS, PARTI, KESIM, DEHAP_IL, KURUM, DIS, EKO, GERCEK, ULKE_AD, ULKE_ETIKET, DENIZ, PROJE, OLAY, HABER, AYLAR, BASLANGIC: '2001-08-14' };
 })();
