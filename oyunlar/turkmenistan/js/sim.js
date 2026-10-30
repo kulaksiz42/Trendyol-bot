@@ -185,19 +185,23 @@ window.Sim = (function () {
     const P = V.PROJE[tip], yil = Sim_yil();
     if (yil < P.yil) return 'erken';
     if (P.tekil && S.projeler.some(p => p.tip === tip)) return 'var';
+    if (P.iller && !P.iller.includes(il)) return 'yer';
     if (S.projeler.some(p => p.tip === tip && p.il === il)) return 'ilde';
     if (V.ULKE === 'tm') { if (S.eko.rezerv < P.maliyet * 0.5) return 'para'; S.eko.rezerv -= P.maliyet; } else S.odenek -= P.maliyet;
     S.projeler.push({ tip, il: P.il || il, bas: S.gun, bitis: S.gun + Math.round(P.sure * 30.4), bitti: false });
-    S.ilEtki[P.il || il] = (S.ilEtki[P.il || il] || 0) + P.yerel * 0.3;
+    S.ilEtki[P.il || il] = (S.ilEtki[P.il || il] || 0) + P.yerel * 0.15 / (1 + projeSay(P.il || il) * 0.7);
     return 'tamam';
   }
+  function projeSay(il) { return S.projeler.filter(p => p.il === il).length; }
   function projeAy() {
     const biten = [];
     S.projeler.forEach(p => {
       if (!p.bitti && S.gun >= p.bitis) {
         p.bitti = true; biten.push(p); const P = V.PROJE[p.tip];
-        S.ilEtki[p.il] = (S.ilEtki[p.il] || 0) + P.yerel;
-        Object.entries(P.etki).forEach(([k, v]) => S.kesim[k].m += v);
+        const azal = 1 / (1 + (projeSay(p.il) - 1) * 0.7);
+        S.ilEtki[p.il] = (S.ilEtki[p.il] || 0) + P.yerel * azal;
+        (P.bolgeIller || []).forEach(il => { if (il !== p.il) S.ilEtki[il] = (S.ilEtki[il] || 0) + P.yerel * 0.5; });
+        Object.entries(P.etki).forEach(([k, v]) => S.kesim[k].m += v * azal);
       }
     });
     return biten;
@@ -206,7 +210,7 @@ window.Sim = (function () {
   /* ---------- kararlar ---------- */
   function etkiUygula(et) {
     if (!et) return;
-    Object.entries(et.k || {}).forEach(([k, v]) => S.kesim[k].m += v);
+    Object.entries(et.k || {}).forEach(([k, v]) => S.kesim[k].m += v * (V.KARAR_CARPAN || 1));
     Object.entries(et.i || {}).forEach(([k, v]) => S.kurum[k] = clamp(S.kurum[k] + v));
     Object.entries(et.d || {}).forEach(([k, v]) => S.dis[k] = clamp(S.dis[k] + v));
     Object.entries(et.b || {}).forEach(([k, v]) => S.b[k] = typeof v === 'string' ? v : (S.b[k] || 0) + v);

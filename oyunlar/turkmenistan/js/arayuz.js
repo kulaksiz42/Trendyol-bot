@@ -69,7 +69,7 @@
     const t = Sim.gunTarih(S.gun), e = S.eko;
     const trh = ui.querySelector('#trh'); if (!trh) return;
     trh.textContent = `${t.getUTCDate()} ${V.AYLAR[t.getUTCMonth()]} ${t.getUTCFullYear()}`;
-    ui.querySelector('#unvan').textContent = 'Devlet Başkanı ' + S.ad + ' · ' + { kapali: 'Tek parti', kontrollu: 'Kontrollü açılım', acik: 'Çok partili' }[S.pol.acilim]; if (0) ui.querySelector('#unvan').textContent = S.iktidar ? (S.b.basbakan ? 'Başbakan ' : 'Genel Başkan ') + S.ad + (S.b.koalisyon ? ' · Koalisyon' : '') : 'Genel Başkan ' + S.ad + ' · Muhalefet';
+    ui.querySelector('#unvan').textContent = (S.b.ulusalLider ? 'Ulusal Lider ' : S.b.halef === 'ogul' || S.b.halef === 'acik' ? 'Eski Devlet Başkanı ' : 'Devlet Başkanı ') + S.ad + ' · ' + { kapali: 'Tek parti', kontrollu: 'Kontrollü açılım', acik: 'Çok partili' }[S.pol.acilim]; if (0) ui.querySelector('#unvan').textContent = S.iktidar ? (S.b.basbakan ? 'Başbakan ' : 'Genel Başkan ') + S.ad + (S.b.koalisyon ? ' · Koalisyon' : '') : 'Genel Başkan ' + S.ad + ' · Muhalefet';
     const by = ui.querySelector('#btnYat'); if (by) by.innerHTML = S.iktidar ? '<span>🏗️</span>Yatırım' : '<span>📣</span>Kampanya';
     const o = onceki || {};
     document.body.classList.remove('basta');
@@ -145,11 +145,11 @@
   const DOSYA_SURE = 60, DOSYA_MAX = 3;
   const sureOf = id => { const o = V.OLAY.find(x => x.id === id); return o && o.sure !== undefined ? o.sure : DOSYA_SURE; };
   const KARAR_TUR = ['karar', 'butce', 'asgari'];
-  function logla(m) { S.log = S.log || []; const t = Sim.gunTarih(S.gun); S.log.unshift({ t: `${t.getUTCDate()} ${V.AYLAR[t.getUTCMonth()].slice(0, 3)} ${t.getUTCFullYear()}`, m }); S.log = S.log.slice(0, 40); }
+  function logla(m, kisi) { S.log = S.log || []; const t = Sim.gunTarih(S.gun); S.log.unshift({ t: `${t.getUTCDate()} ${V.AYLAR[t.getUTCMonth()].slice(0, 3)} ${t.getUTCFullYear()}`, m, kisi }); S.log = S.log.slice(0, 40); }
   function olayIsle(ol) {
     S.masa = S.masa || [];
     if (ol.tur === 'haber') {
-      Sim.etkiUygula(ol.etki); Sim.olayBitti(ol); haberEkle(ol.baslik); logla('🔴 ' + ol.baslik + ': ' + ol.metin);
+      Sim.etkiUygula(ol.etki); Sim.olayBitti(ol); haberEkle(ol.baslik); logla('🔴 ' + ol.baslik + ': ' + ol.metin, ol.kisi);
       bildirim('🔴 Son dakika: ' + ol.baslik); return;
     }
     if (KARAR_TUR.includes(ol.tur) && ol.id !== 'kurulus') {
@@ -172,6 +172,15 @@
     document.body.appendChild(el); if (kur) kur(el); return el;
   }
   const tarihYazi = s => { const [y, a, g] = s.split('-'); return `${+g} ${V.AYLAR[+a - 1]} ${y}`; };
+  const FOTO = window.FOTO || {};
+  function yuz(id) {
+    const K = V.KISI[id]; if (!K) return '';
+    const bas = K.ad.split(' ').map(x => x[0]).slice(0, 2).join('');
+    return FOTO[id] ? `<img class="yuz" src="img/${id}.jpg" alt="${esc(K.ad)}" loading="lazy">` : `<span class="yuz">${bas}</span>`;
+  }
+  const kisiKart = id => V.KISI[id] ? `<div class="kisi">${yuz(id)}<span><b>${esc(V.KISI[id].ad)}</b><small>${esc(V.KISI[id].rol)}</small></span></div>` : '';
+  const kisiSerit = l => l && l.length ? `<div class="kisiler">${l.map(kisiKart).join('')}</div>` : '';
+  const nedir = o => o.nedir ? `<details class="nedir"><summary>ℹ️ Bu ne demek?</summary><p>${esc(o.nedir)}</p></details>` : '';
   function ipuclari(et) {
     const o = [];
     const ekle = (ad, v) => { if (!v) return; o.push(`<span class="${v > 0 ? 'a' : 'e'}">${ad} ${v > 0 ? '▲' : '▼'}</span>`); };
@@ -204,8 +213,8 @@
     if (o.id === 'kurulus') setTimeout(() => bildirim('🏗️ Yatırım menüsünden boru hattı kur: gaz geliri her şeyin anahtarı', 5000), 400);
   }
   function kararKart(o, z) {
-    const el = kartAc(`<div class="ust-serit"><span>Türkmenbaşı Sarayı · Karar</span><span class="yer">${esc(o.yer || '')} · ${tarihYazi(o.t)}</span></div>
-      <div class="govde">${dosyaUst(o, z)}<h2>${esc(o.baslik)}</h2><p>${esc(o.metin)}</p>
+    const el = kartAc(`<div class="ust-serit"><span>Türkmenbaşı Sarayı · Karar</span><span class="yer">${esc(o.yer || '')} · ${tarihYazi(o.t)}</span></div>${kisiSerit(o.kisi)}
+      <div class="govde">${dosyaUst(o, z)}<h2>${esc(o.baslik)}</h2><p>${esc(o.metin)}</p>${nedir(o)}
       ${o.s.map((s, i) => `<button class="secenek" data-i="${i}">${esc(s.ad)}<div class="ip">${ipuclari(s.etki)}</div></button>`).join('')}</div>`);
     sonraBagla(el);
     el.querySelectorAll('.secenek').forEach(b => b.onclick = () => {
@@ -263,12 +272,12 @@
     sonraBagla(el);
   }
   function sonKart(o) {
-    const e = S.eko, g = V.GERCEK[2022], c = (ad, sen, ger) => `<div class="satir"><span class="ad">${ad}</span><b style="width:80px;text-align:right">${sen}</b><span class="kucuk" style="width:80px;text-align:right">${ger}</span></div>`;
-    const el = kartAc(`<div class="ust-serit"><span>Otuz yıl</span><span class="yer">2022</span></div><div class="govde"><h2>Türkmenistan'ın karnesi</h2>
+    const e = S.eko, g = V.GERCEK[2025], c = (ad, sen, ger) => `<div class="satir"><span class="ad">${ad}</span><b style="width:80px;text-align:right">${sen}</b><span class="kucuk" style="width:80px;text-align:right">${ger}</span></div>`;
+    const el = kartAc(`<div class="ust-serit"><span>Bağımsızlıktan bugüne</span><span class="yer">2025</span></div><div class="govde"><h2>Türkmenistan'ın karnesi</h2>
       <p>${esc(S.ad)}, ${S.kararlar || 0} kararının ${S.tarihle || 0} tanesi tarihtekiyle aynıydı. Ülke ${{ kapali: 'tek partiyle', kontrollu: 'kontrollü bir açılımla', acik: 'çok partili bir demokrasi olarak' }[S.pol.acilim]} bugüne geldi.</p>
       <div class="satir kucuk"><span class="ad"></span><span style="width:80px;text-align:right">Sen</span><span style="width:80px;text-align:right">Gerçek</span></div>
       ${c('Kişi başı gelir', '$' + sayi(e.kisiBasi), '$' + sayi(g.kisiBasi))}${c('Gaz ihracatı', Math.round(e.gaz) + ' mlr m³', g.gaz + ' mlr m³')}${c('Enflasyon', yz(e.enf), yz(g.enf))}${c('Manat/$', e.kur.toFixed(2).replace('.', ','), '3,50')}${c('Batı ile ilişki', Math.round(S.dis.bati), '–')}
-      <div class="tarihte"><b>Boru hatların</b>${['iran', 'cin', 'hazar', 'tapi'].map(t => V.PROJE[t].ad + ': ' + (S.projeler.some(p => p.tip === t && p.bitti) ? '✓' : '—')).join(' · ')}. Gerçekte Hazar ötesi hat ve TAPI tamamlanmadı.</div>
+      <div class="tarihte"><b>Boru hatların</b>${['iran', 'cin', 'galkynysh', 'hazar', 'tapi'].map(t => V.PROJE[t].ad + ': ' + (S.projeler.some(p => p.tip === t && p.bitti) ? '✓' : '—')).join(' · ')}. Gerçekte Hazar ötesi hat ve TAPI tamamlanmadı.</div>
       <button class="btn" id="dv">Haritada dolaş</button><button class="btn ikincil" id="yb" style="margin-top:8px">Baştan başla</button></div>`);
     el.querySelector('#dv').onclick = () => { el.remove(); Sim.olayBitti(o); hiz(0); modal = false; Sim.kaydet(); };
     el.querySelector('#yb').onclick = () => { Sim.sil(); location.reload(); };
@@ -377,6 +386,9 @@
       return ['Halk', `<div class="baslik2" style="margin-top:0">Gerçek destek (bağımsız tahmin)</div>${Sim.PARTILER.map(k => `<div class="prt"><span class="amb">${amblem(k)}</span><span class="nm">${V.PARTI[k].ad}</span><span class="cb"><i style="width:${a[k] * 2}%;background:${V.PARTI[k].renk}"></i></span><span class="yz">${yz(a[k])}</span></div>`).join('')}
         <div class="baslik2">Toplum kesimleri · sana destek</div>
         ${Object.entries(V.KESIM).map(([k, K]) => { const s = S.kesim[k]; return `<div class="satir"><span style="font-size:22px">${K.ikon}</span><span class="ad">${K.ad}<small>${s.m > 1 ? 'Kararlarından memnun' : s.m < -1 ? 'Kararlarından rahatsız' : 'Kararsız'}</small>${cubuk(s.v * 100, V.PARTI.akp.renk)}</span><b>${yz(s.v * 100, 0)}</b></div>`; }).join('')}
+        <div class="baslik2">Dönemin yüzleri · ${tarihYazi(Sim.iso(Sim.gunTarih(S.gun)))}</div>
+        <div class="yuzler">${Object.entries(V.KISI).filter(([, K]) => { const b = Sim.iso(Sim.gunTarih(S.gun)); return K.bas <= b && b < K.son; }).map(([id]) => kisiKart(id)).join('')}</div>
+        <div class="foto-kaynak">Fotoğraflar: Wikimedia Commons (${Object.values(FOTO).map(f => `<a href="${f.url}" target="_blank" rel="noopener">${esc(f.dosya.replace(/_/g, ' '))}</a>`).join(', ')}). Lisans bilgisi dosya sayfalarındadır.</div>
         <div class="baslik2">Kurumlarla ilişki</div>
         ${Object.entries(V.KURUM).map(([k, K]) => `<div class="satir"><span style="font-size:20px">${K.ikon}</span><span class="ad">${K.ad}${cubuk(S.kurum[k], S.kurum[k] < 30 ? '#ff5d5d' : '#7fb6e6')}</span><b>${Math.round(S.kurum[k])}</b></div>`).join('')}`];
     },
@@ -395,7 +407,7 @@
       const masa = (S.masa || []).map(m => { const o = V.OLAY.find(x => x.id === m.id); const ad = o.baslik || (o.tur === 'butce' ? o.yil + ' bütçesi' : o.yil + ' asgari ücreti'); return `<button class="dosya" data-dosya="${o.id}"><span style="font-size:22px">📁</span><span class="ad"><b>${esc(ad)}</b><span class="kucuk">${tarihYazi(o.t)}${o.yer ? ' · ' + esc(o.yer) : ''}</span></span><span class="sure">${Math.max(0, sureOf(o.id) - (S.gun - m.gelis))} gün</span></button>`; }).join('');
       return ['Gündem', `<div class="baslik2" style="margin-top:0">Masandaki dosyalar</div>${masa || '<p class="not">Bekleyen karar yok. Zaman aktıkça yeni dosyalar gelecek.</p>'}
         <p class="kucuk">Panel açıkken zaman durur. Bir dosyayı süresi içinde açmazsan kendiliğinden önüne gelir.</p>
-        <div class="baslik2">Son gelişmeler</div>${(S.log || []).map(l => `<div class="log"><small>${l.t}</small>${esc(l.m)}</div>`).join('') || '<p class="not">Henüz bir şey yok.</p>'}`];
+        <div class="baslik2">Son gelişmeler</div>${(S.log || []).map(l => `<div class="log"><small>${l.t}</small>${esc(l.m)}${l.kisi ? `<div style="display:flex;gap:6px;margin-top:6px">${l.kisi.map(k => yuz(k)).join('')}</div>` : ''}</div>`).join('') || '<p class="not">Henüz bir şey yok.</p>'}`];
     },
     kampanya() {
       const T = Sim.teskilatOrani(), tarih = S.b.secimTarihi ? Math.max(0, Sim.tarihGun('2002-11-03') - S.gun) + ' gün kaldı (3 Kasım 2002)' : 'Seçim tarihi belli değil; olağan seçim 2004\'te';
@@ -423,7 +435,7 @@
         <p class="kucuk" style="text-align:right;margin:0">sağdaki: 1991</p>
         ${!S.iktidar ? `<div class="baslik2">Kampanya</div><p class="not">${V.BOLGE[b].ad} teşkilatı: ${S.teskilat[b] !== undefined ? '<b style="color:var(--yesil)">kuruldu</b>' : '<b style="color:var(--kotu)">yok</b>'}${S.miting[ad] ? ' · Miting etkisi sürüyor' : ''}</p>
           <button class="btn" data-mitil="${esc(ad)}" ${S.gun - S.mitingSon < 7 ? 'disabled style="opacity:.5"' : ''}>📣 ${esc(ad)}'da miting yap ($${String(Sim.MITING_MALIYET).replace('.', ',')} mn)</button>` : `<div class="baslik2">Bu ile yatırım</div>
-        ${Object.entries(V.PROJE).filter(([, P]) => !P.il || P.il === ad).map(([k, P]) => { const erken = yil < P.yil, var_ = pr.some(p => p.tip === k) || (P.tekil && S.projeler.some(p => p.tip === k)); return `<div class="proje"><span class="em">${P.ikon}</span><span class="ad"><b>${P.ad}</b><span class="kucuk">$${String(P.maliyet).replace('.', ',')} mlr · ${P.sure} ay</span></span><button data-kur="${k}" ${erken || var_ ? 'disabled' : ''}>${erken ? P.yil : var_ ? 'Var' : 'Kur'}</button></div>`; }).join('')}`}`];
+        ${Object.entries(V.PROJE).filter(([, P]) => (!P.il || P.il === ad) && (!P.iller || P.iller.includes(ad))).map(([k, P]) => { const erken = yil < P.yil, var_ = pr.some(p => p.tip === k) || (P.tekil && S.projeler.some(p => p.tip === k)); return `<div class="proje"><span class="em">${P.ikon}</span><span class="ad"><b>${P.ad}</b><span class="kucuk">$${String(P.maliyet).replace('.', ',')} mlr · ${P.sure} ay</span></span><button data-kur="${k}" ${erken || var_ ? 'disabled' : ''}>${erken ? P.yil : var_ ? 'Var' : 'Kur'}</button></div>`; }).join('')}`}`];
     }
   };
   const PANEL_KUR = {
@@ -451,7 +463,15 @@
       };
       el.querySelectorAll('[data-proje]').forEach(b => b.onclick = () => {
         const k = b.dataset.proje, P = V.PROJE[k];
-        if (P.il) return projeKur(k, P.il);
+        if (P.il) { projeKur(k, P.il); return ciz(); }
+        if (P.iller) {
+          const kutu = b.closest('.proje'), var_ = kutu.nextElementSibling && kutu.nextElementSibling.classList.contains('ilsec-liste');
+          if (var_) return kutu.nextElementSibling.remove();
+          const l = document.createElement('div'); l.className = 'ilsec-liste';
+          l.innerHTML = P.iller.filter(il => !S.projeler.some(p => p.tip === k && p.il === il)).map(il => `<button data-pil="${il}">${il}</button>`).join('') || '<span class="kucuk">Uygun yer kalmadı</span>';
+          kutu.after(l); l.querySelectorAll('[data-pil]').forEach(x => x.onclick = () => { if (projeKur(k, x.dataset.pil)) ciz(); });
+          return;
+        }
         panelKapat(); ilSecimi = k;
         const ban = document.createElement('div'); ban.className = 'ilsec'; ban.id = 'ilsec'; ban.innerHTML = `${P.ikon} Bir il seç <button>Vazgeç</button>`;
         document.body.appendChild(ban); ban.querySelector('button').onclick = () => { ilSecimi = null; ban.remove(); };
@@ -470,7 +490,7 @@
   };
   function projeKur(tip, il) {
     const r = Sim.projeKur(tip, il), P = V.PROJE[tip];
-    if (r !== 'tamam') { bildirim(r === 'erken' ? `${P.ad} ${P.yil}'den itibaren` : r === 'para' ? 'Rezerv yetersiz' : 'Bu proje zaten var'); return false; }
+    if (r !== 'tamam') { bildirim(r === 'erken' ? `${P.ad} ${P.yil}'den itibaren` : r === 'para' ? 'Rezerv yetersiz' : r === 'yer' ? `${P.ad} burada yapılamaz` : 'Bu proje zaten var'); return false; }
     Harita.projeleriCiz(S.projeler); haritaRenk(); bildirim(`${P.ikon} ${P.il || il}: ${P.ad} için temel atıldı`); haberEkle(`${P.il || il}'de ${P.ad} için temel atıldı`);
     Sim.kaydet(); return true;
   }
